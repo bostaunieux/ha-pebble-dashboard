@@ -38,7 +38,7 @@ customElements.whenDefined("hui-view-editor").then(() => {
         You have pebble-dashboard installed which adds some options to this dialog. <br/>
         Please see
           <a
-            href="https://github.com/bostaunieux/pebble-dashboard"
+            href="https://github.com/bostaunieux/ha-pebble-dashboard"
             target="_blank"
             rel="no referrer"
           >
