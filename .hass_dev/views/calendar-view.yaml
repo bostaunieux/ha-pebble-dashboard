@@ -1,0 +1,10 @@
+title: Calendar
+type: panel
+cards:
+  - type: custom:pebble-calendar-card
+    calendars:
+      - entity: calendar.my_calendar
+        color: purple
+      - calendar.my_calendar_2
+      - calendar.my_calendar_3
+    num_weeks: 4

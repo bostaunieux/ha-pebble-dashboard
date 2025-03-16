@@ -1,0 +1,4 @@
+title: Demo
+views:
+  - !include views/primary-view.yaml
+  - !include views/calendar-view.yaml

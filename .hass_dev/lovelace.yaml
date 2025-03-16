@@ -1,0 +1,8 @@
+mode: storage
+dashboards:
+  lovelace-preview:
+    mode: yaml
+    title: Preview
+    icon: mdi:abacus
+    show_in_sidebar: true
+    filename: lovelace-preview.yaml

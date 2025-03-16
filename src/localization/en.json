@@ -1,0 +1,259 @@
+{
+  "weather": {
+    "card": {
+      "forecast": {
+        "today": "Today"
+      },
+      "weather": {
+        "condition": {
+          "cloudy": "Cloudy",
+          "fog": "Foggy",
+          "hail": "Hail",
+          "lightning": "Lightning",
+          "lightning-rainy": "Thunder storm",
+          "partlycloudy": "Partly cloudy",
+          "pouring": "Heavy rain",
+          "rainy": "Rainy",
+          "snowy": "Snowy",
+          "snowy-rainy": "Wintery mix",
+          "sunny": "Sunny",
+          "windy": "Windy",
+          "windy-variant": "Windy",
+          "exceptional": "Exceptional"
+        }
+      }
+    },
+    "editor": {
+      "form": {
+        "current-conditions": {
+          "title": "Current Conditions"
+        },
+        "forecast": {
+          "title": "Forecast",
+          "hide-forecast": {
+            "label": "Hide forecast"
+          },
+          "forecast-count": {
+            "label": "Num forecast entries"
+          },
+          "forecast-type": {
+            "label": "Forecast type",
+            "option": {
+              "hourly": "Hourly",
+              "daily": "Daily",
+              "twice-daily": "Twice Daily"
+            }
+          }
+        },
+        "weather-entity": {
+          "label": "Weather entity"
+        },
+        "hide-today": {
+          "label": "Hide current conditions"
+        },
+        "today": {
+          "description-inline": {
+            "label": "Inline description"
+          },
+          "secondary": {
+            "label": "Secondary attributes",
+            "option": {
+              "sun": "Sunrise / sunset",
+              "wind": "Wind speed"
+            }
+          }
+        },
+        "hourly-forecast": {
+          "label": "Hourly forecast"
+        }
+      }
+    }
+  },
+  "clock": {
+    "editor": {
+      "form": {
+        "show-seconds": {
+          "label": "Show seconds"
+        },
+        "show-date": {
+          "label": "Show date"
+        }
+      }
+    }
+  },
+  "calendar": {
+    "card": {
+      "calendar": {
+        "week-days": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        },
+        "detail": {
+          "all-day": "All day"
+        }
+      }
+    },
+    "editor": {
+      "form": {
+        "num-weeks": {
+          "label": "Number of weeks"
+        },
+        "week-start": {
+          "label": "Start of week",
+          "days": {
+            "sun": "Sunday",
+            "mon": "Monday",
+            "tue": "Tuesday",
+            "wed": "Wednesday",
+            "thu": "Thursday",
+            "fri": "Friday",
+            "sat": "Saturday"
+          }
+        },
+        "add-calendar": {
+          "label": "Select calendar"
+        },
+        "calendar": {
+          "label": "Calendar"
+        },
+        "calendar-color": {
+          "label": "Calendar color"
+        },
+        "event-format": {
+          "label": "Consolidate multi-day events (BETA)"
+        },
+        "enable-weather": {
+          "label": "Enable weather"
+        }
+      }
+    }
+  },
+  "section": {
+    "editor": {
+      "title": "Edit Section",
+      "photo-source": {
+        "title": "Background Image",
+        "label": "Photo Source",
+        "none": "None",
+        "entity": {
+          "title": "Entity",
+          "entity-id": "Entity ID"
+        },
+        "remote": {
+          "title": "Photo URLs",
+          "description": "Source background images from the internet. Specify URLs for publicly accessible photos.",
+          "add-photo": "Add Photo URL",
+          "delete-photo": "Delete Photo"
+        },
+        "local-media": {
+          "title": "Local Media",
+          "description": "Source background images from your local media library. Images will be picked from the selected folder.",
+          "section-header": {
+            "images": "Images"
+          },
+          "explore": "Explore",
+          "media-source": "Media Source",
+          "source-not-found": "Media source not found",
+          "no-images": "No images"
+        },
+        "picsum": {
+          "title": "Picsum",
+          "description": "Source background images from Picsum.",
+          "random": "Random",
+          "nature-description": "Photos are chosen at random from a curated list of nature photos.",
+          "random-description": "Photos are chosen at random from the Picsum library.",
+          "collection": {
+            "label": "Collection",
+            "option": {
+              "all": "All",
+              "nature": "Nature"
+            }
+          }
+        }
+      },
+      "formatting": {
+        "title": "Formatting",
+        "background-blur": {
+          "label": "Background blur intensity"
+        },
+        "border-radius": {
+          "label": "Border radius",
+          "options": {
+            "default": "Default"
+          }
+        }
+      },
+      "alignment": {
+        "horizontal-align": {
+          "title": "Horizontal Alignment"
+        },
+        "vertical-align": {
+          "title": "Vertical Alignment"
+        },
+        "option": {
+          "start": "Start",
+          "middle": "Middle",
+          "end": "End",
+          "around": "Around",
+          "between": "Between"
+        }
+      },
+      "browse-media": {
+        "title": "Browse Media",
+        "image-summary": "Images:",
+        "subtitle": "Select a folder to use as a source for background images for the section. When expanded, folders will show the count of images they contain."
+      }
+    }
+  },
+  "colorpicker": {
+    "editor": {
+      "options": {
+        "default": "Default color",
+        "red": "Red",
+        "pink": "Pink",
+        "light-purple": "Light Purple",
+        "purple": "Purple",
+        "blue": "Blue",
+        "light-blue": "Light Blue",
+        "cyan": "Cyan",
+        "teal": "Teal",
+        "green": "Green",
+        "light-green": "Light Green",
+        "lime": "Lime",
+        "gold": "Gold",
+        "yellow": "Yellow",
+        "amber": "Amber",
+        "light-orange": "Light Orange",
+        "orange": "Orange",
+        "brown": "Brown",
+        "grey": "Grey",
+        "white": "White"
+      }
+    }
+  },
+  "dialogs": {
+    "generic": {
+      "save": "Save",
+      "select": "Select",
+      "cancel": "Cancel",
+      "select-folder": "Select Folder"
+    }
+  },
+  "shared": {
+    "editor": {
+      "form": {
+        "text-options": {
+          "title": "Formatting",
+          "text-scale": {
+            "label": "Text scale"
+          }
+        }
+      }
+    }
+  }
+}

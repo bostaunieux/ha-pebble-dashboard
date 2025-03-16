@@ -1,0 +1,13 @@
+- id: "1737309382474"
+  alias: "Button: Reload Dashboard"
+  description: ""
+  trigger:
+    - platform: state
+      entity_id:
+        - input_button.reload_kitchen_dashboard
+  condition: []
+  action:
+    - event: browser_reload_requested
+      event_data:
+        browser_id: kitchen
+  mode: single
