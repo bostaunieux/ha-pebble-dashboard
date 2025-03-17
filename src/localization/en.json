@@ -142,6 +142,7 @@
         "none": "None",
         "entity": {
           "title": "Entity",
+          "description": "Source background images from a Home Assistant sensor or image entity with a state set to an image URL.",
           "entity-id": "Entity ID"
         },
         "remote": {

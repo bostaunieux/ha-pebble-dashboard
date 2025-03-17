@@ -310,9 +310,12 @@ export default class PebbleGridSectionDialog extends LitElement {
                       : nothing}
                     ${section["photo_source"] === "entity"
                       ? html`<div class="">
+                          <div class="source-description">
+                            ${this.localize("section.editor.photo-source.entity.description")}
+                          </div>
                           <ha-form
                             .hass=${this.hass}
-                            .data=${section.photo_config?.entity?.entity_id}
+                            .data=${section.photo_config?.entity ?? {}}
                             .schema=${[
                               {
                                 label: this.localize(
