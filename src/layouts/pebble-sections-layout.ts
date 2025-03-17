@@ -171,9 +171,9 @@ export default class PebbleSectionsLayout extends LitElement {
       new CustomEvent("show-dialog", {
         composed: true,
         detail: {
-          dialogTag: "pebble-stack-section-dialog",
+          dialogTag: "pebble-grid-section-dialog",
           dialogImport: () => {
-            return import("../sections/pebble-stack-section-dialog");
+            return import("../sections/pebble-grid-section-dialog");
           },
           dialogParams: {
             prompt: true,

@@ -4,7 +4,7 @@ export type VerticalAlignment = "start" | "end" | "center" | "around" | "between
 export type HorizontalAlignment = "start" | "end" | "center";
 
 export type StackSectionConfig = {
-  type: "custom:pebble-stack-section";
+  type: "custom:pebble-grid-section";
   columns?: number;
   title?: string;
   vertical_align?: VerticalAlignment;

@@ -28,15 +28,3 @@ cards:
         forecast_type: hourly
     square: false
     columns: 1
-  - type: grid
-    title: Stacked Card
-    cards:
-      - type: custom:pebble-stack-card
-        cards:
-          - type: custom:pebble-clock-card
-            show_seconds: true
-            show_date: false
-          - type: custom:pebble-weather-card
-            entity: weather.demo_weather_south
-            forecast_type: daily
-    columns: 1

@@ -15,8 +15,8 @@ const stopPropagation = (ev: Event) => ev.stopPropagation();
 const TABS = ["tab-settings", "tab-visibility"] as const;
 const computeLabel = (s: { label?: string }) => s.label;
 
-@customElement("pebble-stack-section-dialog")
-export default class PebbleStackSectionDialog extends LitElement {
+@customElement("pebble-grid-section-dialog")
+export default class PebbleGridSectionDialog extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @state() private _error?: string;
@@ -735,6 +735,6 @@ export default class PebbleStackSectionDialog extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "pebble-stack-section-dialog": PebbleStackSectionDialog;
+    "pebble-grid-section-dialog": PebbleGridSectionDialog;
   }
 }

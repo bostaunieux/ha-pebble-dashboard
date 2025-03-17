@@ -27,7 +27,7 @@ customElements.whenDefined("hui-card-element-editor").then(() => {
     get() {
       return (
         originalShowLayoutTab.call(this) ||
-        this.sectionConfig?.type === "custom:pebble-stack-section2"
+        this.sectionConfig?.type === "custom:pebble-grid-section"
       );
     },
   });

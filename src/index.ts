@@ -3,7 +3,7 @@ import "./cards/pebble-clock-card";
 import "./cards/pebble-weather-card";
 import "./patched/hui-view-editor";
 import "./patched/hui-card-element-editor";
-import "./sections/pebble-stack-section";
+import "./sections/pebble-grid-section";
 import "./layouts/pebble-sections-layout";
 import { version } from "../package.json";
 import type { LovelaceElement } from "./types";
