@@ -10,13 +10,11 @@ Supported cards
 - Weather Card
 - Calendar Card
 
-
 Additional features
 
 - Dynamic background images behind sections
 - Resizable dual section layout
 - Designed for use on a full screen dashboard
-
 
 ## Installation
 

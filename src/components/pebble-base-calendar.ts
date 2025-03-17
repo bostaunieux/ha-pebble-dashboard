@@ -56,7 +56,10 @@ export abstract class PebbleBaseCalendar extends LitElement {
     }
     return html` <div class="forecast">
       <div class="forecast-icon">
-        <pebble-weather-icon .condition=${forecast.condition} .isNight=${false}></pebble-weather-icon>
+        <pebble-weather-icon
+          .condition=${forecast.condition}
+          .isNight=${false}
+        ></pebble-weather-icon>
       </div>
       <div class="forecast-temp">
         ${forecast.templow ? html`<div>${forecast.templow}°</div>` : null}
