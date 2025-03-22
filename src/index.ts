@@ -46,4 +46,4 @@ window.customCards.push({
   description: "Card to vertically stack other cards over a dynamic background image",
 });
 
-console.info(`🪨 %PEBBLE DASHBOARD ${version} is installed`, "color: orange; font-weight: bold");
+console.info(`🪨 %cPEBBLE DASHBOARD ${version} is installed`, "color: lightblue; font-weight: bold");

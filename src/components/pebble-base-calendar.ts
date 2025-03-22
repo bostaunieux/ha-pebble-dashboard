@@ -190,7 +190,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
         }
 
         .numeral.today {
-          background-color: var(--disabled-text-color, #444);
+          background-color: rgb(68, 68, 68);
           padding: 10px;
         }
 

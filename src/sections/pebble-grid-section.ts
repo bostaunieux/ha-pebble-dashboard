@@ -6,6 +6,7 @@ import { getAverageBackgroundColor, isDark } from "../utils/colors";
 import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
 import { getPhotoFromConfig } from "../media";
+import debounce from "../utils/debounce";
 
 const PHOTO_UPDATE_INTERVAL_MS = 1_000 * 60 * 60;
 // const PHOTO_UPDATE_INTERVAL_MS = 1_000 * 5;
@@ -62,8 +63,8 @@ customElements.whenDefined("hui-grid-section").then(() => {
       ) {
         const newPhotoUrl =
           changedProps.get("hass")?.states?.[this._config.photo_config.entity.entity_id]?.state;
-
-        if (newPhotoUrl && this._photoEntityUrl !== newPhotoUrl) {
+        const oldPhotoUrl = this._photoEntityUrl;
+        if (newPhotoUrl && oldPhotoUrl !== newPhotoUrl) {
           this._photoEntityUrl = newPhotoUrl;
           this._updateBackgroundImage();
         }
@@ -143,7 +144,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
       }
     }
 
-    _setBackground(image: string) {
+    _setBackground = debounce((image: string) => {
       if (this._isMainActive) {
         this._altBackground = image;
       } else {
@@ -162,7 +163,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
         const color = await getAverageBackgroundColor(container, container, image);
         this._isDarkBackground = isDark(color);
       }, 1_500);
-    }
+    }, 1_000);
 
     static get styles(): CSSResultGroup[] {
       return [
