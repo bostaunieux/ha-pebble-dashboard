@@ -66,10 +66,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
         const oldPhotoUrl = this._photoEntityUrl;
         if (newPhotoUrl && oldPhotoUrl !== newPhotoUrl) {
           this._photoEntityUrl = newPhotoUrl;
-
-          // if (oldPhotoUrl != null) {
-            this._updateBackgroundImage();
-          // }
+          this._updateBackgroundImage();
         }
       }
     }
