@@ -216,6 +216,7 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           -webkit-line-clamp: 1;
           overflow-y: hidden;
           white-space: normal;
+          word-break: break-all;
         }
 
         .event.all-day {
