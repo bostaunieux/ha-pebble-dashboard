@@ -322,7 +322,7 @@ export default class PebbleGridSectionDialog extends LitElement {
                                   "section.editor.photo-source.entity.entity-id",
                                 ),
                                 name: "entity_id",
-                                selector: { entity: { domain: ["sensor", "image"] } },
+                                selector: { entity: { domain: ["sensor", "image", "input_text"] } },
                               },
                             ]}
                             .computeLabel=${computeLabel}
