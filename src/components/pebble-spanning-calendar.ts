@@ -182,7 +182,7 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
 
         .week {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           grid-column: 1 / span 7;
         }

@@ -148,7 +148,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
         .calendar {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           height: 100%;
         }
