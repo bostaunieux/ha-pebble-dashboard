@@ -144,8 +144,15 @@ export const getAverageBackgroundColor = (
         offsetY,
       } = getCoverDimensions(width, height, img.naturalWidth, img.naturalHeight);
 
-      ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
-      const imageData = ctx.getImageData(cardLeft, cardTop, cardWidth, cardHeight);
+      let imageData: ImageData;
+      try {
+        ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+        imageData = ctx.getImageData(cardLeft, cardTop, cardWidth, cardHeight);
+      } catch (e) {
+        console.error("Error drawing image on canvas", e);
+        reject("Failed to draw image");
+        return false;
+      }
       const pixelMap = imageData.data;
 
       let red = 0;
