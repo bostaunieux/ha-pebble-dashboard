@@ -48,19 +48,18 @@ This plugin is available in HACS (Home Assistant Community Store)
 
 When creating a new dashboard, select the `Pebble Sections (pebble-dashboard)` layout type. Once created, the setup will resemble that of the `Sections` layout type, with the following changes
 
-* Only two sections can exist - these can not be deleted from the UI
-* In edit mode, a resize bar allows selecting the relative width of the left section
-* The two sections will extend the full height of the browser viewport
-* The edit menu for each section allows setting an image source to use as a background behind all cards
-
+- Only two sections can exist - these can not be deleted from the UI
+- In edit mode, a resize bar allows selecting the relative width of the left section
+- The two sections will extend the full height of the browser viewport
+- The edit menu for each section allows setting an image source to use as a background behind all cards
 
 Section background images can be configured to pull from the following sources
 
-* None - Don't set a background image
-* Local Media - Source images from a local media directory containing photos. This depends on the [Media source](https://www.home-assistant.io/integrations/media_source/) integration being enabled. This is enabled by default when using [Default Config](https://www.home-assistant.io/integrations/default_config/).
-* Picsum - Sources images from https://picsum.photos/. 
-* Entity - Sources the image from a sensor or image entity within Home Assistant. This allows setting up automations to update the image on a schedule, sourcing it from public APIs or other integrations. More details to come...
-* Photo URLs - Manually curate a list of image URLS accessible on the Internet
+- None - Don't set a background image
+- Local Media - Source images from a local media directory containing photos. This depends on the [Media source](https://www.home-assistant.io/integrations/media_source/) integration being enabled. This is enabled by default when using [Default Config](https://www.home-assistant.io/integrations/default_config/).
+- Picsum - Sources images from https://picsum.photos/.
+- Entity - Sources the image from a sensor or image entity within Home Assistant. This allows setting up automations to update the image on a schedule, sourcing it from public APIs or other integrations. More details to come...
+- Photo URLs - Manually curate a list of image URLS accessible on the Internet
 
 ### Cards
 
