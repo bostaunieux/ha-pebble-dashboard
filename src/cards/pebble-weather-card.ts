@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
+import { isAfter, isBefore } from "date-fns";
 import initLocalize, { LocalizationKey } from "../localize";
 import { WiSunrise, WiSunset } from "../utils/icons";
 import { supportsFeature, ForecastFeatures, getDefaultForecastType } from "../utils/weather-utils";
@@ -109,7 +110,7 @@ class PebbleWeatherCard extends LitElement {
 
     const { forecast_type, forecast_count, today_description_inline } = this.config;
     const hourly = forecast_type === "hourly";
-    const forecast = this.forecastEvent?.forecast?.slice(0, forecast_count ?? 4) ?? [];
+    const forecast = this.forecastEvent?.forecast ?? [];
 
     const textSize = this.config.text_size;
     const styles = {
@@ -146,28 +147,7 @@ class PebbleWeatherCard extends LitElement {
               </div>`}
           ${this.config.hide_forecast
             ? null
-            : html` <div class="forecast-list">
-                ${forecast.map((entry) => {
-                  return html`
-                    <div class="forecast">
-                      <div>${this._renderDateTime(entry.datetime, hourly)}</div>
-                      <div class="forecast-icon">
-                        <pebble-weather-icon
-                          .condition=${entry.condition}
-                          .isNight=${false}
-                        ></pebble-weather-icon>
-                      </div>
-                      <div class="forecast-precip">${this._renderPrecipitation(entry)}</div>
-                      <div class="forecast-temp">
-                        ${!hourly && "templow" in entry
-                          ? html`<span>${entry.templow}</span>`
-                          : null}
-                        <span>${entry.temperature}</span>
-                      </div>
-                    </div>
-                  `;
-                })}
-              </div>`}
+            : this._renderForecast(forecast, forecast_count ?? 4, hourly)}
         </div>
       </ha-card>
     `;
@@ -223,6 +203,76 @@ class PebbleWeatherCard extends LitElement {
         ${Math.round(entity.attributes.wind_speed)} ${entity.attributes.wind_speed_unit}
       </div>
     `;
+  }
+
+  _renderForecast(forecast: ForecastAttribute[], count: number, hourly: boolean) {
+    const sunset = this._hass.states?.["sun.sun"].attributes?.next_setting;
+    const sunrise = this._hass.states?.["sun.sun"].attributes?.next_rising;
+
+    const truncatedForecast = forecast.slice(0, count);
+
+    if (!hourly) {
+      return html`<div class="forecast-list">
+        ${truncatedForecast.map((entry) => {
+          return html`
+            <div class="forecast foo">
+              <div>${this._renderDateTime(entry.datetime, hourly)}</div>
+              <div class="forecast-icon">
+                <pebble-weather-icon
+                  .condition=${entry.condition}
+                  .isNight=${false}
+                ></pebble-weather-icon>
+              </div>
+              <div class="forecast-precip">${this._renderPrecipitation(entry)}</div>
+              <div class="forecast-temp">
+                ${"templow" in entry ? html`<span>${entry.templow}</span>` : null}
+                <span>${entry.temperature}</span>
+              </div>
+            </div>
+          `;
+        })}
+      </div>`;
+    }
+
+    const tempRange = {
+      min: Math.min(...forecast.map((entry) => entry.temperature)),
+      max: Math.max(...forecast.map((entry) => entry.temperature)),
+    };
+
+    const calculatePosition = (temp: number) => {
+      if (tempRange.max === tempRange.min) return 0;
+
+      const range = tempRange.max - tempRange.min;
+      const position = 100 - ((temp - tempRange.min) / range) * 100;
+
+      return position * 0.5;
+    };
+
+    return html`<div class="forecast-list">
+      ${truncatedForecast.map((entry) => {
+        const datetime = new Date(entry.datetime);
+        const isNight =
+          (this.isNight && sunrise != null && isBefore(datetime, new Date(sunrise))) ||
+          (!this.isNight && sunset != null && isAfter(datetime, new Date(sunset)));
+
+        return html`
+          <div class="forecast hourly">
+            <div class="time">${this._renderDateTime(entry.datetime, hourly)}</div>
+            <div class="hourly-conditions" style="top: ${calculatePosition(entry.temperature)}%;">
+              <div class="forecast-icon">
+                <pebble-weather-icon
+                  .condition=${entry.condition}
+                  .isNight=${isNight}
+                ></pebble-weather-icon>
+              </div>
+              <div class="forecast-temp">
+                <span>${entry.temperature}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      })}
+    </div>`;
   }
 
   _getPrecipitationFormatter() {
@@ -413,6 +463,22 @@ class PebbleWeatherCard extends LitElement {
         display: grid;
         gap: 20px;
         justify-items: center;
+      }
+
+      .forecast.hourly {
+        grid-template-rows: min-content 1fr;
+        min-height: 250px;
+        position: relative;
+      }
+
+      .time {
+        font-size: 0.8125em;
+      }
+
+      .hourly-conditions {
+        position: absolute;
+        margin-top: 32px;
+        place-items: center;
       }
 
       .forecast-icon {
