@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
+import { isAfter, isBefore } from "date-fns";
 import initLocalize, { LocalizationKey } from "../localize";
 import { WiSunrise, WiSunset } from "../utils/icons";
 import { supportsFeature, ForecastFeatures, getDefaultForecastType } from "../utils/weather-utils";
@@ -111,6 +112,9 @@ class PebbleWeatherCard extends LitElement {
     const hourly = forecast_type === "hourly";
     const forecast = this.forecastEvent?.forecast?.slice(0, forecast_count ?? 4) ?? [];
 
+    const sunset = this._hass.states?.["sun.sun"].attributes?.next_setting;
+    const sunrise = this._hass.states?.["sun.sun"].attributes?.next_rising;
+
     const textSize = this.config.text_size;
     const styles = {
       "--pebble-font-size": textSize
@@ -148,13 +152,20 @@ class PebbleWeatherCard extends LitElement {
             ? null
             : html` <div class="forecast-list">
                 ${forecast.map((entry) => {
+                  const isNight =
+                    hourly &&
+                    sunrise != null &&
+                    sunset != null &&
+                    ((this.isNight && isBefore(new Date(entry.datetime), new Date(sunrise))) ||
+                      (!this.isNight && isAfter(new Date(entry.datetime), new Date(sunset))));
+                  
                   return html`
                     <div class="forecast">
                       <div>${this._renderDateTime(entry.datetime, hourly)}</div>
                       <div class="forecast-icon">
                         <pebble-weather-icon
                           .condition=${entry.condition}
-                          .isNight=${false}
+                          .isNight=${isNight}
                         ></pebble-weather-icon>
                       </div>
                       <div class="forecast-precip">${this._renderPrecipitation(entry)}</div>

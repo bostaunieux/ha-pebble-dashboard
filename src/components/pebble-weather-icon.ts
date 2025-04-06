@@ -47,6 +47,7 @@ const NIGHT_WEATHER_ICONS: Record<string, string> = {
   partlycloudy: WiNightAltCloudy,
   pouring: WiNightAltRain,
   rainy: WiNightAltShowers,
+  sunny: WiNightClear,
   "windy-variant": WiNightAltCloudyWindy,
 };
 
