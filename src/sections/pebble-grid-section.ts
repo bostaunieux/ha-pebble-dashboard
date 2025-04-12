@@ -80,7 +80,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
         const delay = getTimeUntilNextInterval(
           config.photo_config?.refresh_interval ?? DEFAULT_PHOTO_UPDATE_INTERVAL_MS,
         );
-        console.log("delay", delay);
+
         this._intervalId = setInterval(() => {
           this._updateBackgroundImage();
         }, delay);
