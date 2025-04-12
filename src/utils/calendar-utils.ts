@@ -122,37 +122,21 @@ const getCalendarDate = (dateObj: any): string | undefined => {
   return undefined;
 };
 
-export const getTimeUntilNextQuarterHour = () => {
-  const now = new Date();
+export const getTimeUntilNextInterval = (intervalMinutes: number, now: Date = new Date()) => {
   const minutes = now.getMinutes();
   const seconds = now.getSeconds();
   const milliseconds = now.getMilliseconds();
 
-  // Calculate how many minutes are left until the next quarter hour
-  const minutesTillNextQuarter = 15 - (minutes % 15);
-  const totalMinutes = (minutesTillNextQuarter === 15 ? 0 : minutesTillNextQuarter) * 60;
+  // For 1-minute intervals, we only need to calculate time until next minute
+  if (intervalMinutes === 1) {
+    return (60 - seconds) * 1_000 - milliseconds;
+  }
 
-  // Calculate total seconds (remaining minutes + current second)
+  // For other intervals, calculate time until next interval block
+  const minutesTillNext = intervalMinutes - (minutes % intervalMinutes);
+  const totalMinutes = (minutesTillNext === intervalMinutes ? 0 : minutesTillNext) * 60;
   const totalSeconds = totalMinutes - seconds;
 
-  // Convert total seconds to milliseconds and subtract current milliseconds
-  return totalSeconds * 1_000 - milliseconds;
-};
-
-export const getTimeUntilNext5Minutes = () => {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const seconds = now.getSeconds();
-  const milliseconds = now.getMilliseconds();
-
-  // Calculate how many minutes are left until the next 5 minute block
-  const minutesTillNext5 = 5 - (minutes % 5);
-  const totalMinutes = (minutesTillNext5 === 5 ? 0 : minutesTillNext5) * 60;
-
-  // Calculate total seconds (remaining minutes + current second)
-  const totalSeconds = totalMinutes - seconds;
-
-  // Convert total seconds to milliseconds and subtract current milliseconds
   return totalSeconds * 1_000 - milliseconds;
 };
 

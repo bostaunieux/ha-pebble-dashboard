@@ -7,9 +7,9 @@ import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
 import { getPhotoFromConfig } from "../media";
 import debounce from "../utils/debounce";
+import { getTimeUntilNextInterval } from "../utils/calendar-utils";
 
-const PHOTO_UPDATE_INTERVAL_MS = 1_000 * 60 * 60;
-// const PHOTO_UPDATE_INTERVAL_MS = 1_000 * 5;
+const DEFAULT_PHOTO_UPDATE_INTERVAL_MS = 1_000 * 60 * 60;
 
 customElements.whenDefined("hui-grid-section").then(() => {
   const HuiGridSection = customElements.get("hui-grid-section") as typeof LitElement & {
@@ -77,9 +77,13 @@ customElements.whenDefined("hui-grid-section").then(() => {
 
       // entity-based photo source will update automatically, so we don't need to poll
       if (config.photo_source != null && config.photo_source !== "entity") {
+        const delay = getTimeUntilNextInterval(
+          config.photo_config?.refresh_interval ?? DEFAULT_PHOTO_UPDATE_INTERVAL_MS,
+        );
+        console.log("delay", delay);
         this._intervalId = setInterval(() => {
           this._updateBackgroundImage();
-        }, PHOTO_UPDATE_INTERVAL_MS);
+        }, delay);
       } else {
         clearInterval(this._intervalId);
       }

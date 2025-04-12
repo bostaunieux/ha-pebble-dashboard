@@ -1,4 +1,4 @@
-export type PhotoSource = "remote" | "local_media" | "picsum" | "entity";
+export type PhotoSource = "remote" | "local_media" | "picsum" | "entity" | "none";
 
 export type VerticalAlignment = "start" | "end" | "center" | "around" | "between";
 export type HorizontalAlignment = "start" | "end" | "center";
@@ -18,6 +18,7 @@ export type StackSectionConfig = {
     entity?: { entity_id: string };
     remote?: { photos: string[] };
     picsum?: { collection?: "all" | "nature" };
+    refresh_interval?: number;
   };
 };
 

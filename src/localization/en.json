@@ -145,6 +145,9 @@
           "description": "Source background images from a Home Assistant sensor or image entity with a state set to an image URL.",
           "entity-id": "Entity ID"
         },
+        "refresh-interval": {
+          "label": "Refresh Interval (minutes)"
+        },
         "remote": {
           "title": "Photo URLs",
           "description": "Source background images from the internet. Specify URLs for publicly accessible photos.",

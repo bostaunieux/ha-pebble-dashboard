@@ -6,7 +6,7 @@ import { CalendarCardConfig } from "./calendar-types";
 import {
   CalendarEvent,
   fetchCalendarEvents,
-  getTimeUntilNextQuarterHour,
+  getTimeUntilNextInterval,
 } from "../utils/calendar-utils";
 import { getColor } from "../utils/colors";
 import type { HomeAssistant } from "../types";
@@ -120,7 +120,7 @@ class PebbleCalendarCard extends LitElement {
   }
 
   _setupEventLoader() {
-    const delay = getTimeUntilNextQuarterHour();
+    const delay = getTimeUntilNextInterval(15);
 
     // Set a timeout to start the task at the beginning of the next quarter hour
     this.reloadTimeoutId = setTimeout(() => {
