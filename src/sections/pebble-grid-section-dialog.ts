@@ -240,6 +240,22 @@ export default class PebbleGridSectionDialog extends LitElement {
                         ${this.localize("section.editor.photo-source.remote.title")}
                       </ha-list-item>
                     </ha-select>
+                    ${section.photo_source && section.photo_source !== "none"
+                      ? html`
+                          <div class="grid">
+                            <ha-textfield
+                              .label=${this.localize(
+                                "section.editor.photo-source.refresh-interval.label",
+                              )}
+                              .type=${"number"}
+                              .min=${1}
+                              .value=${section.photo_config?.refresh_interval ?? ""}
+                              .configKey=${"refresh_interval"}
+                              @input=${this._onPhotoConfigChange}
+                            ></ha-textfield>
+                          </div>
+                        `
+                      : nothing}
                   </div>
 
                   <div class="sub-content">
@@ -527,6 +543,19 @@ export default class PebbleGridSectionDialog extends LitElement {
     };
   }
 
+  private _onPhotoConfigChange(ev: CustomEvent) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { value, configKey } = ev.target as any;
+
+    this._section = {
+      ...this._section!,
+      photo_config: {
+        ...(this._section!.photo_config ?? {}),
+        [configKey]: value ? Number(value) : undefined,
+      },
+    };
+  }
+
   _onLocalPhotoChange(ev: CustomEvent) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { value, photoIndex } = ev.target as any;
@@ -662,6 +691,8 @@ export default class PebbleGridSectionDialog extends LitElement {
 
         .source-select {
           display: grid;
+          gap: 8px;
+          grid-template-columns: 1fr 1fr;
           justify-content: space-between;
           margin-bottom: 8px;
         }
