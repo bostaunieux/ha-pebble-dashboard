@@ -134,7 +134,7 @@ export const getTimeUntilNextInterval = (intervalMinutes: number, now: Date = ne
 
   // For other intervals, calculate time until next interval block
   const minutesTillNext = intervalMinutes - (minutes % intervalMinutes);
-  const totalMinutes = (minutesTillNext === intervalMinutes ? 0 : minutesTillNext) * 60;
+  const totalMinutes = minutesTillNext * 60;
   const totalSeconds = totalMinutes - seconds;
 
   return totalSeconds * 1_000 - milliseconds;
