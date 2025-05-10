@@ -9,7 +9,7 @@ import { getPhotoFromConfig } from "../media";
 import debounce from "../utils/debounce";
 import { getTimeUntilNextInterval } from "../utils/calendar-utils";
 
-const DEFAULT_PHOTO_UPDATE_INTERVAL_MS = 1_000 * 60 * 60;
+const DEFAULT_PHOTO_UPDATE_INTERVAL_MINS = 60;
 
 customElements.whenDefined("hui-grid-section").then(() => {
   const HuiGridSection = customElements.get("hui-grid-section") as typeof LitElement & {
@@ -39,7 +39,8 @@ customElements.whenDefined("hui-grid-section").then(() => {
     /** For entity photo source, the URL of the photo */
     private _photoEntityUrl?: string;
 
-    private _intervalId?: NodeJS.Timeout;
+    private _refreshTimeout?: number;
+    private _refreshInterval?: number;
 
     connectedCallback() {
       super.connectedCallback();
@@ -49,8 +50,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
 
     disconnectedCallback() {
       super.disconnectedCallback();
-
-      clearInterval(this._intervalId);
+      this._clearRefreshTimers();
     }
 
     updated(changedProps: PropertyValues) {
@@ -76,16 +76,8 @@ customElements.whenDefined("hui-grid-section").then(() => {
       super.setConfig(config);
 
       // entity-based photo source will update automatically, so we don't need to poll
-      if (config.photo_source != null && config.photo_source !== "entity") {
-        const delay = getTimeUntilNextInterval(
-          config.photo_config?.refresh_interval ?? DEFAULT_PHOTO_UPDATE_INTERVAL_MS,
-        );
-
-        this._intervalId = setInterval(() => {
-          this._updateBackgroundImage();
-        }, delay);
-      } else {
-        clearInterval(this._intervalId);
+      if (config?.photo_source != null && config?.photo_source !== "entity") {
+        this._setupBackgroundRefresh(config?.photo_config?.refresh_interval);
       }
     }
 
@@ -168,6 +160,34 @@ customElements.whenDefined("hui-grid-section").then(() => {
         this._isDarkBackground = isDark(color);
       }, 1_500);
     }, 1_000);
+
+    private _setupBackgroundRefresh(intervalConfig: number = DEFAULT_PHOTO_UPDATE_INTERVAL_MINS) {
+      this._clearRefreshTimers();
+
+      const intervalMins = Math.max(intervalConfig, 1);
+
+      // Schedule the first update at the next interval boundary
+      const msUntilNext = getTimeUntilNextInterval(intervalMins);
+      this._refreshTimeout = window.setTimeout(() => {
+        this._updateBackgroundImage();
+        // After the first, set a regular interval
+        this._refreshInterval = window.setInterval(
+          () => this._updateBackgroundImage(),
+          intervalMins * 60 * 1000
+        );
+      }, msUntilNext);
+    }
+
+    private _clearRefreshTimers() {
+      if (this._refreshTimeout) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = undefined;
+      }
+      if (this._refreshInterval) {
+        clearInterval(this._refreshInterval);
+        this._refreshInterval = undefined;
+      }
+    }
 
     static get styles(): CSSResultGroup[] {
       return [
