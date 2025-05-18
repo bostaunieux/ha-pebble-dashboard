@@ -72,8 +72,7 @@ class PebbleCalendarCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    clearTimeout(this.reloadTimeoutId);
-    clearInterval(this.reloadIntervalId);
+    this._clearRefreshTimers();
   }
 
   set hass(hass: HomeAssistant) {
@@ -93,7 +92,13 @@ class PebbleCalendarCard extends LitElement {
       return;
     }
 
-    if (prevConfig.calendars !== config.calendars) {
+    const eventRefreshIntervalChanged =
+      prevConfig.event_refresh_interval !== config.event_refresh_interval;
+    if (prevConfig.calendars !== config.calendars || eventRefreshIntervalChanged) {
+      if (eventRefreshIntervalChanged) {
+        this._setupEventLoader();
+      }
+
       // check if calendar entities changed
       if (
         JSON.stringify(prevConfig.calendars?.map((c) => c.entity).sort()) ===
@@ -119,15 +124,29 @@ class PebbleCalendarCard extends LitElement {
     }
   }
 
+  private _clearRefreshTimers() {
+    if (this.reloadTimeoutId) {
+      clearTimeout(this.reloadTimeoutId);
+      this.reloadTimeoutId = undefined;
+    }
+    if (this.reloadIntervalId) {
+      clearInterval(this.reloadIntervalId);
+      this.reloadIntervalId = undefined;
+    }
+  }
+
   _setupEventLoader() {
-    const delay = getTimeUntilNextInterval(15);
+    this._clearRefreshTimers();
+
+    const interval = this.config.event_refresh_interval ?? 15;
+    const delay = getTimeUntilNextInterval(interval);
 
     // Set a timeout to start the task at the beginning of the next quarter hour
     this.reloadTimeoutId = setTimeout(() => {
       this._fetchEvents();
 
       // Set an interval to execute the task every quarter hour after that
-      this.reloadIntervalId = setInterval(() => this._fetchEvents(), 15 * 60 * 1_000);
+      this.reloadIntervalId = setInterval(() => this._fetchEvents(), interval * 60 * 1_000);
     }, delay);
   }
 

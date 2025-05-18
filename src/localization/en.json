@@ -127,6 +127,9 @@
         "event-format": {
           "label": "Consolidate multi-day events (BETA)"
         },
+        "event-refresh-interval": {
+          "label": "Event refresh interval (minutes)"
+        },
         "enable-weather": {
           "label": "Enable weather"
         }
