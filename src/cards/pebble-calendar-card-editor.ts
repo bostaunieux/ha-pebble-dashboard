@@ -339,6 +339,7 @@ class PebbleCalendarCardEditor extends LitElement {
         .calendar-entry {
           display: grid;
           grid-template-columns: minmax(150px, 7fr) minmax(150px, 5fr);
+          align-items: flex-end;
           gap: 8px;
           margin-bottom: 16px;
         }
