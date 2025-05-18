@@ -27,6 +27,7 @@ class PebbleCalendarCardEditor extends LitElement {
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
+      event_refresh_interval: 15,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -43,12 +44,19 @@ class PebbleCalendarCardEditor extends LitElement {
     super.disconnectedCallback();
   }
 
-  _getEventFormatSchema() {
-    return {
-      label: this.localize("calendar.editor.form.event-format.label"),
-      name: "events_span_days",
-      selector: { boolean: {} },
-    };
+  _getEventConfigSchema() {
+    return [
+      {
+        label: this.localize("calendar.editor.form.event-format.label"),
+        name: "events_span_days",
+        selector: { boolean: {} },
+      },
+      {
+        label: this.localize("calendar.editor.form.event-refresh-interval.label"),
+        name: "event_refresh_interval",
+        selector: { number: { mode: "box", min: 5 } },
+      },
+    ];
   }
 
   _getAddCalendarSchema(excludeEntities: string[]) {
@@ -170,9 +178,9 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeEventFormat(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { events_span_days } = ev.detail.value;
+    const { events_span_days, event_refresh_interval } = ev.detail.value;
 
-    this._config = { ...this._config, events_span_days };
+    this._config = { ...this._config, events_span_days, event_refresh_interval };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -253,7 +261,7 @@ class PebbleCalendarCardEditor extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
-            .schema=${[this._getEventFormatSchema()]}
+            .schema=${this._getEventConfigSchema()}
             .computeLabel=${computeLabel}
             @value-changed=${this._changeEventFormat}
           ></ha-form>
@@ -331,6 +339,7 @@ class PebbleCalendarCardEditor extends LitElement {
         .calendar-entry {
           display: grid;
           grid-template-columns: minmax(150px, 7fr) minmax(150px, 5fr);
+          align-items: flex-end;
           gap: 8px;
           margin-bottom: 16px;
         }

@@ -173,7 +173,7 @@ customElements.whenDefined("hui-grid-section").then(() => {
         // After the first, set a regular interval
         this._refreshInterval = window.setInterval(
           () => this._updateBackgroundImage(),
-          intervalMins * 60 * 1000
+          intervalMins * 60 * 1000,
         );
       }, msUntilNext);
     }
