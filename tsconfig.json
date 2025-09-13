@@ -7,7 +7,7 @@
     "lib": ["es2017", "dom"],
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist-tsc",
+    "outDir": "dist",
     "rootDir": "./",
     "experimentalDecorators": true,
     "resolveJsonModule": true

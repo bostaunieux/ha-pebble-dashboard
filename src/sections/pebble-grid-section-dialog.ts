@@ -619,7 +619,6 @@ export default class PebbleGridSectionDialog extends LitElement {
         },
       }),
     );
-    ``;
   }
 
   static get styles() {
