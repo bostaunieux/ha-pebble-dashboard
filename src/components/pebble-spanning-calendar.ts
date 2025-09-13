@@ -255,7 +255,8 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           background: inherit;
 
           aspect-ratio: cos(30deg);
-          -webkit-mask: linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
+          -webkit-mask:
+            linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
             radial-gradient(
               var(--arrow-radius) at calc(var(--arrow-radius) * sqrt(2)) 50%,
               #000 98%,
@@ -278,7 +279,8 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           background: inherit;
 
           aspect-ratio: cos(30deg);
-          -webkit-mask: linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
+          -webkit-mask:
+            linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
             radial-gradient(
               var(--arrow-radius) at calc(100% - var(--arrow-radius) * sqrt(2)) 50%,
               #000 98%,

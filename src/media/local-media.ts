@@ -5,7 +5,7 @@ export const resolveRandomMedia = async (hass: HomeAssistant, mediaSource?: stri
   let browsedMedia;
   try {
     browsedMedia = (await browseMedia(hass, mediaSource))?.children;
-  } catch (e) {
+  } catch (_e) {
     console.info(console.info(`Unable to browse media with media id ${mediaSource}`));
     return null;
   }
@@ -28,7 +28,7 @@ export const resolveMedia = async (hass: HomeAssistant, mediaId: string) => {
     });
 
     return resolvedUrl.url ?? null;
-  } catch (e) {
+  } catch (_e) {
     console.info(`Unable to resolve media with media id ${mediaId}`);
   }
 
