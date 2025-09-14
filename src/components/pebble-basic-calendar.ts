@@ -29,10 +29,6 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
   }
 
   private calculateMonthsToRender() {
-    if (!this.enableScrolling) {
-      return [startOfMonth(Date.now())];
-    }
-
     const bufferMonths = this.scrollBufferMonths ?? 2;
     const today = Date.now();
     const startPosition = this.startPosition ?? "current_week";
@@ -63,9 +59,18 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
   private generateContinuousWeeks(monthsToRender: Date[], weekStartsOn: Day) {
     if (monthsToRender.length === 0) return [];
     
-    // Start from the beginning of the current month (first day of the month)
-    const firstMonthStart = monthsToRender[0];
-    const firstWeekStart = startOfWeek(firstMonthStart, { weekStartsOn });
+    const startPosition = this.startPosition ?? "current_week";
+    const today = Date.now();
+    
+    let firstWeekStart: Date;
+    if (startPosition === "start_of_month") {
+      // Start from the beginning of the first month
+      const firstMonthStart = monthsToRender[0];
+      firstWeekStart = startOfWeek(firstMonthStart, { weekStartsOn });
+    } else {
+      // current_week - start from the beginning of the current week
+      firstWeekStart = startOfWeek(today, { weekStartsOn });
+    }
     
     // Find the end of the last week that contains the last month
     const lastMonthEnd = endOfMonth(monthsToRender[monthsToRender.length - 1]);
@@ -88,74 +93,9 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());
 
-    if (this.enableScrolling) {
-      return this.renderScrollingCalendar(weekStartsOn, today);
-    } else {
-      return this.renderStaticCalendar(weekStartsOn, today);
-    }
+    return this.renderScrollingCalendar(weekStartsOn, today);
   }
 
-  private renderStaticCalendar(weekStartsOn: Day, today: Date) {
-    const startPosition = this.startPosition ?? "current_week";
-    
-    let start: Date;
-    if (startPosition === "start_of_month") {
-      // Start from the beginning of the current month
-      const monthStart = startOfMonth(today);
-      start = startOfWeek(monthStart, { weekStartsOn });
-    } else {
-      // current_week - start from the beginning of the current week
-      start = startOfWeek(today, { weekStartsOn });
-    }
-    
-    const end = addDays(start, 7 * (this.numWeeks ?? 4) - 1);
-    const interval = eachDayOfInterval({ start, end });
-
-    const adjustedDaysOfWeek = [
-      ...DAYS_OF_WEEK.slice(weekStartsOn),
-      ...DAYS_OF_WEEK.slice(0, weekStartsOn),
-    ];
-
-    const textSize = this.textSize;
-    const styles = {
-      "--pebble-font-size": textSize
-        ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
-        : undefined,
-    };
-
-    return html`
-      <ha-card style=${styleMap(styles)}>
-        <div class="calendar">
-          ${adjustedDaysOfWeek.map(
-            (day, index) =>
-              html`<div
-                class="day-name ${classMap({
-                  "active-day": today.getDay() === index,
-                })}"
-              >
-                ${this.localize(`calendar.card.calendar.week-days.${day}`)}
-              </div>`,
-          )}
-          ${interval.map((date, index) => {
-            const events = this.getEventsForDay(date);
-            const forecast = this.weatherForecast?.get(getDayOfYear(date));
-
-            return html`<div class="day">
-              ${this.renderForecast(forecast)}
-              <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
-                ${index === 0 || date.getDate() === 1
-                  ? html`<div class="month">${format(date, "MMM")}</div>`
-                  : nothing}
-                <div class="numeral ${classMap({ today: isToday(date) })}">${date.getDate()}</div>
-              </div>
-              ${events.map((event) => this.renderEvent(event, date))}
-            </div>`;
-          })}
-        </div>
-        ${this.renderEventDialog()}
-      </ha-card>
-    `;
-  }
 
   private renderScrollingCalendar(weekStartsOn: Day, today: Date) {
     const monthsToRender = this.calculateMonthsToRender();

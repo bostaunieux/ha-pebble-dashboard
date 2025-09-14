@@ -100,9 +100,6 @@
     },
     "editor": {
       "form": {
-        "num-weeks": {
-          "label": "Number of weeks"
-        },
         "week-start": {
           "label": "Start of week",
           "days": {
@@ -134,10 +131,7 @@
           "label": "Enable weather"
         },
         "scrolling": {
-          "title": "Scrolling Options"
-        },
-        "enable-scrolling": {
-          "label": "Enable vertical scrolling"
+          "title": "Calendar Options"
         },
         "scroll-buffer-months": {
           "label": "Months to render ahead/behind"

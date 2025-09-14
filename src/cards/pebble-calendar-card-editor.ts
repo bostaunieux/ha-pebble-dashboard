@@ -23,12 +23,10 @@ class PebbleCalendarCardEditor extends LitElement {
     this._config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
-      num_weeks: 4,
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
-      enable_scrolling: false,
       scroll_buffer_months: 2,
       start_position: "current_week",
     };
@@ -132,11 +130,6 @@ class PebbleCalendarCardEditor extends LitElement {
             },
           },
         },
-        {
-          label: this.localize("calendar.editor.form.num-weeks.label"),
-          name: "num_weeks",
-          selector: { number: { mode: "box", min: 1 } },
-        },
       ],
     };
   }
@@ -147,11 +140,6 @@ class PebbleCalendarCardEditor extends LitElement {
       type: "expandable",
       title: this.localize("calendar.editor.form.scrolling.title"),
       schema: [
-        {
-          label: this.localize("calendar.editor.form.enable-scrolling.label"),
-          name: "enable_scrolling",
-          selector: { boolean: {} },
-        },
         {
           label: this.localize("calendar.editor.form.start-position.label"),
           name: "start_position",
@@ -170,15 +158,11 @@ class PebbleCalendarCardEditor extends LitElement {
             },
           },
         },
-        ...(this._config.enable_scrolling
-          ? [
-              {
-                label: this.localize("calendar.editor.form.scroll-buffer-months.label"),
-                name: "scroll_buffer_months",
-                selector: { number: { mode: "box", min: 1, max: 12 } },
-              },
-            ]
-          : []),
+        {
+          label: this.localize("calendar.editor.form.scroll-buffer-months.label"),
+          name: "scroll_buffer_months",
+          selector: { number: { mode: "box", min: 1, max: 12 } },
+        },
       ],
     };
   }
@@ -232,20 +216,19 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeWeeks(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { num_weeks, week_start } = ev.detail.value;
+    const { week_start } = ev.detail.value;
 
-    this._config = { ...this._config, num_weeks, week_start };
+    this._config = { ...this._config, week_start };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
   _changeScrolling(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { enable_scrolling, scroll_buffer_months, start_position } = ev.detail.value;
+    const { scroll_buffer_months, start_position } = ev.detail.value;
 
     this._config = { 
       ...this._config, 
-      enable_scrolling, 
       scroll_buffer_months,
       start_position
     };

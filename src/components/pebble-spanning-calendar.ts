@@ -54,10 +54,6 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
   }
 
   private calculateMonthsToRender() {
-    if (!this.enableScrolling) {
-      return [startOfMonth(Date.now())];
-    }
-
     const bufferMonths = this.scrollBufferMonths ?? 2;
     const today = Date.now();
     const startPosition = this.startPosition ?? "current_week";
@@ -133,94 +129,9 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());
 
-    if (this.enableScrolling) {
-      return this.renderScrollingCalendar(weekStartsOn, today);
-    } else {
-      return this.renderStaticCalendar(weekStartsOn, today);
-    }
+    return this.renderScrollingCalendar(weekStartsOn, today);
   }
 
-  private renderStaticCalendar(weekStartsOn: Day, today: Date) {
-    const startPosition = this.startPosition ?? "current_week";
-    
-    let initialStart: Date;
-    if (startPosition === "start_of_month") {
-      // Start from the beginning of the current month
-      const monthStart = startOfMonth(today);
-      initialStart = startOfWeek(monthStart, { weekStartsOn });
-    } else {
-      // current_week - start from the beginning of the current week
-      initialStart = startOfWeek(today, { weekStartsOn });
-    }
-
-    const daysByWeek = [...Array(this.numWeeks ?? 4).keys()].reduce((weeks, weekIndex) => {
-      const weekStart = addDays(initialStart, weekIndex * 7);
-      const weekEnd = addDays(weekStart, 6);
-      weeks.push(eachDayOfInterval({ start: weekStart, end: weekEnd }));
-      return weeks;
-    }, [] as Date[][]);
-
-    const adjustedDaysOfWeek = [
-      ...DAYS_OF_WEEK.slice(weekStartsOn),
-      ...DAYS_OF_WEEK.slice(0, weekStartsOn),
-    ];
-
-    const textSize = this.textSize;
-    const styles = {
-      "--pebble-font-size": textSize
-        ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
-        : undefined,
-    };
-
-    return html`
-      <ha-card style=${styleMap(styles)}>
-        <div class="calendar span-events">
-          ${adjustedDaysOfWeek.map(
-            (day, index) =>
-              html`<div
-                class="day-name ${classMap({
-                  "active-day": today.getDay() === index,
-                })}"
-              >
-                ${this.localize(`calendar.card.calendar.week-days.${day}`)}
-              </div>`,
-          )}
-          ${daysByWeek.map((week, weekIndex) => {
-            const weekStart = startOfWeek(week[0], { weekStartsOn });
-            const weekEnd = endOfWeek(week[0], { weekStartsOn });
-            const weekEvents = getEventsByWeekdays(
-              this.getEventsForWeek(weekStart, weekEnd),
-              weekStart,
-              weekEnd,
-              weekStartsOn,
-            );
-
-            return html`
-              <div class="week">
-                ${week.map((date, dayIndex) => {
-                  const events = weekEvents[dayIndex];
-                  const forecast = this.weatherForecast?.get(getDayOfYear(date));
-                  return html`<div class="day">
-                    ${this.renderForecast(forecast)}
-                    <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
-                      ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
-                        ? html`<div class="month">${format(date, "MMM")}</div>`
-                        : nothing}
-                      <div class="numeral ${classMap({ today: isToday(date) })}">
-                        ${date.getDate()}
-                      </div>
-                    </div>
-                    ${events.map((event) => this.renderEvent(event, date, weekStartsOn))}
-                  </div>`;
-                })}
-              </div>
-            `;
-          })}
-        </div>
-        ${this.renderEventDialog()}
-      </ha-card>
-    `;
-  }
 
   private renderScrollingCalendar(weekStartsOn: Day, today: Date) {
     const monthsToRender = this.calculateMonthsToRender();

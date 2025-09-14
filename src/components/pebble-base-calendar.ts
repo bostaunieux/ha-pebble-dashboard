@@ -12,11 +12,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected weekStartsOn: Day;
 
-  @property({ attribute: false }) protected numWeeks: number;
-
   @property({ attribute: false }) protected textSize?: string;
-
-  @property({ attribute: false }) protected enableScrolling?: boolean;
 
   @property({ attribute: false }) protected scrollBufferMonths?: number;
 
@@ -35,9 +31,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
   constructor() {
     super();
     this.weekStartsOn = 0;
-    this.numWeeks = 4;
     this.events = [];
-    this.enableScrolling = false;
     this.scrollBufferMonths = 2;
     this.startPosition = "current_week";
     this.localize = (arg) => arg;
@@ -67,7 +61,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
 
   protected handleScroll = () => {
-    if (!this.scrollContainer || !this.enableScrolling) return;
+    if (!this.scrollContainer) return;
     
     // This could be enhanced to detect which month is currently in view
     // and update currentMonthOffset accordingly
