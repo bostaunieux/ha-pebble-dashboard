@@ -82,7 +82,6 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           </div>
           <div
             class="calendar-scroll-area"
-            @scroll=${this.handleScroll}
             .ref=${this.setScrollContainer}
           >
             <div class="calendar span-events">

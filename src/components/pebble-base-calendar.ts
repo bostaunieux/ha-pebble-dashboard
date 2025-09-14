@@ -86,14 +86,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
     this.scrollContainer = el;
   };
 
-  protected handleScroll = () => {
-    if (!this.scrollContainer) return;
-
-    // This could be enhanced to detect which month is currently in view
-    // and update currentMonthOffset accordingly
-    // For now, we'll keep it simple
-  };
-
   protected renderForecast(forecast?: ForecastAttribute) {
     if (!forecast) {
       return html`<div></div>`;
