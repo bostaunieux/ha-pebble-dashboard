@@ -23,12 +23,12 @@ class PebbleCalendarCardEditor extends LitElement {
     this._config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
+      num_weeks: 12,
+      start_position: "current_week",
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
-      num_weeks: 12,
-      start_position: "current_week",
     };
     this.localize = initLocalize(this.hass);
   }

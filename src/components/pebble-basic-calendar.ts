@@ -22,7 +22,6 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     super();
   }
 
-
   render() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());

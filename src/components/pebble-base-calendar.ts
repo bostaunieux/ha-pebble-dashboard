@@ -18,8 +18,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected events: CalendarEvent[];
 
-  protected scrollContainer?: HTMLElement;
-
   @property({ attribute: false }) protected selectedEvent?: CalendarEvent;
 
   @property({ attribute: false }) protected weatherForecast?: Map<number, ForecastAttribute>;
@@ -27,6 +25,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
   @property({ attribute: false }) protected textSize?: string;
 
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
+
+  protected scrollContainer?: HTMLElement;
 
   constructor() {
     super();
