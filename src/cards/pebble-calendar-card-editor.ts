@@ -27,7 +27,7 @@ class PebbleCalendarCardEditor extends LitElement {
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
-      scroll_buffer_months: 2,
+      total_months: 3,
       start_position: "current_week",
     };
     this.localize = initLocalize(this.hass);
@@ -136,8 +136,8 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.scroll-buffer-months.label"),
-          name: "scroll_buffer_months",
+          label: this.localize("calendar.editor.form.total-months.label"),
+          name: "total_months",
           selector: { number: { mode: "box", min: 1, max: 12 } },
         },
       ],
@@ -206,9 +206,9 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, start_position, scroll_buffer_months } = ev.detail.value;
+    const { week_start, start_position, total_months } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, start_position, scroll_buffer_months };
+    this._config = { ...this._config, week_start, start_position, total_months };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 

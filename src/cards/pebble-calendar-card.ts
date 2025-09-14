@@ -155,7 +155,7 @@ class PebbleCalendarCard extends LitElement {
     }
 
     const today = startOfDay(Date.now());
-    const bufferMonths = this.config.scroll_buffer_months ?? 2;
+    const totalMonths = this.config.total_months ?? 3;
     const startPosition = this.config.start_position ?? "current_week";
     
     let startDate: Date;
@@ -169,7 +169,7 @@ class PebbleCalendarCard extends LitElement {
     }
     
     const currentMonthStart = startOfMonth(startDate);
-    const lastMonthEnd = endOfMonth(addMonths(currentMonthStart, bufferMonths));
+    const lastMonthEnd = endOfMonth(addMonths(currentMonthStart, totalMonths - 1));
     
     const start = currentMonthStart;
     const end = lastMonthEnd;
@@ -199,7 +199,7 @@ class PebbleCalendarCard extends LitElement {
     return this.config?.events_span_days
         ? html`<pebble-spanning-calendar
           .weekStartsOn=${this.config?.week_start}
-          .scrollBufferMonths=${this.config?.scroll_buffer_months}
+          .scrollBufferMonths=${this.config?.total_months}
           .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
@@ -209,7 +209,7 @@ class PebbleCalendarCard extends LitElement {
         ></pebble-spanning-calendar>`
       : html`<pebble-basic-calendar
           .weekStartsOn=${this.config?.week_start}
-          .scrollBufferMonths=${this.config?.scroll_buffer_months}
+          .scrollBufferMonths=${this.config?.total_months}
           .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}

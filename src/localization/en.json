@@ -136,8 +136,8 @@
         "events": {
           "title": "Events"
         },
-        "scroll-buffer-months": {
-          "label": "Months to render ahead"
+        "total-months": {
+          "label": "Total months to render"
         },
         "start-position": {
           "label": "Calendar start position",

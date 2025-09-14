@@ -29,7 +29,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
   }
 
   private calculateMonthsToRender() {
-    const bufferMonths = this.scrollBufferMonths ?? 2;
+    const totalMonths = this.scrollBufferMonths ?? 3;
     const today = Date.now();
     const startPosition = this.startPosition ?? "current_week";
     
@@ -45,14 +45,11 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     const months = [];
     const currentMonth = startOfMonth(startDate);
     
-    // Start with the month containing the start date
-    months.push(currentMonth);
-
-    // Add future months only
-    for (let i = 1; i <= bufferMonths; i++) {
+    // Add the total number of months starting from the current month
+    for (let i = 0; i < totalMonths; i++) {
       months.push(addMonths(currentMonth, i));
     }
-
+    
     return months;
   }
 
@@ -72,15 +69,14 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
       firstWeekStart = startOfWeek(today, { weekStartsOn });
     }
     
-    // Find the end of the last week that contains the last month
+    // Find the end of the last month
     const lastMonthEnd = endOfMonth(monthsToRender[monthsToRender.length - 1]);
-    const lastWeekEnd = startOfWeek(addDays(lastMonthEnd, 7), { weekStartsOn });
     
     // Generate all weeks in the continuous range
     const weeks = [];
     let currentWeekStart = firstWeekStart;
     
-    while (currentWeekStart <= lastWeekEnd) {
+    while (currentWeekStart <= lastMonthEnd) {
       const weekEnd = addDays(currentWeekStart, 6);
       weeks.push(eachDayOfInterval({ start: currentWeekStart, end: weekEnd }));
       currentWeekStart = addDays(currentWeekStart, 7);
