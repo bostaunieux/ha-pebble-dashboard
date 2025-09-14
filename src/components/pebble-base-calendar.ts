@@ -1,6 +1,15 @@
 import { LitElement, html, css, CSSResultGroup, nothing } from "lit";
 import { property } from "lit/decorators.js";
-import { isSameDay, isWithinInterval, Day, format, startOfWeek, startOfMonth, addDays, eachDayOfInterval } from "date-fns";
+import {
+  isSameDay,
+  isWithinInterval,
+  Day,
+  format,
+  startOfWeek,
+  startOfMonth,
+  addDays,
+  eachDayOfInterval,
+} from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { LocalizationKey } from "../localize";

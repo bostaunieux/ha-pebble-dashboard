@@ -158,11 +158,12 @@ class PebbleCalendarCard extends LitElement {
     const numWeeks = this.config.num_weeks ?? 12;
     const startPosition = this.config.start_position ?? "current_week";
 
-    const startDate = startPosition === "start_of_month"
-      ? startOfMonth(today)
-      : startOfWeek(today, {
-          weekStartsOn: +(this.config.week_start ?? "0") as Day,
-        });
+    const startDate =
+      startPosition === "start_of_month"
+        ? startOfMonth(today)
+        : startOfWeek(today, {
+            weekStartsOn: +(this.config.week_start ?? "0") as Day,
+          });
 
     const weekStartsOn = +(this.config.week_start ?? "0") as Day;
     const startWeekStart = startOfWeek(startDate, { weekStartsOn });

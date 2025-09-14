@@ -117,10 +117,11 @@ class PebbleWeatherCard extends LitElement {
     const forecast = this.forecastEvent?.forecast ?? [];
 
     const textSize = this.config.text_size;
-    const visibleColumns = this.containerWidth > 0 
-      ? this._calculateVisibleColumns(this.containerWidth)
-      : Math.max(1, Math.floor((this.offsetWidth || 400) / 88));
-    
+    const visibleColumns =
+      this.containerWidth > 0
+        ? this._calculateVisibleColumns(this.containerWidth)
+        : Math.max(1, Math.floor((this.offsetWidth || 400) / 88));
+
     const styles = {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
@@ -352,13 +353,13 @@ class PebbleWeatherCard extends LitElement {
 
   _calculateVisibleColumns(containerWidth: number, columnWidth: number = 80, gap: number = 8) {
     // Calculate how many full columns can fit in the container
-    const availableWidth = containerWidth - (gap * 2); // Account for padding
+    const availableWidth = containerWidth - gap * 2; // Account for padding
     const columnsPerView = Math.floor(availableWidth / (columnWidth + gap));
     return Math.max(1, columnsPerView);
   }
 
   _setupResizeObserver() {
-    if (typeof ResizeObserver === 'undefined') {
+    if (typeof ResizeObserver === "undefined") {
       return;
     }
 

@@ -2,15 +2,7 @@ import { html, css, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement } from "lit/decorators.js";
-import {
-  isPast,
-  format,
-  startOfDay,
-  isToday,
-  Day,
-  getDayOfYear,
-  endOfDay,
-} from "date-fns";
+import { isPast, format, startOfDay, isToday, Day, getDayOfYear, endOfDay } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
 
@@ -56,10 +48,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div
-            class="calendar-scroll-area"
-            .ref=${this.setScrollContainer}
-          >
+          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
             <div class="calendar">
               ${allWeeks.map((week, weekIndex) => {
                 return html`
