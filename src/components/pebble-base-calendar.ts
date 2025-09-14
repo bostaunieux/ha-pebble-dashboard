@@ -12,8 +12,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected weekStartsOn: Day;
 
-  @property({ attribute: false }) protected textSize?: string;
-
   @property({ attribute: false }) protected numWeeks?: number;
 
   @property({ attribute: false }) protected startPosition?: "current_week" | "start_of_month";
@@ -26,14 +24,16 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected weatherForecast?: Map<number, ForecastAttribute>;
 
+  @property({ attribute: false }) protected textSize?: string;
+
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
 
   constructor() {
     super();
     this.weekStartsOn = 0;
-    this.events = [];
     this.numWeeks = 12;
     this.startPosition = "current_week";
+    this.events = [];
     this.localize = (arg) => arg;
   }
 

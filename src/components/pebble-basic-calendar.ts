@@ -27,10 +27,6 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());
 
-    return this.renderScrollingCalendar(weekStartsOn, today);
-  }
-
-  private renderScrollingCalendar(weekStartsOn: Day, today: Date) {
     const adjustedDaysOfWeek = [
       ...DAYS_OF_WEEK.slice(weekStartsOn),
       ...DAYS_OF_WEEK.slice(0, weekStartsOn),

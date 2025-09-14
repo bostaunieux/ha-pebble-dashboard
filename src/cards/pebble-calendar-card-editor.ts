@@ -83,33 +83,34 @@ class PebbleCalendarCardEditor extends LitElement {
           selector: {
             select: {
               options: [
+                // select only supports string value, so they must be converted when the config is used in the card
                 {
-                  value: "0",
                   label: this.localize("calendar.editor.form.week-start.days.sun"),
+                  value: "0",
                 },
                 {
-                  value: "1",
                   label: this.localize("calendar.editor.form.week-start.days.mon"),
+                  value: "1",
                 },
                 {
-                  value: "2",
                   label: this.localize("calendar.editor.form.week-start.days.tue"),
+                  value: "2",
                 },
                 {
-                  value: "3",
                   label: this.localize("calendar.editor.form.week-start.days.wed"),
+                  value: "3",
                 },
                 {
-                  value: "4",
                   label: this.localize("calendar.editor.form.week-start.days.thu"),
+                  value: "4",
                 },
                 {
-                  value: "5",
                   label: this.localize("calendar.editor.form.week-start.days.fri"),
+                  value: "5",
                 },
                 {
-                  value: "6",
                   label: this.localize("calendar.editor.form.week-start.days.sat"),
+                  value: "6",
                 },
               ],
             },

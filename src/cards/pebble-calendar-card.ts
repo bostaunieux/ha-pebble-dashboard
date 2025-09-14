@@ -158,15 +158,11 @@ class PebbleCalendarCard extends LitElement {
     const numWeeks = this.config.num_weeks ?? 12;
     const startPosition = this.config.start_position ?? "current_week";
 
-    let startDate: Date;
-    if (startPosition === "start_of_month") {
-      startDate = startOfMonth(today);
-    } else {
-      // current_week - start from the beginning of the current week
-      startDate = startOfWeek(today, {
-        weekStartsOn: +(this.config.week_start ?? "0") as Day,
-      });
-    }
+    const startDate = startPosition === "start_of_month"
+      ? startOfMonth(today)
+      : startOfWeek(today, {
+          weekStartsOn: +(this.config.week_start ?? "0") as Day,
+        });
 
     const weekStartsOn = +(this.config.week_start ?? "0") as Day;
     const startWeekStart = startOfWeek(startDate, { weekStartsOn });
@@ -279,7 +275,7 @@ class PebbleCalendarCard extends LitElement {
   }
 
   static getStubConfig() {
-    return { calendars: [] };
+    return { num_weeks: 4, calendars: [] };
   }
 
   static get styles() {

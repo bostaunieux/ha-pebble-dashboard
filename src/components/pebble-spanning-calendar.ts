@@ -25,8 +25,6 @@ const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 @customElement("pebble-spanning-calendar")
 class PebbleSpanningCalendar extends PebbleBaseCalendar {
-  private currentMonthOffset = 0;
-
   constructor() {
     super();
   }
@@ -48,15 +46,10 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
       );
   }
 
-
   render() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());
 
-    return this.renderScrollingCalendar(weekStartsOn, today);
-  }
-
-  private renderScrollingCalendar(weekStartsOn: Day, today: Date) {
     const adjustedDaysOfWeek = [
       ...DAYS_OF_WEEK.slice(weekStartsOn),
       ...DAYS_OF_WEEK.slice(0, weekStartsOn),
