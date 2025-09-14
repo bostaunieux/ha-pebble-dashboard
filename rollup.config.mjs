@@ -39,7 +39,7 @@ export default [
   {
     input: "src/index.ts",
     output: {
-      file: "dist/pebble-dashboard.js",
+      file: "dist/ha-pebble-dashboard.js",
       format: "es",
       inlineDynamicImports: true,
     },
