@@ -104,9 +104,18 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
   private generateContinuousWeeks(monthsToRender: Date[], weekStartsOn: Day) {
     if (monthsToRender.length === 0) return [];
     
-    // Start from the beginning of the current month (first day of the month)
-    const firstMonthStart = monthsToRender[0];
-    const firstWeekStart = startOfWeek(firstMonthStart, { weekStartsOn });
+    const startPosition = this.startPosition ?? "current_week";
+    const today = Date.now();
+    
+    let firstWeekStart: Date;
+    if (startPosition === "start_of_month") {
+      // Start from the beginning of the first month
+      const firstMonthStart = monthsToRender[0];
+      firstWeekStart = startOfWeek(firstMonthStart, { weekStartsOn });
+    } else {
+      // current_week - start from the beginning of the current week
+      firstWeekStart = startOfWeek(today, { weekStartsOn });
+    }
     
     // Find the end of the last week that contains the last month
     const lastMonthEnd = endOfMonth(monthsToRender[monthsToRender.length - 1]);
