@@ -141,6 +141,13 @@
         },
         "scroll-buffer-months": {
           "label": "Months to render ahead/behind"
+        },
+        "start-position": {
+          "label": "Calendar start position",
+          "option": {
+            "current_week": "Current week",
+            "start_of_month": "Start of month"
+          }
         }
       }
     }

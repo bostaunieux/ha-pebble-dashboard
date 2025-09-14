@@ -59,15 +59,27 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
     }
 
     const bufferMonths = this.scrollBufferMonths ?? 2;
-    const today = startOfMonth(Date.now());
+    const today = Date.now();
+    const startPosition = this.startPosition ?? "current_week";
+    
+    let startDate: Date;
+    if (startPosition === "start_of_month") {
+      startDate = startOfMonth(today);
+    } else {
+      // current_week - start from the beginning of the current week
+      const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
+      startDate = startOfWeek(today, { weekStartsOn });
+    }
+    
     const months = [];
-
-    // Start with current month
-    months.push(today);
+    const currentMonth = startOfMonth(startDate);
+    
+    // Start with the month containing the start date
+    months.push(currentMonth);
 
     // Add future months only
     for (let i = 1; i <= bufferMonths; i++) {
-      months.push(addMonths(today, i));
+      months.push(addMonths(currentMonth, i));
     }
 
     return months;
@@ -129,7 +141,17 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
   }
 
   private renderStaticCalendar(weekStartsOn: Day, today: Date) {
-    const initialStart = startOfWeek(today, { weekStartsOn });
+    const startPosition = this.startPosition ?? "current_week";
+    
+    let initialStart: Date;
+    if (startPosition === "start_of_month") {
+      // Start from the beginning of the current month
+      const monthStart = startOfMonth(today);
+      initialStart = startOfWeek(monthStart, { weekStartsOn });
+    } else {
+      // current_week - start from the beginning of the current week
+      initialStart = startOfWeek(today, { weekStartsOn });
+    }
 
     const daysByWeek = [...Array(this.numWeeks ?? 4).keys()].reduce((weeks, weekIndex) => {
       const weekStart = addDays(initialStart, weekIndex * 7);

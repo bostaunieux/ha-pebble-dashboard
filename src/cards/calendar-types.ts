@@ -13,4 +13,5 @@ export type CalendarCardConfig = {
   weather_entity?: string;
   enable_scrolling?: boolean;
   scroll_buffer_months?: number;
+  start_position?: "current_week" | "start_of_month";
 } & CardTextOptions;

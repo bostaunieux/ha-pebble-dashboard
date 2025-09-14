@@ -30,6 +30,7 @@ class PebbleCalendarCardEditor extends LitElement {
       event_refresh_interval: 15,
       enable_scrolling: false,
       scroll_buffer_months: 2,
+      start_position: "current_week",
     };
     this.localize = initLocalize(this.hass);
   }
@@ -151,6 +152,24 @@ class PebbleCalendarCardEditor extends LitElement {
           name: "enable_scrolling",
           selector: { boolean: {} },
         },
+        {
+          label: this.localize("calendar.editor.form.start-position.label"),
+          name: "start_position",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "current_week",
+                  label: this.localize("calendar.editor.form.start-position.option.current_week"),
+                },
+                {
+                  value: "start_of_month",
+                  label: this.localize("calendar.editor.form.start-position.option.start_of_month"),
+                },
+              ],
+            },
+          },
+        },
         ...(this._config.enable_scrolling
           ? [
               {
@@ -222,12 +241,13 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeScrolling(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { enable_scrolling, scroll_buffer_months } = ev.detail.value;
+    const { enable_scrolling, scroll_buffer_months, start_position } = ev.detail.value;
 
     this._config = { 
       ...this._config, 
       enable_scrolling, 
-      scroll_buffer_months
+      scroll_buffer_months,
+      start_position
     };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }

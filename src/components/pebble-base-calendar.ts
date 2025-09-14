@@ -20,6 +20,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected scrollBufferMonths?: number;
 
+  @property({ attribute: false }) protected startPosition?: "current_week" | "start_of_month";
+
   @property({ attribute: false }) protected events: CalendarEvent[];
 
   protected scrollContainer?: HTMLElement;
@@ -37,6 +39,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
     this.events = [];
     this.enableScrolling = false;
     this.scrollBufferMonths = 2;
+    this.startPosition = "current_week";
     this.localize = (arg) => arg;
   }
 

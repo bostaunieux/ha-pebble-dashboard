@@ -162,18 +162,39 @@ class PebbleCalendarCard extends LitElement {
     if (this.config.enable_scrolling) {
       // For scrolling view, fetch events for all visible months
       const bufferMonths = this.config.scroll_buffer_months ?? 2;
-      const currentMonthStart = startOfMonth(today);
+      const startPosition = this.config.start_position ?? "current_week";
+      
+      let startDate: Date;
+      if (startPosition === "start_of_month") {
+        startDate = startOfMonth(today);
+      } else {
+        // current_week - start from the beginning of the current week
+        startDate = startOfWeek(today, {
+          weekStartsOn: +(this.config.week_start ?? "0") as Day,
+        });
+      }
+      
+      const currentMonthStart = startOfMonth(startDate);
       const lastMonthEnd = endOfMonth(addMonths(currentMonthStart, bufferMonths));
       
-      // Start from the beginning of the current month
       start = currentMonthStart;
-      // End at the end of the last visible month
       end = lastMonthEnd;
     } else {
-      // For static view, use the original logic
-      start = startOfWeek(today, {
-        weekStartsOn: +(this.config.week_start ?? "0") as Day,
-      });
+      // For static view, respect start position setting
+      const startPosition = this.config.start_position ?? "current_week";
+      
+      if (startPosition === "start_of_month") {
+        // Start from the beginning of the current month
+        const monthStart = startOfMonth(today);
+        start = startOfWeek(monthStart, {
+          weekStartsOn: +(this.config.week_start ?? "0") as Day,
+        });
+      } else {
+        // current_week - start from the beginning of the current week
+        start = startOfWeek(today, {
+          weekStartsOn: +(this.config.week_start ?? "0") as Day,
+        });
+      }
       end = addDays(start, 7 * +(this.config.num_weeks ?? 4));
     }
 
@@ -205,6 +226,7 @@ class PebbleCalendarCard extends LitElement {
           .numWeeks=${this.config?.num_weeks}
           .enableScrolling=${this.config?.enable_scrolling}
           .scrollBufferMonths=${this.config?.scroll_buffer_months}
+          .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
@@ -216,6 +238,7 @@ class PebbleCalendarCard extends LitElement {
           .numWeeks=${this.config?.num_weeks}
           .enableScrolling=${this.config?.enable_scrolling}
           .scrollBufferMonths=${this.config?.scroll_buffer_months}
+          .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
