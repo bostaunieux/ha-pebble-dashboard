@@ -354,6 +354,18 @@ class PebbleWeatherCard extends LitElement {
       return this.localize("weather.card.forecast.today");
     }
 
+    // For hourly forecasts, show day name at midnight (day boundaries)
+    if (hourly && date.getHours() === 0) {
+      const dayOptions = {
+        weekday: "short",
+      } as const;
+      const dayName = new Intl.DateTimeFormat(
+        this._hass.locale?.language ?? "en-US",
+        dayOptions,
+      ).format(date);
+      return dayName;
+    }
+
     const options = hourly
       ? ({
           hour: "numeric",
