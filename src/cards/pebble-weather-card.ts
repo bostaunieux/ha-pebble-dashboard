@@ -3,7 +3,6 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
-import { isAfter, isBefore } from "date-fns";
 import initLocalize, { LocalizationKey } from "../localize";
 import { WiSunrise, WiSunset } from "../utils/icons";
 import { supportsFeature, ForecastFeatures, getDefaultForecastType } from "../utils/weather-utils";
@@ -259,9 +258,29 @@ class PebbleWeatherCard extends LitElement {
     return html`<div class="forecast-list">
       ${forecast.map((entry) => {
         const datetime = new Date(entry.datetime);
-        const isNight =
-          (this.isNight && sunrise != null && isBefore(datetime, new Date(sunrise))) ||
-          (!this.isNight && sunset != null && isAfter(datetime, new Date(sunset)));
+        const calculatedSunrise = new Date(datetime);
+        const calculatedSunset = new Date(datetime);
+
+        if (sunrise && sunset) {
+          const sunriseTime = new Date(sunrise);
+          const sunsetTime = new Date(sunset);
+
+          calculatedSunrise.setHours(
+            sunriseTime.getHours(),
+            sunriseTime.getMinutes(),
+            sunriseTime.getSeconds(),
+          );
+          calculatedSunset.setHours(
+            sunsetTime.getHours(),
+            sunsetTime.getMinutes(),
+            sunsetTime.getSeconds(),
+          );
+        } else {
+          // fallback to time-based calculation if sunrise/sunset data is not available
+          calculatedSunrise.setHours(6, 0, 0);
+          calculatedSunset.setHours(18, 0, 0);
+        }
+        const isNight = datetime < calculatedSunrise || datetime >= calculatedSunset;
 
         return html`
           <div class="forecast hourly">
