@@ -171,8 +171,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
             @scroll=${this.handleScroll}
             .ref=${this.setScrollContainer}
           >
-            <div class="calendar-content">
-              <div class="calendar">
+            <div class="calendar">
                 ${allWeeks.map((week, weekIndex) => {
                   return html`
                     <div class="week">
@@ -197,7 +196,6 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
                   `;
                 })}
               </div>
-            </div>
           </div>
         </div>
         ${this.renderEventDialog()}
@@ -239,6 +237,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
           grid-auto-rows: min-content;
           grid-column: 1 / span 7;
           scroll-snap-align: start;
+          overflow: visible;
         }
 
         .event {

@@ -172,6 +172,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
           grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           height: 100%;
+          padding: 0 12px;
+          overflow: visible;
         }
 
         .calendar-container {
@@ -183,6 +185,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
         .calendar-scroll-area {
           height: min(100%, calc(100vh - var(--header-height)));
           overflow-y: scroll;
+          overflow-x: hidden;
           scroll-behavior: smooth;
           scrollbar-width: thin;
           scroll-snap-type: y mandatory;
@@ -206,9 +209,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
           background: rgba(0, 0, 0, 0.5);
         }
 
-        .calendar-content {
-          display: block;
-        }
 
         .calendar-header {
           display: grid;
@@ -217,10 +217,13 @@ export abstract class PebbleBaseCalendar extends LitElement {
           top: 0;
           z-index: 10;
           border-bottom: 2px solid var(--divider-color, #e0e0e0);
+          padding: 0 12px;
         }
 
         .day {
           min-height: 100px;
+          position: relative;
+          overflow: visible;
         }
 
         .day-name,
