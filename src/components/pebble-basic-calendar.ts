@@ -3,19 +3,13 @@ import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement } from "lit/decorators.js";
 import {
-  addDays,
-  eachDayOfInterval,
   isPast,
   format,
   startOfDay,
-  startOfWeek,
   isToday,
   Day,
   getDayOfYear,
   endOfDay,
-  startOfMonth,
-  endOfMonth,
-  addMonths,
 } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
@@ -28,62 +22,6 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     super();
   }
 
-  private calculateMonthsToRender() {
-    const totalMonths = this.scrollBufferMonths ?? 3;
-    const today = Date.now();
-    const startPosition = this.startPosition ?? "current_week";
-    
-    let startDate: Date;
-    if (startPosition === "start_of_month") {
-      startDate = startOfMonth(today);
-    } else {
-      // current_week - start from the beginning of the current week
-      const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-      startDate = startOfWeek(today, { weekStartsOn });
-    }
-    
-    const months = [];
-    const currentMonth = startOfMonth(startDate);
-    
-    // Add the total number of months starting from the current month
-    for (let i = 0; i < totalMonths; i++) {
-      months.push(addMonths(currentMonth, i));
-    }
-    
-    return months;
-  }
-
-  private generateContinuousWeeks(monthsToRender: Date[], weekStartsOn: Day) {
-    if (monthsToRender.length === 0) return [];
-    
-    const startPosition = this.startPosition ?? "current_week";
-    const today = Date.now();
-    
-    let firstWeekStart: Date;
-    if (startPosition === "start_of_month") {
-      // Start from the beginning of the first month
-      const firstMonthStart = monthsToRender[0];
-      firstWeekStart = startOfWeek(firstMonthStart, { weekStartsOn });
-    } else {
-      // current_week - start from the beginning of the current week
-      firstWeekStart = startOfWeek(today, { weekStartsOn });
-    }
-    
-    // Find the end of the last month
-    const lastMonthEnd = endOfMonth(monthsToRender[monthsToRender.length - 1]);
-    
-    // Generate all weeks in the continuous range
-    const weeks = [];
-    let currentWeekStart = firstWeekStart;
-    
-    while (currentWeekStart <= lastMonthEnd) {
-      const weekEnd = addDays(currentWeekStart, 6);
-      weeks.push(eachDayOfInterval({ start: currentWeekStart, end: weekEnd }));
-      currentWeekStart = addDays(currentWeekStart, 7);
-    }
-    
-    return weeks;
-  }
 
   render() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
@@ -92,16 +30,14 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     return this.renderScrollingCalendar(weekStartsOn, today);
   }
 
-
   private renderScrollingCalendar(weekStartsOn: Day, today: Date) {
-    const monthsToRender = this.calculateMonthsToRender();
     const adjustedDaysOfWeek = [
       ...DAYS_OF_WEEK.slice(weekStartsOn),
       ...DAYS_OF_WEEK.slice(0, weekStartsOn),
     ];
 
-    // Generate all weeks in a continuous sequence without duplicates
-    const allWeeks = this.generateContinuousWeeks(monthsToRender, weekStartsOn);
+    // Generate all weeks in a continuous sequence
+    const allWeeks = this.generateWeeks();
 
     const textSize = this.textSize;
     const styles = {
@@ -125,36 +61,36 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div 
-            class="calendar-scroll-area" 
+          <div
+            class="calendar-scroll-area"
             @scroll=${this.handleScroll}
             .ref=${this.setScrollContainer}
           >
             <div class="calendar">
-                ${allWeeks.map((week, weekIndex) => {
-                  return html`
-                    <div class="week">
-                      ${week.map((date, dayIndex) => {
-                        const events = this.getEventsForDay(date);
-                        const forecast = this.weatherForecast?.get(getDayOfYear(date));
+              ${allWeeks.map((week, weekIndex) => {
+                return html`
+                  <div class="week">
+                    ${week.map((date, dayIndex) => {
+                      const events = this.getEventsForDay(date);
+                      const forecast = this.weatherForecast?.get(getDayOfYear(date));
 
-                        return html`<div class="day">
-                          ${this.renderForecast(forecast)}
-                          <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
-                            ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
-                              ? html`<div class="month">${format(date, "MMM")}</div>`
-                              : nothing}
-                            <div class="numeral ${classMap({ today: isToday(date) })}">
-                              ${date.getDate()}
-                            </div>
+                      return html`<div class="day">
+                        ${this.renderForecast(forecast)}
+                        <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
+                          ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
+                            ? html`<div class="month">${format(date, "MMM")}</div>`
+                            : nothing}
+                          <div class="numeral ${classMap({ today: isToday(date) })}">
+                            ${date.getDate()}
                           </div>
-                          ${events.map((event) => this.renderEvent(event, date))}
-                        </div>`;
-                      })}
-                    </div>
-                  `;
-                })}
-              </div>
+                        </div>
+                        ${events.map((event) => this.renderEvent(event, date))}
+                      </div>`;
+                    })}
+                  </div>
+                `;
+              })}
+            </div>
           </div>
         </div>
         ${this.renderEventDialog()}

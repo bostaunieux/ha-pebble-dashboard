@@ -1,6 +1,6 @@
 import { LitElement, html, css, CSSResultGroup, nothing } from "lit";
 import { property } from "lit/decorators.js";
-import { isSameDay, isWithinInterval, Day, format } from "date-fns";
+import { isSameDay, isWithinInterval, Day, format, startOfWeek, startOfMonth, addDays, eachDayOfInterval } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { LocalizationKey } from "../localize";
@@ -14,7 +14,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected textSize?: string;
 
-  @property({ attribute: false }) protected scrollBufferMonths?: number;
+  @property({ attribute: false }) protected numWeeks?: number;
 
   @property({ attribute: false }) protected startPosition?: "current_week" | "start_of_month";
 
@@ -32,7 +32,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
     super();
     this.weekStartsOn = 0;
     this.events = [];
-    this.scrollBufferMonths = 2;
+    this.numWeeks = 12;
     this.startPosition = "current_week";
     this.localize = (arg) => arg;
   }
@@ -55,14 +55,40 @@ export abstract class PebbleBaseCalendar extends LitElement {
       );
   }
 
+  protected generateWeeks() {
+    const numWeeks = this.numWeeks ?? 12;
+    const today = Date.now();
+    const startPosition = this.startPosition ?? "current_week";
+    const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
+
+    let startDate: Date;
+    if (startPosition === "start_of_month") {
+      startDate = startOfMonth(today);
+    } else {
+      // current_week - start from the beginning of the current week
+      startDate = startOfWeek(today, { weekStartsOn });
+    }
+
+    const firstWeekStart = startOfWeek(startDate, { weekStartsOn });
+
+    // Generate all weeks in the continuous range
+    const weeks = [];
+    for (let i = 0; i < numWeeks; i++) {
+      const weekStart = addDays(firstWeekStart, i * 7);
+      const weekEnd = addDays(weekStart, 6);
+      weeks.push(eachDayOfInterval({ start: weekStart, end: weekEnd }));
+    }
+
+    return weeks;
+  }
+
   protected setScrollContainer = (el: HTMLElement) => {
     this.scrollContainer = el;
   };
 
-
   protected handleScroll = () => {
     if (!this.scrollContainer) return;
-    
+
     // This could be enhanced to detect which month is currently in view
     // and update currentMonthOffset accordingly
     // For now, we'll keep it simple
@@ -205,7 +231,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
         .calendar-scroll-area::-webkit-scrollbar-thumb:hover {
           background: rgba(0, 0, 0, 0.5);
         }
-
 
         .calendar-header {
           display: grid;

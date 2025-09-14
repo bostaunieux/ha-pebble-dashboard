@@ -27,7 +27,7 @@ class PebbleCalendarCardEditor extends LitElement {
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
-      total_months: 3,
+      num_weeks: 12,
       start_position: "current_week",
     };
     this.localize = initLocalize(this.hass);
@@ -44,7 +44,6 @@ class PebbleCalendarCardEditor extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
   }
-
 
   _getAddCalendarSchema(excludeEntities: string[]) {
     return {
@@ -71,7 +70,6 @@ class PebbleCalendarCardEditor extends LitElement {
       label: this.localize("calendar.editor.form.calendar.label"),
     };
   }
-
 
   _getCalendarViewSchema() {
     return {
@@ -136,9 +134,9 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.total-months.label"),
-          name: "total_months",
-          selector: { number: { mode: "box", min: 1, max: 12 } },
+          label: this.localize("calendar.editor.form.num-weeks.label"),
+          name: "num_weeks",
+          selector: { number: { mode: "box", min: 1, max: 52 } },
         },
       ],
     };
@@ -163,7 +161,6 @@ class PebbleCalendarCardEditor extends LitElement {
       ],
     };
   }
-
 
   _getWeatherSchema() {
     return {
@@ -202,13 +199,12 @@ class PebbleCalendarCardEditor extends LitElement {
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
-
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, start_position, total_months } = ev.detail.value;
+    const { week_start, start_position, num_weeks } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, start_position, total_months };
+    this._config = { ...this._config, week_start, start_position, num_weeks };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -220,8 +216,6 @@ class PebbleCalendarCardEditor extends LitElement {
     this._config = { ...this._config, events_span_days, event_refresh_interval };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
-
-
 
   _changeTextScale(ev: CustomEvent) {
     if (!this._config) return;

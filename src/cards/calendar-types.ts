@@ -10,6 +10,6 @@ export type CalendarCardConfig = {
   event_refresh_interval?: number;
   enable_weather?: boolean;
   weather_entity?: string;
-  total_months?: number;
+  num_weeks?: number;
   start_position?: "current_week" | "start_of_month";
 } & CardTextOptions;

@@ -136,8 +136,8 @@
         "events": {
           "title": "Events"
         },
-        "total-months": {
-          "label": "Total months to render"
+        "num-weeks": {
+          "label": "Number of weeks to show"
         },
         "start-position": {
           "label": "Calendar start position",

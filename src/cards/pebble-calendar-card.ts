@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, endOfMonth, addMonths } from "date-fns";
+import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, addDays } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
 import {
@@ -155,9 +155,9 @@ class PebbleCalendarCard extends LitElement {
     }
 
     const today = startOfDay(Date.now());
-    const totalMonths = this.config.total_months ?? 3;
+    const numWeeks = this.config.num_weeks ?? 12;
     const startPosition = this.config.start_position ?? "current_week";
-    
+
     let startDate: Date;
     if (startPosition === "start_of_month") {
       startDate = startOfMonth(today);
@@ -167,12 +167,14 @@ class PebbleCalendarCard extends LitElement {
         weekStartsOn: +(this.config.week_start ?? "0") as Day,
       });
     }
-    
-    const currentMonthStart = startOfMonth(startDate);
-    const lastMonthEnd = endOfMonth(addMonths(currentMonthStart, totalMonths - 1));
-    
-    const start = currentMonthStart;
-    const end = lastMonthEnd;
+
+    const weekStartsOn = +(this.config.week_start ?? "0") as Day;
+    const startWeekStart = startOfWeek(startDate, { weekStartsOn });
+    const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
+    const endWeekEnd = addDays(endWeekStart, 6);
+
+    const start = startWeekStart;
+    const end = endWeekEnd;
 
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
@@ -197,9 +199,9 @@ class PebbleCalendarCard extends LitElement {
 
   render() {
     return this.config?.events_span_days
-        ? html`<pebble-spanning-calendar
+      ? html`<pebble-spanning-calendar
           .weekStartsOn=${this.config?.week_start}
-          .scrollBufferMonths=${this.config?.total_months}
+          .numWeeks=${this.config?.num_weeks}
           .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
@@ -209,7 +211,7 @@ class PebbleCalendarCard extends LitElement {
         ></pebble-spanning-calendar>`
       : html`<pebble-basic-calendar
           .weekStartsOn=${this.config?.week_start}
-          .scrollBufferMonths=${this.config?.total_months}
+          .numWeeks=${this.config?.num_weeks}
           .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
