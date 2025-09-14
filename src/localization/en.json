@@ -132,6 +132,15 @@
         },
         "enable-weather": {
           "label": "Enable weather"
+        },
+        "scrolling": {
+          "title": "Scrolling Options"
+        },
+        "enable-scrolling": {
+          "label": "Enable vertical scrolling"
+        },
+        "scroll-buffer-months": {
+          "label": "Months to render ahead/behind"
         }
       }
     }

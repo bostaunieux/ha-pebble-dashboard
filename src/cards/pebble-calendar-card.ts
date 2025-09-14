@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { addDays, startOfDay, startOfWeek, Day, getDayOfYear } from "date-fns";
+import { addDays, startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, endOfMonth, addMonths } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
 import {
@@ -156,10 +156,27 @@ class PebbleCalendarCard extends LitElement {
     }
 
     const today = startOfDay(Date.now());
-    const start = startOfWeek(today, {
-      weekStartsOn: +(this.config.week_start ?? "0") as Day,
-    });
-    const end = addDays(start, 7 * +(this.config.num_weeks ?? 4));
+    let start: Date;
+    let end: Date;
+
+    if (this.config.enable_scrolling) {
+      // For scrolling view, fetch events for all visible months
+      const bufferMonths = this.config.scroll_buffer_months ?? 2;
+      const currentMonthStart = startOfMonth(today);
+      const lastMonthEnd = endOfMonth(addMonths(currentMonthStart, bufferMonths));
+      
+      // Start from the beginning of the current month
+      start = currentMonthStart;
+      // End at the end of the last visible month
+      end = lastMonthEnd;
+    } else {
+      // For static view, use the original logic
+      start = startOfWeek(today, {
+        weekStartsOn: +(this.config.week_start ?? "0") as Day,
+      });
+      end = addDays(start, 7 * +(this.config.num_weeks ?? 4));
+    }
+
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
       start,
@@ -183,9 +200,11 @@ class PebbleCalendarCard extends LitElement {
 
   render() {
     return this.config?.events_span_days
-      ? html`<pebble-spanning-calendar
+        ? html`<pebble-spanning-calendar
           .weekStartsOn=${this.config?.week_start}
           .numWeeks=${this.config?.num_weeks}
+          .enableScrolling=${this.config?.enable_scrolling}
+          .scrollBufferMonths=${this.config?.scroll_buffer_months}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
@@ -195,6 +214,8 @@ class PebbleCalendarCard extends LitElement {
       : html`<pebble-basic-calendar
           .weekStartsOn=${this.config?.week_start}
           .numWeeks=${this.config?.num_weeks}
+          .enableScrolling=${this.config?.enable_scrolling}
+          .scrollBufferMonths=${this.config?.scroll_buffer_months}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}

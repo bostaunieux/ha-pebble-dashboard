@@ -11,4 +11,6 @@ export type CalendarCardConfig = {
   event_refresh_interval?: number;
   enable_weather?: boolean;
   weather_entity?: string;
+  enable_scrolling?: boolean;
+  scroll_buffer_months?: number;
 } & CardTextOptions;

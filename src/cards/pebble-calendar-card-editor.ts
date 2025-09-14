@@ -28,6 +28,8 @@ class PebbleCalendarCardEditor extends LitElement {
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
+      enable_scrolling: false,
+      scroll_buffer_months: 2,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -138,6 +140,30 @@ class PebbleCalendarCardEditor extends LitElement {
     };
   }
 
+  _getScrollingSchema() {
+    return {
+      name: "",
+      type: "expandable",
+      title: this.localize("calendar.editor.form.scrolling.title"),
+      schema: [
+        {
+          label: this.localize("calendar.editor.form.enable-scrolling.label"),
+          name: "enable_scrolling",
+          selector: { boolean: {} },
+        },
+        ...(this._config.enable_scrolling
+          ? [
+              {
+                label: this.localize("calendar.editor.form.scroll-buffer-months.label"),
+                name: "scroll_buffer_months",
+                selector: { number: { mode: "box", min: 1, max: 12 } },
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+
   _getWeatherSchema() {
     return {
       name: "",
@@ -190,6 +216,19 @@ class PebbleCalendarCardEditor extends LitElement {
     const { num_weeks, week_start } = ev.detail.value;
 
     this._config = { ...this._config, num_weeks, week_start };
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
+  }
+
+  _changeScrolling(ev: CustomEvent) {
+    if (!this._config) return;
+
+    const { enable_scrolling, scroll_buffer_months } = ev.detail.value;
+
+    this._config = { 
+      ...this._config, 
+      enable_scrolling, 
+      scroll_buffer_months
+    };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -272,6 +311,14 @@ class PebbleCalendarCardEditor extends LitElement {
             .schema=${[this._getWeeksSchema()]}
             .computeLabel=${computeLabel}
             @value-changed=${this._changeWeeks}
+          ></ha-form>
+
+          <ha-form
+            .hass=${this.hass}
+            .data=${this._config}
+            .schema=${[this._getScrollingSchema()]}
+            .computeLabel=${computeLabel}
+            @value-changed=${this._changeScrolling}
           ></ha-form>
 
           <div class="box">

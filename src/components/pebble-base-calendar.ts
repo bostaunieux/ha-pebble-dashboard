@@ -16,7 +16,13 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected textSize?: string;
 
+  @property({ attribute: false }) protected enableScrolling?: boolean;
+
+  @property({ attribute: false }) protected scrollBufferMonths?: number;
+
   @property({ attribute: false }) protected events: CalendarEvent[];
+
+  protected scrollContainer?: HTMLElement;
 
   @property({ attribute: false }) protected selectedEvent?: CalendarEvent;
 
@@ -29,6 +35,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
     this.weekStartsOn = 0;
     this.numWeeks = 4;
     this.events = [];
+    this.enableScrolling = false;
+    this.scrollBufferMonths = 2;
     this.localize = (arg) => arg;
   }
 
@@ -49,6 +57,19 @@ export abstract class PebbleBaseCalendar extends LitElement {
           (b.allDay ? 0 : b.start.getHours() * 60 + b.start.getMinutes()),
       );
   }
+
+  protected setScrollContainer = (el: HTMLElement) => {
+    this.scrollContainer = el;
+  };
+
+
+  protected handleScroll = () => {
+    if (!this.scrollContainer || !this.enableScrolling) return;
+    
+    // This could be enhanced to detect which month is currently in view
+    // and update currentMonthOffset accordingly
+    // For now, we'll keep it simple
+  };
 
   protected renderForecast(forecast?: ForecastAttribute) {
     if (!forecast) {
@@ -151,6 +172,51 @@ export abstract class PebbleBaseCalendar extends LitElement {
           grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           height: 100%;
+        }
+
+        .calendar-container {
+          height: 100%;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .calendar-scroll-area {
+          height: min(100%, calc(100vh - var(--header-height)));
+          overflow-y: scroll;
+          scroll-behavior: smooth;
+          scrollbar-width: thin;
+          scroll-snap-type: y mandatory;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 3px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 3px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.5);
+        }
+
+        .calendar-content {
+          display: block;
+        }
+
+        .calendar-header {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          border-bottom: 2px solid var(--divider-color, #e0e0e0);
         }
 
         .day {
