@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { addDays, startOfDay, startOfWeek, Day, getDayOfYear } from "date-fns";
+import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, addDays } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
 import {
@@ -53,7 +53,6 @@ class PebbleCalendarCard extends LitElement {
     super();
     this.config = {
       type: "custom:pebble-calendar-card",
-      num_weeks: 4,
       week_start: "0",
       calendars: [],
     };
@@ -156,10 +155,24 @@ class PebbleCalendarCard extends LitElement {
     }
 
     const today = startOfDay(Date.now());
-    const start = startOfWeek(today, {
-      weekStartsOn: +(this.config.week_start ?? "0") as Day,
-    });
-    const end = addDays(start, 7 * +(this.config.num_weeks ?? 4));
+    const numWeeks = this.config.num_weeks ?? 12;
+    const startPosition = this.config.start_position ?? "current_week";
+
+    const startDate =
+      startPosition === "start_of_month"
+        ? startOfMonth(today)
+        : startOfWeek(today, {
+            weekStartsOn: +(this.config.week_start ?? "0") as Day,
+          });
+
+    const weekStartsOn = +(this.config.week_start ?? "0") as Day;
+    const startWeekStart = startOfWeek(startDate, { weekStartsOn });
+    const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
+    const endWeekEnd = addDays(endWeekStart, 6);
+
+    const start = startWeekStart;
+    const end = endWeekEnd;
+
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
       start,
@@ -186,6 +199,7 @@ class PebbleCalendarCard extends LitElement {
       ? html`<pebble-spanning-calendar
           .weekStartsOn=${this.config?.week_start}
           .numWeeks=${this.config?.num_weeks}
+          .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
@@ -195,6 +209,7 @@ class PebbleCalendarCard extends LitElement {
       : html`<pebble-basic-calendar
           .weekStartsOn=${this.config?.week_start}
           .numWeeks=${this.config?.num_weeks}
+          .startPosition=${this.config?.start_position}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}

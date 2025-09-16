@@ -3,7 +3,6 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
-import { isAfter, isBefore } from "date-fns";
 import initLocalize, { LocalizationKey } from "../localize";
 import { WiSunrise, WiSunset } from "../utils/icons";
 import { supportsFeature, ForecastFeatures, getDefaultForecastType } from "../utils/weather-utils";
@@ -23,10 +22,12 @@ class PebbleWeatherCard extends LitElement {
   @state() private isNight: boolean;
   @state() private weather: HassEntity | null;
   @state() private forecastEvent?: ForecastEvent;
+  @state() private containerWidth: number = 0;
 
   private _retryCount: number;
 
   private _unsubscribe?: () => Promise<void>;
+  private _resizeObserver?: ResizeObserver;
 
   private localize: (key: LocalizationKey) => string;
 
@@ -49,11 +50,13 @@ class PebbleWeatherCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this._subscribe();
+    this._setupResizeObserver();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unsubscribe?.();
+    this._resizeObserver?.disconnect();
   }
 
   set hass(hass: HomeAssistant) {
@@ -113,10 +116,16 @@ class PebbleWeatherCard extends LitElement {
     const forecast = this.forecastEvent?.forecast ?? [];
 
     const textSize = this.config.text_size;
+    const visibleColumns =
+      this.containerWidth > 0
+        ? this._calculateVisibleColumns(this.containerWidth)
+        : Math.max(1, Math.floor((this.offsetWidth || 400) / 88));
+
     const styles = {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
         : undefined,
+      "--visible-columns": visibleColumns,
     };
 
     return html`
@@ -209,11 +218,9 @@ class PebbleWeatherCard extends LitElement {
     const sunset = this._hass.states?.["sun.sun"].attributes?.next_setting;
     const sunrise = this._hass.states?.["sun.sun"].attributes?.next_rising;
 
-    const truncatedForecast = forecast.slice(0, count);
-
     if (!hourly) {
       return html`<div class="forecast-list">
-        ${truncatedForecast.map((entry) => {
+        ${forecast.map((entry) => {
           return html`
             <div class="forecast foo">
               <div>${this._renderDateTime(entry.datetime, hourly)}</div>
@@ -249,11 +256,31 @@ class PebbleWeatherCard extends LitElement {
     };
 
     return html`<div class="forecast-list">
-      ${truncatedForecast.map((entry) => {
+      ${forecast.map((entry) => {
         const datetime = new Date(entry.datetime);
-        const isNight =
-          (this.isNight && sunrise != null && isBefore(datetime, new Date(sunrise))) ||
-          (!this.isNight && sunset != null && isAfter(datetime, new Date(sunset)));
+        const calculatedSunrise = new Date(datetime);
+        const calculatedSunset = new Date(datetime);
+
+        if (sunrise && sunset) {
+          const sunriseTime = new Date(sunrise);
+          const sunsetTime = new Date(sunset);
+
+          calculatedSunrise.setHours(
+            sunriseTime.getHours(),
+            sunriseTime.getMinutes(),
+            sunriseTime.getSeconds(),
+          );
+          calculatedSunset.setHours(
+            sunsetTime.getHours(),
+            sunsetTime.getMinutes(),
+            sunsetTime.getSeconds(),
+          );
+        } else {
+          // fallback to time-based calculation if sunrise/sunset data is not available
+          calculatedSunrise.setHours(6, 0, 0);
+          calculatedSunset.setHours(18, 0, 0);
+        }
+        const isNight = datetime < calculatedSunrise || datetime >= calculatedSunset;
 
         return html`
           <div class="forecast hourly">
@@ -327,6 +354,18 @@ class PebbleWeatherCard extends LitElement {
       return this.localize("weather.card.forecast.today");
     }
 
+    // For hourly forecasts, show day name at midnight (day boundaries)
+    if (hourly && date.getHours() === 0) {
+      const dayOptions = {
+        weekday: "short",
+      } as const;
+      const dayName = new Intl.DateTimeFormat(
+        this._hass.locale?.language ?? "en-US",
+        dayOptions,
+      ).format(date);
+      return dayName;
+    }
+
     const options = hourly
       ? ({
           hour: "numeric",
@@ -341,6 +380,29 @@ class PebbleWeatherCard extends LitElement {
     ).format(date);
 
     return hourly ? formattedDateTime.toLocaleLowerCase() : formattedDateTime;
+  }
+
+  _calculateVisibleColumns(containerWidth: number, columnWidth: number = 80, gap: number = 8) {
+    // Calculate how many full columns can fit in the container
+    const availableWidth = containerWidth - gap * 2; // Account for padding
+    const columnsPerView = Math.floor(availableWidth / (columnWidth + gap));
+    return Math.max(1, columnsPerView);
+  }
+
+  _setupResizeObserver() {
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    this._resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === this) {
+          this.containerWidth = entry.contentRect.width;
+        }
+      }
+    });
+
+    this._resizeObserver.observe(this);
   }
 
   async _subscribe() {
@@ -450,19 +512,42 @@ class PebbleWeatherCard extends LitElement {
       }
 
       .forecast-list {
-        display: grid;
-        grid-auto-columns: minmax(1fr, 150px);
-        grid-auto-flow: column;
-        justify-content: space-between;
-
-        font-size: 1.5em;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
         gap: 8px;
+        font-size: 1.5em;
+        padding-bottom: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--divider-color, #e0e0e0) transparent;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+      }
+
+      .forecast-list::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .forecast-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .forecast-list::-webkit-scrollbar-thumb {
+        background-color: var(--divider-color, #e0e0e0);
+        border-radius: 3px;
+      }
+
+      .forecast-list::-webkit-scrollbar-thumb:hover {
+        background-color: var(--secondary-text-color, #666);
       }
 
       .forecast {
         display: grid;
         gap: 20px;
         justify-items: center;
+        width: 80px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
       }
 
       .forecast.hourly {

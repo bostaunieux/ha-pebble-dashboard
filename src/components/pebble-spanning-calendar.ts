@@ -3,8 +3,6 @@ import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement } from "lit/decorators.js";
 import {
-  addDays,
-  eachDayOfInterval,
   isPast,
   format,
   startOfDay,
@@ -52,19 +50,13 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const today = startOfDay(Date.now());
 
-    const initialStart = startOfWeek(today, { weekStartsOn });
-
-    const daysByWeek = [...Array(this.numWeeks ?? 4).keys()].reduce((weeks, weekIndex) => {
-      const weekStart = addDays(initialStart, weekIndex * 7);
-      const weekEnd = addDays(weekStart, 6);
-      weeks.push(eachDayOfInterval({ start: weekStart, end: weekEnd }));
-      return weeks;
-    }, [] as Date[][]);
-
     const adjustedDaysOfWeek = [
       ...DAYS_OF_WEEK.slice(weekStartsOn),
       ...DAYS_OF_WEEK.slice(0, weekStartsOn),
     ];
+
+    // Generate all weeks in a continuous sequence
+    const allWeeks = this.generateWeeks();
 
     const textSize = this.textSize;
     const styles = {
@@ -75,48 +67,54 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
 
     return html`
       <ha-card style=${styleMap(styles)}>
-        <div class="calendar span-events">
-          ${adjustedDaysOfWeek.map(
-            (day, index) =>
-              html`<div
-                class="day-name ${classMap({
-                  "active-day": today.getDay() === index,
-                })}"
-              >
-                ${this.localize(`calendar.card.calendar.week-days.${day}`)}
-              </div>`,
-          )}
-          ${daysByWeek.map((week, weekIndex) => {
-            const weekStart = startOfWeek(week[0], { weekStartsOn });
-            const weekEnd = endOfWeek(week[0], { weekStartsOn });
-            const weekEvents = getEventsByWeekdays(
-              this.getEventsForWeek(weekStart, weekEnd),
-              weekStart,
-              weekEnd,
-              weekStartsOn,
-            );
+        <div class="calendar-container">
+          <div class="calendar-header">
+            ${adjustedDaysOfWeek.map(
+              (day, index) =>
+                html`<div
+                  class="day-name ${classMap({
+                    "active-day": today.getDay() === index,
+                  })}"
+                >
+                  ${this.localize(`calendar.card.calendar.week-days.${day}`)}
+                </div>`,
+            )}
+          </div>
+          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
+            <div class="calendar span-events">
+              ${allWeeks.map((week, weekIndex) => {
+                const weekStart = startOfWeek(week[0], { weekStartsOn });
+                const weekEnd = endOfWeek(week[0], { weekStartsOn });
+                const weekEvents = getEventsByWeekdays(
+                  this.getEventsForWeek(weekStart, weekEnd),
+                  weekStart,
+                  weekEnd,
+                  weekStartsOn,
+                );
 
-            return html`
-              <div class="week">
-                ${week.map((date, dayIndex) => {
-                  const events = weekEvents[dayIndex];
-                  const forecast = this.weatherForecast?.get(getDayOfYear(date));
-                  return html`<div class="day">
-                    ${this.renderForecast(forecast)}
-                    <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
-                      ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
-                        ? html`<div class="month">${format(date, "MMM")}</div>`
-                        : nothing}
-                      <div class="numeral ${classMap({ today: isToday(date) })}">
-                        ${date.getDate()}
-                      </div>
-                    </div>
-                    ${events.map((event) => this.renderEvent(event, date, weekStartsOn))}
-                  </div>`;
-                })}
-              </div>
-            `;
-          })}
+                return html`
+                  <div class="week">
+                    ${week.map((date, dayIndex) => {
+                      const events = weekEvents[dayIndex];
+                      const forecast = this.weatherForecast?.get(getDayOfYear(date));
+                      return html`<div class="day">
+                        ${this.renderForecast(forecast)}
+                        <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
+                          ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
+                            ? html`<div class="month">${format(date, "MMM")}</div>`
+                            : nothing}
+                          <div class="numeral ${classMap({ today: isToday(date) })}">
+                            ${date.getDate()}
+                          </div>
+                        </div>
+                        ${events.map((event) => this.renderEvent(event, date, weekStartsOn))}
+                      </div>`;
+                    })}
+                  </div>
+                `;
+              })}
+            </div>
+          </div>
         </div>
         ${this.renderEventDialog()}
       </ha-card>
@@ -185,6 +183,8 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           grid-column: 1 / span 7;
+          scroll-snap-align: start;
+          overflow: visible;
         }
 
         .day {
@@ -255,6 +255,13 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           background: inherit;
 
           aspect-ratio: cos(30deg);
+          mask:
+            linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius) at calc(var(--arrow-radius) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
           -webkit-mask:
             linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
             radial-gradient(
@@ -279,6 +286,13 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
           background: inherit;
 
           aspect-ratio: cos(30deg);
+          mask:
+            linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius) at calc(100% - var(--arrow-radius) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
           -webkit-mask:
             linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
             radial-gradient(

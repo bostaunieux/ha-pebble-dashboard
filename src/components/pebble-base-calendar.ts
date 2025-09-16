@@ -1,6 +1,15 @@
 import { LitElement, html, css, CSSResultGroup, nothing } from "lit";
 import { property } from "lit/decorators.js";
-import { isSameDay, isWithinInterval, Day, format } from "date-fns";
+import {
+  isSameDay,
+  isWithinInterval,
+  Day,
+  format,
+  startOfWeek,
+  startOfMonth,
+  addDays,
+  eachDayOfInterval,
+} from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { LocalizationKey } from "../localize";
@@ -12,9 +21,9 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected weekStartsOn: Day;
 
-  @property({ attribute: false }) protected numWeeks: number;
+  @property({ attribute: false }) protected numWeeks?: number;
 
-  @property({ attribute: false }) protected textSize?: string;
+  @property({ attribute: false }) protected startPosition?: "current_week" | "start_of_month";
 
   @property({ attribute: false }) protected events: CalendarEvent[];
 
@@ -22,12 +31,17 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected weatherForecast?: Map<number, ForecastAttribute>;
 
+  @property({ attribute: false }) protected textSize?: string;
+
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
+
+  protected scrollContainer?: HTMLElement;
 
   constructor() {
     super();
     this.weekStartsOn = 0;
-    this.numWeeks = 4;
+    this.numWeeks = 12;
+    this.startPosition = "current_week";
     this.events = [];
     this.localize = (arg) => arg;
   }
@@ -49,6 +63,37 @@ export abstract class PebbleBaseCalendar extends LitElement {
           (b.allDay ? 0 : b.start.getHours() * 60 + b.start.getMinutes()),
       );
   }
+
+  protected generateWeeks() {
+    const numWeeks = this.numWeeks ?? 12;
+    const today = Date.now();
+    const startPosition = this.startPosition ?? "current_week";
+    const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
+
+    let startDate: Date;
+    if (startPosition === "start_of_month") {
+      startDate = startOfMonth(today);
+    } else {
+      // current_week - start from the beginning of the current week
+      startDate = startOfWeek(today, { weekStartsOn });
+    }
+
+    const firstWeekStart = startOfWeek(startDate, { weekStartsOn });
+
+    // Generate all weeks in the continuous range
+    const weeks = [];
+    for (let i = 0; i < numWeeks; i++) {
+      const weekStart = addDays(firstWeekStart, i * 7);
+      const weekEnd = addDays(weekStart, 6);
+      weeks.push(eachDayOfInterval({ start: weekStart, end: weekEnd }));
+    }
+
+    return weeks;
+  }
+
+  protected setScrollContainer = (el: HTMLElement) => {
+    this.scrollContainer = el;
+  };
 
   protected renderForecast(forecast?: ForecastAttribute) {
     if (!forecast) {
@@ -151,10 +196,57 @@ export abstract class PebbleBaseCalendar extends LitElement {
           grid-template-columns: repeat(7, minmax(0, 1fr));
           grid-auto-rows: min-content;
           height: 100%;
+          padding: 0 12px;
+          overflow: visible;
+        }
+
+        .calendar-container {
+          height: 100%;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .calendar-scroll-area {
+          height: min(100%, calc(100vh - var(--header-height)));
+          overflow-y: scroll;
+          overflow-x: hidden;
+          scroll-behavior: smooth;
+          scrollbar-width: thin;
+          scroll-snap-type: y mandatory;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 3px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 3px;
+        }
+
+        .calendar-scroll-area::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.5);
+        }
+
+        .calendar-header {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          border-bottom: 2px solid var(--divider-color, #e0e0e0);
+          padding: 0 12px;
         }
 
         .day {
           min-height: 100px;
+          position: relative;
+          overflow: visible;
         }
 
         .day-name,

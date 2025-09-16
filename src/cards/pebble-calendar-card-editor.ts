@@ -23,7 +23,8 @@ class PebbleCalendarCardEditor extends LitElement {
     this._config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
-      num_weeks: 4,
+      num_weeks: 12,
+      start_position: "current_week",
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
@@ -42,21 +43,6 @@ class PebbleCalendarCardEditor extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-  }
-
-  _getEventConfigSchema() {
-    return [
-      {
-        label: this.localize("calendar.editor.form.event-format.label"),
-        name: "events_span_days",
-        selector: { boolean: {} },
-      },
-      {
-        label: this.localize("calendar.editor.form.event-refresh-interval.label"),
-        name: "event_refresh_interval",
-        selector: { number: { mode: "box", min: 5 } },
-      },
-    ];
   }
 
   _getAddCalendarSchema(excludeEntities: string[]) {
@@ -85,10 +71,11 @@ class PebbleCalendarCardEditor extends LitElement {
     };
   }
 
-  _getWeeksSchema() {
+  _getCalendarViewSchema() {
     return {
       name: "",
-      type: "grid",
+      type: "expandable",
+      title: this.localize("calendar.editor.form.calendar-view.title"),
       schema: [
         {
           label: this.localize("calendar.editor.form.week-start.label"),
@@ -130,9 +117,47 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
+          label: this.localize("calendar.editor.form.start-position.label"),
+          name: "start_position",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "current_week",
+                  label: this.localize("calendar.editor.form.start-position.option.current_week"),
+                },
+                {
+                  value: "start_of_month",
+                  label: this.localize("calendar.editor.form.start-position.option.start_of_month"),
+                },
+              ],
+            },
+          },
+        },
+        {
           label: this.localize("calendar.editor.form.num-weeks.label"),
           name: "num_weeks",
-          selector: { number: { mode: "box", min: 1 } },
+          selector: { number: { mode: "box", min: 1, max: 52 } },
+        },
+      ],
+    };
+  }
+
+  _getEventsSchema() {
+    return {
+      name: "",
+      type: "expandable",
+      title: this.localize("calendar.editor.form.events.title"),
+      schema: [
+        {
+          label: this.localize("calendar.editor.form.event-format.label"),
+          name: "events_span_days",
+          selector: { boolean: {} },
+        },
+        {
+          label: this.localize("calendar.editor.form.event-refresh-interval.label"),
+          name: "event_refresh_interval",
+          selector: { number: { mode: "box", min: 5 } },
         },
       ],
     };
@@ -175,21 +200,21 @@ class PebbleCalendarCardEditor extends LitElement {
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
-  _changeEventFormat(ev: CustomEvent) {
+  _changeCalendarView(ev: CustomEvent) {
+    if (!this._config) return;
+
+    const { week_start, start_position, num_weeks } = ev.detail.value;
+
+    this._config = { ...this._config, week_start, start_position, num_weeks };
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
+  }
+
+  _changeEvents(ev: CustomEvent) {
     if (!this._config) return;
 
     const { events_span_days, event_refresh_interval } = ev.detail.value;
 
     this._config = { ...this._config, events_span_days, event_refresh_interval };
-    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
-  }
-
-  _changeWeeks(ev: CustomEvent) {
-    if (!this._config) return;
-
-    const { num_weeks, week_start } = ev.detail.value;
-
-    this._config = { ...this._config, num_weeks, week_start };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -261,17 +286,17 @@ class PebbleCalendarCardEditor extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
-            .schema=${this._getEventConfigSchema()}
+            .schema=${[this._getCalendarViewSchema()]}
             .computeLabel=${computeLabel}
-            @value-changed=${this._changeEventFormat}
+            @value-changed=${this._changeCalendarView}
           ></ha-form>
 
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
-            .schema=${[this._getWeeksSchema()]}
+            .schema=${[this._getEventsSchema()]}
             .computeLabel=${computeLabel}
-            @value-changed=${this._changeWeeks}
+            @value-changed=${this._changeEvents}
           ></ha-form>
 
           <div class="box">
@@ -304,6 +329,7 @@ class PebbleCalendarCardEditor extends LitElement {
               .computeLabel=${computeLabel}
               @value-changed=${this._addCalendar}
             ></ha-form>
+          </div>
 
             <ha-form
               .hass=${this.hass}
