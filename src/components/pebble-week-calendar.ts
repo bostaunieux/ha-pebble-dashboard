@@ -186,21 +186,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="week-calendar-container">
-          <!-- Header with month and navigation -->
-          <div class="week-header">
-            <div class="navigation">
-              <ha-icon-button @click=${this.navigatePrev}>
-                <ha-icon icon="mdi:chevron-left"></ha-icon>
-              </ha-icon-button>
-              <ha-icon-button @click=${this.navigateNext}>
-                <ha-icon icon="mdi:chevron-right"></ha-icon>
-              </ha-icon-button>
-            </div>
-          </div>
-
           <!-- Day headers -->
           <div class="day-headers">
-            <div class="month-display">${format(weekDays[0], "MMM")}</div>
+            <div class="month-display">
+              <div class="month-name">${format(weekDays[0], "MMM")}</div>
+              
+            </div>
             ${weekDays.map((date, index) => {
               const dayName = adjustedDaysOfWeek[index];
               return html`
@@ -218,7 +209,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
           <!-- All day events row -->
           <div class="all-day-events">
-            <div></div>
+            
+            <div class="navigation">
+                <ha-icon-button @click=${this.navigatePrev}>
+                  <ha-icon icon="mdi:chevron-left"></ha-icon>
+                </ha-icon-button>
+                <ha-icon-button @click=${this.navigateNext}>
+                  <ha-icon icon="mdi:chevron-right"></ha-icon>
+                </ha-icon-button>
+              </div>
             ${weekDays.map((date, index) => {
               let allDayEvents: CalendarEvent[] = [];
               if (this.eventsSpanDays && weekEvents.length > 0) {
@@ -369,34 +368,37 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           flex-direction: column;
         }
 
-        .week-header {
+        .month-display {
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
           align-items: center;
-          padding: 16px;
-          border-bottom: 2px solid var(--divider-color, #e0e0e0);
+          justify-content: center;
+          padding: 8px;
+          border-right: 1px solid var(--divider-color, #e0e0e0);
         }
 
-        .month-display {
+        .month-name {
           font-size: 1.5em;
           font-weight: bold;
         }
 
         .navigation {
           display: flex;
-          gap: 8px;
+          gap: 4px;
+          margin: -4px;
         }
 
         .day-headers {
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
+          border-bottom: 2px solid var(--divider-color, #e0e0e0);
         }
 
         .wk-day-header {
           margin: var(--day-margin, 5px);
           padding-bottom: 4px;
           border-bottom: 2px solid #ccc;
-          font-size: 2em;
+          font-size: 1.75em;
           display: flex;
           justify-content: space-between;
           place-items: center;
@@ -533,6 +535,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
           overflow-y: auto;
+          /* max-height: 70vh; */
+          /* 84px = month display; 40px = all day events; 32px = calendar padding */
+          max-height: calc(100vh - var(--header-height, 0) - 84px - 40px - 32px);
           min-height: 0;
         }
 
@@ -548,7 +553,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           color: var(--secondary-text-color, #666);
           border-bottom: 1px solid var(--divider-color, #e0e0e0);
           display: flex;
-          align-items: center;
+          align-items: start;
           box-sizing: border-box;
         }
 
@@ -589,6 +594,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         :host {
           --week-days: 7;
           --arrow-radius: 4px;
+          --mdc-icon-button-size: 32px;
         }
 
         :host([week-days="5"]) {
