@@ -16,6 +16,8 @@ import { ForecastAttribute, ForecastEvent } from "./weather-types";
 import { ForecastFeatures, supportsFeature } from "../utils/weather-utils";
 import "../components/pebble-basic-calendar";
 import "../components/pebble-spanning-calendar";
+import "../components/pebble-week-calendar";
+import "../components/pebble-view-toggle";
 
 const WEATHER_RETRIES = [1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 60_000, 60_000];
 
@@ -30,6 +32,8 @@ class PebbleCalendarCard extends LitElement {
   @state() private weather: HassEntity | null;
 
   @state() private weatherForecast?: Map<number, ForecastAttribute>;
+
+  @state() private currentView: "month" | "week" = "month";
 
   private _retryCount: number;
 
@@ -55,6 +59,8 @@ class PebbleCalendarCard extends LitElement {
       type: "custom:pebble-calendar-card",
       week_start: "0",
       calendars: [],
+      view_type: "month",
+      week_days: 7,
     };
     this._retryCount = 0;
     this.weather = null;
@@ -85,6 +91,7 @@ class PebbleCalendarCard extends LitElement {
   setConfig(config: CalendarCardConfig) {
     const prevConfig = this.config;
     this.config = config;
+    this.currentView = config.view_type ?? "month";
 
     if (config.calendars && config.calendars.length === 0) {
       this.events = [];
@@ -194,28 +201,57 @@ class PebbleCalendarCard extends LitElement {
     }
   }
 
+  private handleViewChange = (view: "month" | "week") => {
+    this.currentView = view;
+    this.config = { ...this.config, view_type: view };
+  };
+
   render() {
-    return this.config?.events_span_days
-      ? html`<pebble-spanning-calendar
+    if (this.currentView === "week") {
+      return html`
+        <pebble-week-calendar
           .weekStartsOn=${this.config?.week_start}
-          .numWeeks=${this.config?.num_weeks}
-          .startPosition=${this.config?.start_position}
+          .weekDays=${this.config?.week_days ?? 7}
           .textSize=${this.config?.text_size}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
           .hass=${this._hass}
-        ></pebble-spanning-calendar>`
-      : html`<pebble-basic-calendar
-          .weekStartsOn=${this.config?.week_start}
-          .numWeeks=${this.config?.num_weeks}
-          .startPosition=${this.config?.start_position}
-          .textSize=${this.config?.text_size}
-          .events=${this.events}
-          .weatherForecast=${this.weatherForecast}
-          .localize=${this.localize}
-          .hass=${this._hass}
-        ></pebble-basic-calendar>`;
+        ></pebble-week-calendar>
+        <pebble-view-toggle
+          .currentView=${this.currentView}
+          .onViewChange=${this.handleViewChange}
+        ></pebble-view-toggle>
+      `;
+    }
+
+    return html`
+      ${this.config?.events_span_days
+        ? html`<pebble-spanning-calendar
+            .weekStartsOn=${this.config?.week_start}
+            .numWeeks=${this.config?.num_weeks}
+            .startPosition=${this.config?.start_position}
+            .textSize=${this.config?.text_size}
+            .events=${this.events}
+            .weatherForecast=${this.weatherForecast}
+            .localize=${this.localize}
+            .hass=${this._hass}
+          ></pebble-spanning-calendar>`
+        : html`<pebble-basic-calendar
+            .weekStartsOn=${this.config?.week_start}
+            .numWeeks=${this.config?.num_weeks}
+            .startPosition=${this.config?.start_position}
+            .textSize=${this.config?.text_size}
+            .events=${this.events}
+            .weatherForecast=${this.weatherForecast}
+            .localize=${this.localize}
+            .hass=${this._hass}
+          ></pebble-basic-calendar>`}
+      <pebble-view-toggle
+        .currentView=${this.currentView}
+        .onViewChange=${this.handleViewChange}
+      ></pebble-view-toggle>
+    `;
   }
 
   async _subscribeToWeather() {

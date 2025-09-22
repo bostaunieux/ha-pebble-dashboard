@@ -145,6 +145,20 @@
             "current_week": "Current week",
             "start_of_month": "Start of month"
           }
+        },
+        "view-type": {
+          "label": "View type",
+          "option": {
+            "month": "Month view",
+            "week": "Week view"
+          }
+        },
+        "week-days": {
+          "label": "Number of days in week view",
+          "option": {
+            "5": "5 days",
+            "7": "7 days"
+          }
         }
       }
     }

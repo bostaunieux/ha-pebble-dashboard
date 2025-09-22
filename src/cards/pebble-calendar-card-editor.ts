@@ -29,6 +29,8 @@ class PebbleCalendarCardEditor extends LitElement {
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
+      view_type: "month",
+      week_days: 7,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -139,6 +141,46 @@ class PebbleCalendarCardEditor extends LitElement {
           name: "num_weeks",
           selector: { number: { mode: "box", min: 1, max: 52 } },
         },
+        {
+          label: this.localize("calendar.editor.form.view-type.label"),
+          name: "view_type",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "month",
+                  label: this.localize("calendar.editor.form.view-type.option.month"),
+                },
+                {
+                  value: "week",
+                  label: this.localize("calendar.editor.form.view-type.option.week"),
+                },
+              ],
+            },
+          },
+        },
+        ...(this._config.view_type === "week"
+          ? [
+              {
+                label: this.localize("calendar.editor.form.week-days.label"),
+                name: "week_days",
+                selector: {
+                  select: {
+                    options: [
+                      {
+                        value: 5,
+                        label: this.localize("calendar.editor.form.week-days.option.5"),
+                      },
+                      {
+                        value: 7,
+                        label: this.localize("calendar.editor.form.week-days.option.7"),
+                      },
+                    ],
+                  },
+                },
+              },
+            ]
+          : []),
       ],
     };
   }
@@ -203,9 +245,9 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, start_position, num_weeks } = ev.detail.value;
+    const { week_start, start_position, num_weeks, view_type, week_days } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, start_position, num_weeks };
+    this._config = { ...this._config, week_start, start_position, num_weeks, view_type, week_days };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 

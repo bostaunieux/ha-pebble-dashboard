@@ -12,4 +12,6 @@ export type CalendarCardConfig = {
   event_refresh_interval?: number;
   enable_weather?: boolean;
   weather_entity?: string;
+  view_type?: "month" | "week";
+  week_days?: 5 | 7;
 } & CardTextOptions;
