@@ -16,8 +16,12 @@ import {
   getMinutes,
   setHours,
   setMinutes,
+  endOfWeek,
+  isSameWeek,
+  isPast,
+  differenceInDays,
 } from "date-fns";
-import { CalendarEvent } from "../utils/calendar-utils";
+import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
@@ -35,6 +39,7 @@ interface EventPosition {
 @customElement("pebble-week-calendar")
 class PebbleWeekCalendar extends PebbleBaseCalendar {
   @property({ attribute: false }) protected weekDays: 5 | 7 = 7;
+  @property({ attribute: false }) protected eventsSpanDays: boolean = false;
 
   @state() private currentDate = startOfDay(Date.now());
 
@@ -74,6 +79,22 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const end = addDays(start, this.weekDays - 1);
 
     return eachDayOfInterval({ start, end });
+  }
+
+  private getEventsForWeek(weekStart: Date, weekEnd: Date) {
+    const weekInterval = { start: weekStart, end: weekEnd };
+
+    return this.events
+      .filter((event) =>
+        isWithinInterval(event.start, weekInterval) ||
+        isWithinInterval(event.end, weekInterval) ||
+        (event.start <= weekStart && event.end >= weekEnd)
+      )
+      .sort(
+        (a, b) =>
+          (a.allDay ? 0 : a.start.getHours() * 60 + a.start.getMinutes()) -
+          (b.allDay ? 0 : b.start.getHours() * 60 + b.start.getMinutes()),
+      );
   }
 
   private getEventPosition(
@@ -142,6 +163,19 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       ...DAYS_OF_WEEK.slice(0, weekStartsOn),
     ].slice(0, this.weekDays);
 
+    // Get events organized by weekdays if spanning is enabled
+    let weekEvents: Array<Array<CalendarEvent>> = [];
+    if (this.eventsSpanDays) {
+      const weekStart = startOfWeek(weekDays[0], { weekStartsOn });
+      const weekEnd = endOfWeek(weekDays[weekDays.length - 1], { weekStartsOn });
+      weekEvents = getEventsByWeekdays(
+        this.getEventsForWeek(weekStart, weekEnd),
+        weekStart,
+        weekEnd,
+        weekStartsOn,
+      );
+    }
+
     const textSize = this.textSize;
     const styles = {
       "--pebble-font-size": textSize
@@ -185,11 +219,22 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           <!-- All day events row -->
           <div class="all-day-events">
             <div></div>
-            ${weekDays.map((date, _index) => {
-              const allDayEvents = this.getEventsForDay(date).filter((e) => e.allDay);
+            ${weekDays.map((date, index) => {
+              let allDayEvents: CalendarEvent[] = [];
+              if (this.eventsSpanDays && weekEvents.length > 0) {
+                // Use spanning events logic
+                allDayEvents = weekEvents[index]?.filter((e) => e.allDay) || [];
+              } else {
+                // Use simple per-day logic
+                allDayEvents = this.getEventsForDay(date).filter((e) => e.allDay);
+              }
               return html`
                 <div class="all-day-column">
-                  ${allDayEvents.map((event) => this.renderAllDayEvent(event))}
+                  ${allDayEvents.map((event) => 
+                    this.eventsSpanDays 
+                      ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
+                      : this.renderAllDayEvent(event)
+                  )}
                 </div>
               `;
             })}
@@ -239,6 +284,55 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return html`
       <button class="all-day-event" style="background-color: ${color}" @click=${onClick}>
         ${event.title}
+      </button>
+    `;
+  }
+
+  renderSpanningAllDayEvent(event: CalendarEvent, date: Date, weekStartsOn: Day) {
+    if (event == null) {
+      return html`<span></span>`;
+    }
+
+    // Only render the event on its start day or if it's the first day of the week
+    if (!isSameDay(event.start, date) && date.getDay() !== weekStartsOn) {
+      return html`<span></span>`;
+    }
+
+    const content = event.title;
+    let daysInterval = event.daysInterval;
+    if (daysInterval > 1) {
+      if (isSameDay(event.start, date)) {
+        daysInterval = Math.min(this.weekDays - date.getDay() + weekStartsOn, daysInterval);
+      } else {
+        daysInterval = Math.min(this.weekDays, daysInterval - differenceInDays(date, event.start));
+      }
+    }
+
+    const color = `var(--color-${event.color ?? "blue"})`;
+    const styles = {
+      backgroundColor: color,
+      color: "#000",
+      width:
+        daysInterval <= 1
+          ? undefined
+          : `calc((${daysInterval} * 100%) + (${daysInterval - 1}) * var(--day-margin) * 2)`,
+    };
+
+    const classes = {
+      "all-day-event": true,
+      "spanning-event": true,
+      begin: isSameDay(event.start, date),
+      end: isSameWeek(event.end, date, { weekStartsOn }),
+      past: isPast(event.end),
+    };
+
+    const onClick = () => {
+      this.selectedEvent = event;
+    };
+
+    return html`
+      <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
+        <span class="text">${content}</span>
       </button>
     `;
   }
@@ -347,7 +441,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         .all-day-event {
           font-size: 1em;
-          padding: 4px 8px;
+          padding: 2px 6px;
           border-radius: 4px;
           border: none;
           cursor: pointer;
@@ -358,12 +452,87 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           text-overflow: ellipsis;
         }
 
+        .all-day-event.spanning-event {
+          position: relative;
+          z-index: 1;
+          box-sizing: border-box;
+        }
+
+        .all-day-event.spanning-event.begin {
+          border-top-left-radius: 4px;
+          border-bottom-left-radius: 4px;
+        }
+
+        .all-day-event.spanning-event.end {
+          border-top-right-radius: 4px;
+          border-bottom-right-radius: 4px;
+        }
+
+        /* left arrow for spanning events */
+        .all-day-event.spanning-event:not(.begin):before {
+          content: "";
+          display: block;
+          width: 0;
+          height: 0;
+          clip-path: polygon(100% 0, 0 50%, 100% 100%);
+          position: absolute;
+          top: 0px;
+          left: -12px;
+          width: 12.5px; /* intentional extra half pixel to avoid gap */
+          height: 100%;
+          background: inherit;
+          aspect-ratio: cos(30deg);
+          mask:
+            linear-gradient(90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius, 4px) at calc(var(--arrow-radius, 4px) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
+          -webkit-mask:
+            linear-gradient(90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius, 4px) at calc(var(--arrow-radius, 4px) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
+        }
+
+        /* right arrow for spanning events */
+        .all-day-event.spanning-event:not(.end):after {
+          content: "";
+          display: block;
+          width: 0;
+          height: 0;
+          clip-path: polygon(0 0, 0 100%, 100% 50%);
+          position: absolute;
+          top: 0px;
+          right: -12px;
+          width: 12px;
+          height: 100%;
+          background: inherit;
+          aspect-ratio: cos(30deg);
+          mask:
+            linear-gradient(-90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius, 4px) at calc(100% - var(--arrow-radius, 4px) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
+          -webkit-mask:
+            linear-gradient(-90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
+            radial-gradient(
+              var(--arrow-radius, 4px) at calc(100% - var(--arrow-radius, 4px) * sqrt(2)) 50%,
+              #000 98%,
+              #0000 101%
+            );
+        }
+
         .time-grid-container {
           flex: 1;
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
           overflow-y: auto;
-          max-height: 60vh;
           min-height: 0;
         }
 
@@ -419,6 +588,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         :host {
           --week-days: 7;
+          --arrow-radius: 4px;
         }
 
         :host([week-days="5"]) {

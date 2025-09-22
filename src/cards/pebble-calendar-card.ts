@@ -213,6 +213,7 @@ class PebbleCalendarCard extends LitElement {
           .weekStartsOn=${this.config?.week_start}
           .weekDays=${this.config?.week_days ?? 7}
           .textSize=${this.config?.text_size}
+          .eventsSpanDays=${this.config?.events_span_days ?? false}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
