@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property, query, state } from "lit/decorators.js";
 import {
   format,
   startOfDay,
@@ -43,7 +43,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   @state() private currentDate = startOfDay(Date.now());
   @state() private currentTime = new Date();
+
+  @query(".time-grid-container") private timeGridContainer?: HTMLDivElement;
+
   private timeUpdateInterval?: number;
+  private inactivityTimer?: number;
+  private autoScrollInterval?: number;
+  private scrollListener?: () => void;
 
   constructor() {
     super();
@@ -51,34 +57,86 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   connectedCallback() {
     super.connectedCallback();
-    this.startTimeTracking();
-  }
+    this.startCurrentTimeTracking();
+    this.startInactivityTracking();
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stopTimeTracking();
-  }
-
-  firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
-    super.firstUpdated(changedProperties);
-    // Scroll to current time after the component is rendered
     setTimeout(() => {
       this.scrollToCurrentTime();
     }, 100);
   }
 
-  private startTimeTracking() {
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stopCurrentTimeTracking();
+    this.stopInactivityTracking();
+  }
+
+  private startCurrentTimeTracking() {
     this.currentTime = new Date();
     this.timeUpdateInterval = window.setInterval(() => {
       this.currentTime = new Date();
-    }, 60_000); // Update every minute
+    }, 60 * 1_000); // Update every minute
   }
 
-  private stopTimeTracking() {
+  private stopCurrentTimeTracking() {
     if (this.timeUpdateInterval) {
       clearInterval(this.timeUpdateInterval);
       this.timeUpdateInterval = undefined;
     }
+  }
+
+  private startInactivityTracking() {
+    this.resetInactivityTimer();
+    
+    // Add scroll listener and store reference for cleanup
+    this.scrollListener = () => {
+      this.recordUserInteraction();
+    };
+    this.timeGridContainer?.addEventListener('scroll', this.scrollListener);
+  }
+
+  private stopInactivityTracking() {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = undefined;
+    }
+    if (this.autoScrollInterval) {
+      clearInterval(this.autoScrollInterval);
+      this.autoScrollInterval = undefined;
+    }
+    if (this.scrollListener) {
+      this.timeGridContainer?.removeEventListener('scroll', this.scrollListener);
+      this.scrollListener = undefined;
+    }
+  }
+
+  private resetInactivityTimer() {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+    }
+    if (this.autoScrollInterval) {
+      clearInterval(this.autoScrollInterval);
+      this.autoScrollInterval = undefined;
+    }
+
+    this.inactivityTimer = window.setTimeout(() => {
+      this.startAutoScroll();
+    }, 60 * 1_000); // 1 minute
+  }
+
+
+  private startAutoScroll() {
+    if (this.autoScrollInterval) return; // Already running
+
+    this.autoScrollInterval = window.setInterval(() => {
+      if (this.isCurrentWeek()) {
+        this.scrollToCurrentTime('smooth');
+      }
+    }, 60 * 60 * 1_000); // every hour
+  }
+
+  private recordUserInteraction() {
+    this.resetInactivityTimer();
   }
 
   private isCurrentWeek(): boolean {
@@ -100,20 +158,18 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return isSameDay(date, this.currentTime);
   }
 
-  private scrollToCurrentTime() {
+  private scrollToCurrentTime(behavior: 'smooth' | 'instant' = 'instant') {
     if (!this.isCurrentWeek()) return;
     
     const currentHour = this.getCurrentHour();
     const currentMinute = this.getCurrentMinute();
-    const timeGridContainer = this.shadowRoot?.querySelector('.time-grid-container') as HTMLElement;
     
-    if (timeGridContainer) {
-      // Calculate the position to scroll to (current hour + minutes)
-      const scrollPosition = (currentHour * 60 + currentMinute) * (60 / 60); // 60px per hour
-      timeGridContainer.scrollTop = Math.max(0, scrollPosition - 200); // Offset to center the current time
-    }
+    const scrollPosition = (currentHour * 60 + currentMinute) * (60 / 60); // 60px per hour
+    this.timeGridContainer?.scroll({
+      top: Math.max(0, scrollPosition - 200),
+      behavior,
+    });
   }
-
 
   protected getEventsForDay(currentDate: Date) {
     return this.events
@@ -210,6 +266,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private navigateWeek(direction: "prev" | "next") {
     const days = direction === "prev" ? -this.weekDays : this.weekDays;
     this.currentDate = addDays(this.currentDate, days);
+    this.recordUserInteraction();
   }
 
   private navigatePrev = () => this.navigateWeek("prev");
@@ -439,6 +496,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     const onClick = () => {
       this.selectedEvent = event;
+      this.recordUserInteraction();
     };
 
     return html`
