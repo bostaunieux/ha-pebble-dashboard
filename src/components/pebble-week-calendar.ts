@@ -155,6 +155,34 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private navigatePrev = () => this.navigateWeek("prev");
   private navigateNext = () => this.navigateWeek("next");
 
+  private organizeAllDayEventsIntoPositions(events: CalendarEvent[]): (CalendarEvent | null)[] {
+    if (events.length === 0) return [];
+    
+    // Sort events by start time
+    const sortedEvents = [...events].sort((a, b) => {
+      const diff = a.start.getTime() - b.start.getTime();
+      if (diff === 0) {
+        // for events with the same start date, put event with longer end dates first
+        return b.end.getTime() - a.end.getTime();
+      }
+      return diff;
+    });
+    
+    // Initialize array to hold events at specific positions
+    const positions: (CalendarEvent | null)[] = [];
+    
+    sortedEvents.forEach(event => {
+      // Find the next available position
+      let position = 0;
+      while (positions[position]) {
+        position++;
+      }
+      positions[position] = event;
+    });
+    
+    return positions;
+  }
+
   render() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const weekDays = this.generateWeekDays();
@@ -227,12 +255,21 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                 // Use simple per-day logic
                 allDayEvents = this.getEventsForDay(date).filter((e) => e.allDay);
               }
+              
+              // Organize events into positions (like spanning calendar)
+              const eventPositions = this.organizeAllDayEventsIntoPositions(allDayEvents);
+              
               return html`
                 <div class="all-day-column">
-                  ${allDayEvents.map((event) => 
-                    this.eventsSpanDays 
-                      ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
-                      : this.renderAllDayEvent(event)
+                  ${eventPositions.map((event) => 
+                    event ? html`
+                      <div>
+                        ${this.eventsSpanDays 
+                          ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
+                          : this.renderAllDayEvent(event)
+                        }
+                      </div>
+                    ` : html`<div></div>`
                   )}
                 </div>
               `;
@@ -314,7 +351,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       width:
         daysInterval <= 1
           ? undefined
-          : `calc((${daysInterval} * 100%) + (${daysInterval - 1}) * var(--day-margin) * 2)`,
+          : `calc((${daysInterval} * 100%) + (${daysInterval - 1} * var(--day-margin) * 2))`,
     };
 
     const classes = {
@@ -400,7 +437,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           border-bottom: 2px solid #ccc;
           font-size: 1.75em;
           display: flex;
-          justify-content: space-between;
+          gap: 8px;
           place-items: center;
           line-height: 120%;
         }
@@ -434,11 +471,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         .all-day-column {
-          border-right: 1px solid var(--divider-color, #e0e0e0);
-          padding: 4px;
-          display: flex;
-          flex-direction: column;
           gap: 2px;
+          display: grid;
+          grid-template-rows: subgrid;
+          grid-row: span 100;
+          margin: var(--day-margin, 5px);
         }
 
         .all-day-event {
@@ -450,7 +487,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           text-align: left;
           color: #000;
           white-space: nowrap;
-          overflow: hidden;
+          /* overflow: hidden; */
           text-overflow: ellipsis;
         }
 
@@ -458,6 +495,16 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           position: relative;
           z-index: 1;
           box-sizing: border-box;
+        }
+
+        .all-day-event.spanning-event .text {
+          /* line clamp */
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 1;
+          overflow-y: hidden;
+          white-space: normal;
+          word-break: break-all;
         }
 
         .all-day-event.spanning-event.begin {
@@ -479,7 +526,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           clip-path: polygon(100% 0, 0 50%, 100% 100%);
           position: absolute;
           top: 0px;
-          left: -12px;
+          left: -11px;
           width: 12.5px; /* intentional extra half pixel to avoid gap */
           height: 100%;
           background: inherit;
@@ -509,7 +556,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           clip-path: polygon(0 0, 0 100%, 100% 50%);
           position: absolute;
           top: 0px;
-          right: -12px;
+          right: -11px;
           width: 12px;
           height: 100%;
           background: inherit;
