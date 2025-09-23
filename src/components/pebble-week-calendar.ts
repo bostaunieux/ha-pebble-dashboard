@@ -286,7 +286,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
               ${HOURS.map(
                 (hour) => html`
                   <div class="time-label">
-                    ${format(setHours(setMinutes(new Date(), 0), hour), "ha")}
+                    <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "ha")}</span>  
                   </div>
                 `,
               )}
@@ -592,11 +592,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         .time-labels {
           border-right: 1px solid var(--divider-color, #e0e0e0);
           background: var(--card-background-color, #fff);
+
+          padding-top: 16px;
+          margin-top: -16px;
         }
 
         .time-label {
           height: 60px;
-          padding: 4px 8px;
           font-size: 0.8em;
           color: var(--secondary-text-color, #666);
           border-bottom: 1px solid var(--divider-color, #e0e0e0);
@@ -605,10 +607,23 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           box-sizing: border-box;
         }
 
+        .time-label:first-child {
+          border-top: 1px solid var(--divider-color, #e0e0e0);
+        }
+
+        .time-label .text {
+          margin-top: -11px;
+          background: var(--card-background-color, #fff);
+          padding: 0 8px;
+        }
+
         .time-grid {
           grid-column: 1 / -1;
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
+
+          margin-top: -8px;
+          padding-top: 16px;
         }
 
         .day-column {
@@ -621,6 +636,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           border-bottom: 1px solid var(--divider-color, #e0e0e0);
           box-sizing: border-box;
         }
+
+        .hour-slot:first-child {
+          border-top: 1px solid var(--divider-color, #e0e0e0);
+        }
+
 
         .timed-event {
           display: flex;
