@@ -332,12 +332,22 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="week-calendar-container">
+          <!-- Month header with navigation -->
+          <div class="month-header">
+            <div class="month-name">${format(weekDays[1], "MMMM u")}</div>
+            <div class="navigation">
+              <ha-icon-button @click=${this.navigatePrev}>
+                <ha-icon icon="mdi:chevron-left"></ha-icon>
+              </ha-icon-button>
+              <ha-icon-button @click=${this.navigateNext}>
+                <ha-icon icon="mdi:chevron-right"></ha-icon>
+              </ha-icon-button>
+            </div>
+          </div>
+
           <!-- Day headers -->
           <div class="day-headers">
-            <div class="month-display">
-              <div class="month-name">${format(weekDays[0], "MMM")}</div>
-              
-            </div>
+            <div class="time-labels-spacer"></div>
             ${weekDays.map((date, index) => {
               const dayName = adjustedDaysOfWeek[index];
               return html`
@@ -355,15 +365,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
           <!-- All day events row -->
           <div class="all-day-events">
-            
-            <div class="navigation">
-                <ha-icon-button @click=${this.navigatePrev}>
-                  <ha-icon icon="mdi:chevron-left"></ha-icon>
-                </ha-icon-button>
-                <ha-icon-button @click=${this.navigateNext}>
-                  <ha-icon icon="mdi:chevron-right"></ha-icon>
-                </ha-icon-button>
-              </div>
+            <div class="time-labels-spacer"></div>
             ${weekDays.map((date, index) => {
               let allDayEvents: CalendarEvent[] = [];
               if (this.eventsSpanDays && weekEvents.length > 0) {
@@ -542,24 +544,29 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           flex-direction: column;
         }
 
-        .month-display {
+        .month-header {
           display: flex;
-          flex-direction: column;
+          justify-content: space-between;
           align-items: center;
-          justify-content: center;
-          padding: 8px;
-          border-right: 1px solid var(--divider-color, #e0e0e0);
+          padding: 0 12px 16px;
+          border-bottom: 2px solid var(--divider-color, #e0e0e0);
         }
 
         .month-name {
           font-size: 1.5em;
           font-weight: bold;
+          flex: 1;
+          text-align: center;
         }
 
         .navigation {
           display: flex;
           gap: 4px;
-          margin: -4px;
+        }
+
+        .time-labels-spacer {
+          width: 60px;
+          border-right: 1px solid var(--divider-color, #e0e0e0);
         }
 
         .day-headers {
@@ -720,19 +727,17 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         .time-grid-container {
           flex: 1;
-          display: grid;
-          grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
+          position: relative;
           overflow-y: auto;
           /* max-height: 70vh; */
-          /* 84px = month display; 40px = all day events; 32px = calendar padding */
-          max-height: calc(100vh - var(--header-height, 0) - 84px - 40px - 32px);
+          /* 84px = month header; 40px = all day events; 32px = calendar padding */
+          max-height: calc(100vh - var(--header-height, 0) - 84px - 40px - 32px - 56px);
           min-height: 0;
         }
 
         .time-labels {
           border-right: 1px solid var(--divider-color, #e0e0e0);
           background: var(--card-background-color, #fff);
-
           padding-top: 16px;
           margin-top: -16px;
         }
@@ -768,10 +773,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         .time-grid {
-          grid-column: 1 / -1;
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
-
           margin-top: -8px;
           padding-top: 16px;
         }
