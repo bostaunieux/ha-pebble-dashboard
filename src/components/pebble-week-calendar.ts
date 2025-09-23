@@ -209,6 +209,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
         : undefined,
+      "--week-days": this.weekDays,
     };
 
     return html`
@@ -642,10 +643,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           --week-days: 7;
           --arrow-radius: 4px;
           --mdc-icon-button-size: 32px;
-        }
-
-        :host([week-days="5"]) {
-          --week-days: 5;
         }
       `,
     ];
