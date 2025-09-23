@@ -42,6 +42,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   @property({ attribute: false }) protected eventsSpanDays: boolean = false;
 
   @state() private currentDate = startOfDay(Date.now());
+  @state() private currentTime = new Date();
+  private timeUpdateInterval?: number;
 
   constructor() {
     super();
@@ -49,11 +51,69 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   connectedCallback() {
     super.connectedCallback();
+    this.startTimeTracking();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.stopTimeTracking();
   }
+
+  firstUpdated(changedProperties: Map<string | number | symbol, unknown>) {
+    super.firstUpdated(changedProperties);
+    // Scroll to current time after the component is rendered
+    setTimeout(() => {
+      this.scrollToCurrentTime();
+    }, 100);
+  }
+
+  private startTimeTracking() {
+    this.currentTime = new Date();
+    this.timeUpdateInterval = window.setInterval(() => {
+      this.currentTime = new Date();
+    }, 60_000); // Update every minute
+  }
+
+  private stopTimeTracking() {
+    if (this.timeUpdateInterval) {
+      clearInterval(this.timeUpdateInterval);
+      this.timeUpdateInterval = undefined;
+    }
+  }
+
+  private isCurrentWeek(): boolean {
+    const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
+    const weekStart = startOfWeek(this.currentDate, { weekStartsOn });
+    const currentWeekStart = startOfWeek(this.currentTime, { weekStartsOn });
+    return isSameWeek(weekStart, currentWeekStart, { weekStartsOn });
+  }
+
+  private getCurrentHour(): number {
+    return getHours(this.currentTime);
+  }
+
+  private getCurrentMinute(): number {
+    return getMinutes(this.currentTime);
+  }
+
+  private isCurrentDay(date: Date): boolean {
+    return isSameDay(date, this.currentTime);
+  }
+
+  private scrollToCurrentTime() {
+    if (!this.isCurrentWeek()) return;
+    
+    const currentHour = this.getCurrentHour();
+    const currentMinute = this.getCurrentMinute();
+    const timeGridContainer = this.shadowRoot?.querySelector('.time-grid-container') as HTMLElement;
+    
+    if (timeGridContainer) {
+      // Calculate the position to scroll to (current hour + minutes)
+      const scrollPosition = (currentHour * 60 + currentMinute) * (60 / 60); // 60px per hour
+      timeGridContainer.scrollTop = Math.max(0, scrollPosition - 200); // Offset to center the current time
+    }
+  }
+
 
   protected getEventsForDay(currentDate: Date) {
     return this.events
@@ -224,11 +284,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             ${weekDays.map((date, index) => {
               const dayName = adjustedDaysOfWeek[index];
               return html`
-                <div class="wk-day-header">
+                <div class="wk-day-header ${classMap({ today: isToday(date) })}">
                   <div class="wk-day-name">
                     ${this.localize(`calendar.card.calendar.week-days.${dayName}`)}
                   </div>
-                  <div class="wk-day-number ${classMap({ today: isToday(date) })}">
+                  <div class="wk-day-number">
                     ${date.getDate()}
                   </div>
                 </div>
@@ -285,7 +345,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             <div class="time-labels">
               ${HOURS.map(
                 (hour) => html`
-                  <div class="time-label">
+                  <div class="time-label ${classMap({
+                    'current-hour': this.isCurrentWeek() && hour === this.getCurrentHour()
+                  })}">
                     <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "ha")}</span>  
                   </div>
                 `,
@@ -294,13 +356,25 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
               ${weekDays.map((date) => {
                 const dayEvents = this.getEventsForDay(date).filter((e) => !e.allDay);
+                const isCurrentDay = this.isCurrentDay(date);
                 return html`
-                  <div class="day-column">
-                    ${HOURS.map((_hour) => html`<div class="hour-slot"></div>`)}
+                  <div class="day-column ${classMap({
+                    'current-day': isCurrentDay
+                  })}">
+                    ${HOURS.map((hour) => html`
+                      <div class="hour-slot ${classMap({
+                        'current-hour': this.isCurrentWeek() && hour === this.getCurrentHour()
+                      })}"></div>
+                    `)}
                     ${dayEvents.map((event) => {
                       const position = this.getEventPosition(event, dayEvents);
                       return this.renderTimedEvent(event, position);
                     })}
+                    ${isCurrentDay && this.isCurrentWeek() ? html`
+                      <div class="current-time-line" style=${styleMap({
+                        top: `${(this.getCurrentHour() * 60 + this.getCurrentMinute()) * (60 / 60)}px`
+                      })}></div>
+                    ` : ''}
                   </div>
                 `;
               })}
@@ -447,7 +521,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           border-bottom: 3px solid var(--primary-text-color);
         }
 
-        .wk-day-name {
+        .wk-day-header.today .wk-day-name {
           font-weight: bold;
         }
 
@@ -459,7 +533,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           text-align: center;
         }
 
-        .wk-day-number.today {
+        .wk-day-header.today .wk-day-number {
           background-color: rgb(68, 68, 68);
           padding: 10px;
         }
@@ -617,6 +691,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           padding: 0 8px;
         }
 
+        .time-label.current-hour .text {
+          color: var(--primary-color, #03a9f4);
+          font-weight: bold;
+        }
+
         .time-grid {
           grid-column: 1 / -1;
           display: grid;
@@ -639,6 +718,35 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         .hour-slot:first-child {
           border-top: 1px solid var(--divider-color, #e0e0e0);
+        }
+
+        .hour-slot.current-hour {
+          background-color: rgba(var(--rgb-primary-color, 3, 169, 244), 0.05);
+        }
+
+        .day-column.current-day {
+          background-color: rgba(var(--rgb-primary-color, 3, 169, 244), 0.02);
+        }
+
+        .current-time-line {
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background-color: var(--primary-color, #03a9f4);
+          z-index: 20;
+          pointer-events: none;
+        }
+
+        .current-time-line::before {
+          content: '';
+          position: absolute;
+          left: -4px;
+          top: -3px;
+          width: 8px;
+          height: 8px;
+          background-color: var(--primary-color, #03a9f4);
+          border-radius: 50%;
         }
 
 
