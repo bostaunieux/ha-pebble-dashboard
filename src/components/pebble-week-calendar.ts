@@ -455,8 +455,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       this.selectedEvent = event;
     };
 
+    const classes = {
+      "all-day-event": true,
+      "past": isPast(event.end),
+    };
+
     return html`
-      <button class="all-day-event" style="background-color: ${color}" @click=${onClick}>
+      <button class=${classMap(classes)} style="background-color: ${color}" @click=${onClick}>
         ${event.title}
       </button>
     `;
@@ -486,10 +491,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const styles = {
       backgroundColor: color,
       color: "#000",
-      width:
-        daysInterval <= 1
-          ? undefined
-          : `calc((${daysInterval} * 100%) + (${daysInterval - 1} * var(--day-margin) * 2))`,
+      width: `calc((${daysInterval} * 100%) + (${daysInterval - 1} * var(--day-margin) * 2))`,
     };
 
     const classes = {
@@ -518,6 +520,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       this.selectedEvent = event;
     };
 
+    const classes = {
+      "timed-event": true,
+      "past": isPast(event.end),
+    };
+
     const styles = {
       top: `${position.top}px`,
       height: `${position.height}px`,
@@ -528,7 +535,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     return html`
-      <button class="timed-event" style=${styleMap(styles)} @click=${onClick}>
+      <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
         ${event.title}
       </button>
     `;
@@ -566,7 +573,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         .time-labels-spacer {
           width: 60px;
-          border-right: 1px solid var(--divider-color, #e0e0e0);
         }
 
         .day-headers {
@@ -844,7 +850,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         :host {
           --week-days: 7;
           --arrow-radius: 4px;
-          --mdc-icon-button-size: 32px;
+          --mdc-icon-size: 28px;
+          --mdc-icon-button-size: 44px;
         }
       `,
     ];
