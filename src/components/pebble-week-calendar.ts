@@ -405,7 +405,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                   <div class="time-label ${classMap({
                     'current-hour': this.isCurrentWeek() && hour === this.getCurrentHour()
                   })}">
-                    <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "ha")}</span>  
+                    <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "h")}
+
+                      <span class="text-am-pm">${format(setHours(setMinutes(new Date(), 0), hour), "a")}</span>  
+                    </span>  
+                    
                   </div>
                 `,
               )}
@@ -619,15 +623,19 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           cursor: pointer;
           text-align: left;
           color: #000;
-          white-space: nowrap;
-          /* overflow: hidden; */
-          text-overflow: ellipsis;
+        }
+
+        .all-day-event:not(.spanning-event) {
+          width: 100%;
         }
 
         .all-day-event.spanning-event {
           position: relative;
           z-index: 1;
           box-sizing: border-box;
+          white-space: nowrap;
+          /* overflow: hidden; */
+          text-overflow: ellipsis;
         }
 
         .all-day-event.spanning-event .text {
@@ -747,6 +755,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           margin-top: -11px;
           background: var(--card-background-color, #fff);
           padding: 0 8px;
+        }
+
+        .time-label .text-am-pm {
+          font-size: 0.75em;
+          margin-right: 8px;
         }
 
         .time-label.current-hour .text {
