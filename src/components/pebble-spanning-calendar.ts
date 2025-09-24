@@ -19,12 +19,12 @@ import {
   endOfDay,
 } from "date-fns";
 import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
-import { PebbleBaseCalendar } from "./pebble-base-calendar";
+import { PebbleMonthCalendar } from "./pebble-month-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 @customElement("pebble-spanning-calendar")
-class PebbleSpanningCalendar extends PebbleBaseCalendar {
+class PebbleSpanningCalendar extends PebbleMonthCalendar {
   constructor() {
     super();
   }
@@ -172,7 +172,8 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
 
   static get styles() {
     return [
-      super.sharedStyles,
+      super.baseStyles,
+      super.monthStyles,
       css`
         :host {
           --arrow-radius: 4px;

@@ -38,8 +38,10 @@ interface EventPosition {
 
 @customElement("pebble-week-calendar")
 class PebbleWeekCalendar extends PebbleBaseCalendar {
+  @property({ attribute: false }) protected weekStartsOn: Day = 0;
   @property({ attribute: false }) protected weekDays: 5 | 7 = 7;
   @property({ attribute: false }) protected eventsSpanDays: boolean = false;
+  @property({ attribute: false }) protected weekCalendarStart?: "current_week" | "current_day";
 
   @state() private currentDate = startOfDay(Date.now());
   @state() private currentTime = new Date();
@@ -337,8 +339,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     return html`
       <ha-card style=${styleMap(styles)}>
-        <div class="week-calendar-container">
-          <!-- Month header with navigation -->
+        <div class="week-calendar">
           <div class="month-header">
             <div class="month-name">${format(weekDays[1], "MMMM u")}</div>
             <div class="navigation">
@@ -353,15 +354,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
           <!-- Day headers -->
           <div class="day-headers">
-            <div class="time-labels-spacer"></div>
+            <div></div>
             ${weekDays.map((date) => {
               const dayName = DAYS_OF_WEEK[date.getDay()];
               return html`
-                <div class="wk-day-header ${classMap({ today: isToday(date) })}">
-                  <div class="wk-day-name">
+                <div class="day-header ${classMap({ today: isToday(date) })}">
+                  <div class="day-name">
                     ${this.localize(`calendar.card.calendar.week-days.${dayName}`)}
                   </div>
-                  <div class="wk-day-number">
+                  <div class="numeral">
                     ${date.getDate()}
                   </div>
                 </div>
@@ -415,7 +416,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                   })}">
                     <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "h")}
 
-                      <span class="text-am-pm">${format(setHours(setMinutes(new Date(), 0), hour), "a")}</span>  
+                      <span class="am-pm">${format(setHours(setMinutes(new Date(), 0), hour), "a")}</span>  
                     </span>  
                     
                   </div>
@@ -462,7 +463,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
-      "all-day-event": true,
+      "event": true,
+      "all-day": true,
       "past": isPast(event.end),
     };
 
@@ -501,7 +503,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
-      "all-day-event": true,
+      "all-day": true,
       "spanning-event": true,
       begin: isSameDay(event.start, date),
       end: isSameWeek(event.end, date, { weekStartsOn }),
@@ -549,9 +551,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   static get styles() {
     return [
-      super.sharedStyles,
+      super.baseStyles,
       css`
-        .week-calendar-container {
+        .week-calendar {
           height: 100%;
           display: flex;
           flex-direction: column;
@@ -577,17 +579,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           gap: 4px;
         }
 
-        .time-labels-spacer {
-          width: 60px;
-        }
-
         .day-headers {
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
           border-bottom: 2px solid var(--divider-color, #e0e0e0);
         }
 
-        .wk-day-header {
+        .day-header {
           margin: var(--day-margin, 5px);
           padding-bottom: 4px;
           border-bottom: 2px solid #ccc;
@@ -598,15 +596,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           line-height: 120%;
         }
 
-        .wk-day-header.today {
+        .day-header.today {
           border-bottom: 3px solid var(--primary-text-color);
         }
 
-        .wk-day-header.today .wk-day-name {
+        .day-header.today .day-name {
           font-weight: bold;
         }
 
-        .wk-day-number {
+        .numeral {
           display: inline-block;
           padding: 10px;
           border-radius: 100px;
@@ -614,7 +612,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           text-align: center;
         }
 
-        .wk-day-header.today .wk-day-number {
+        .day-header.today .numeral {
           background-color: rgb(68, 68, 68);
           padding: 10px;
         }
@@ -634,7 +632,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           margin: var(--day-margin, 5px);
         }
 
-        .all-day-event {
+        .event.all-day,
+        .spanning-event.all-day {
           font-size: 1em;
           padding: 2px 6px;
           border-radius: 4px;
@@ -644,20 +643,19 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           color: #000;
         }
 
-        .all-day-event:not(.spanning-event) {
+        .event.all-day {
           width: 100%;
         }
 
-        .all-day-event.spanning-event {
+        .spanning-event.all-day {
           position: relative;
           z-index: 1;
           box-sizing: border-box;
           white-space: nowrap;
-          /* overflow: hidden; */
           text-overflow: ellipsis;
         }
 
-        .all-day-event.spanning-event .text {
+        .spanning-event.all-day .text {
           /* line clamp */
           display: -webkit-box;
           -webkit-box-orient: vertical;
@@ -667,18 +665,18 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           word-break: break-all;
         }
 
-        .all-day-event.spanning-event.begin {
+        .spanning-event.all-day.begin {
           border-top-left-radius: 4px;
           border-bottom-left-radius: 4px;
         }
 
-        .all-day-event.spanning-event.end {
+        .spanning-event.all-day.end {
           border-top-right-radius: 4px;
           border-bottom-right-radius: 4px;
         }
 
         /* left arrow for spanning events */
-        .all-day-event.spanning-event:not(.begin):before {
+        .spanning-event.all-day:not(.begin):before {
           content: "";
           display: block;
           width: 0;
@@ -708,7 +706,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         /* right arrow for spanning events */
-        .all-day-event.spanning-event:not(.end):after {
+        .spanning-event.all-day:not(.end):after {
           content: "";
           display: block;
           width: 0;
@@ -774,7 +772,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           padding: 0 8px;
         }
 
-        .time-label .text-am-pm {
+        .time-label .am-pm {
           font-size: 0.75em;
           margin-right: 8px;
         }
@@ -834,7 +832,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           background-color: var(--primary-color, #03a9f4);
           border-radius: 50%;
         }
-
 
         .timed-event {
           display: flex;

@@ -4,12 +4,12 @@ import { styleMap } from "lit/directives/style-map.js";
 import { customElement } from "lit/decorators.js";
 import { isPast, format, startOfDay, isToday, Day, getDayOfYear, endOfDay } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
-import { PebbleBaseCalendar } from "./pebble-base-calendar";
+import { PebbleMonthCalendar } from "./pebble-month-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 @customElement("pebble-basic-calendar")
-class PebbleBasicCalendar extends PebbleBaseCalendar {
+class PebbleBasicCalendar extends PebbleMonthCalendar {
   constructor() {
     super();
   }
@@ -107,7 +107,8 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
 
   static get styles() {
     return [
-      super.sharedStyles,
+      super.baseStyles,
+      super.monthStyles,
       css`
         .week {
           display: grid;
