@@ -20,6 +20,7 @@ import {
   isSameWeek,
   isPast,
   differenceInDays,
+  getDayOfYear,
 } from "date-fns";
 import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
@@ -370,6 +371,18 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             })}
           </div>
 
+          <div class="forecast-row">
+            <div></div>
+            ${weekDays.map((date) => {
+              const forecast = this.weatherForecast?.get(getDayOfYear(date));
+              return html`
+                <div class="forecast-cell">
+                  ${this.renderForecast(forecast)}
+                </div>
+              `;
+            })}
+          </div>
+
           <!-- All day events row -->
           <div class="all-day-events">
             <div class="time-labels-spacer"></div>
@@ -582,7 +595,22 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         .day-headers {
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
-          border-bottom: 2px solid var(--divider-color, #e0e0e0);
+          border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        }
+
+        .forecast-row {
+          display: grid;
+          grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
+          border-bottom: 1px solid var(--divider-color, #e0e0e0);
+          min-height: 40px;
+        }
+
+        .forecast-cell {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: var(--day-margin, 5px);
+          font-size: 2em;
         }
 
         .day-header {
