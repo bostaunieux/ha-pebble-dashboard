@@ -48,7 +48,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
+          <div class="calendar-scroll-area">
             <div class="calendar">
               ${allWeeks.map((week, weekIndex) => {
                 return html`

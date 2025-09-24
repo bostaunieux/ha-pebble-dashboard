@@ -37,7 +37,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
 
-  protected scrollContainer?: HTMLElement;
 
   constructor() {
     super();
@@ -93,9 +92,6 @@ export abstract class PebbleBaseCalendar extends LitElement {
     return weeks;
   }
 
-  protected setScrollContainer = (el: HTMLElement) => {
-    this.scrollContainer = el;
-  };
 
   protected renderForecast(forecast?: ForecastAttribute) {
     if (!forecast) {

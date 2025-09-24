@@ -80,7 +80,7 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
+          <div class="calendar-scroll-area">
             <div class="calendar span-events">
               ${allWeeks.map((week, weekIndex) => {
                 const weekStart = startOfWeek(week[0], { weekStartsOn });
