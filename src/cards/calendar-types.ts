@@ -7,7 +7,7 @@ export type CalendarCardConfig = {
   calendars?: Array<CalendarEntity>;
   num_weeks?: number;
   week_start: "0" | "1" | "2" | "3" | "4" | "5" | "6";
-  start_position?: "current_week" | "start_of_month";
+  month_calendar_start?: "current_week" | "start_of_month";
   events_span_days?: boolean;
   event_refresh_interval?: number;
   enable_weather?: boolean;

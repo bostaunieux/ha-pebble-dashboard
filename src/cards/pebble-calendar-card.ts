@@ -163,10 +163,10 @@ class PebbleCalendarCard extends LitElement {
 
     const today = startOfDay(Date.now());
     const numWeeks = this.config.num_weeks ?? 12;
-    const startPosition = this.config.start_position ?? "current_week";
+    const monthCalendarStart = this.config.month_calendar_start ?? "current_week";
 
     const startDate =
-      startPosition === "start_of_month"
+      monthCalendarStart === "start_of_month"
         ? startOfMonth(today)
         : startOfWeek(today, {
             weekStartsOn: +(this.config.week_start ?? "0") as Day,
@@ -231,7 +231,7 @@ class PebbleCalendarCard extends LitElement {
         ? html`<pebble-spanning-calendar
             .weekStartsOn=${this.config?.week_start}
             .numWeeks=${this.config?.num_weeks}
-            .startPosition=${this.config?.start_position}
+            .startPosition=${this.config?.month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}
             .weatherForecast=${this.weatherForecast}
@@ -241,7 +241,7 @@ class PebbleCalendarCard extends LitElement {
         : html`<pebble-basic-calendar
             .weekStartsOn=${this.config?.week_start}
             .numWeeks=${this.config?.num_weeks}
-            .startPosition=${this.config?.start_position}
+            .startPosition=${this.config?.month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}
             .weatherForecast=${this.weatherForecast}

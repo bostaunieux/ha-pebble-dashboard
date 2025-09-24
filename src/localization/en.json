@@ -139,8 +139,8 @@
         "num-weeks": {
           "label": "Number of weeks to show"
         },
-        "start-position": {
-          "label": "Calendar start position",
+        "month-calendar-start": {
+          "label": "Month calendar start position",
           "option": {
             "current_week": "Current week",
             "start_of_month": "Start of month"

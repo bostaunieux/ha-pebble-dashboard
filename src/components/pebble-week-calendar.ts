@@ -191,7 +191,18 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   private generateWeekDays() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    const start = startOfWeek(this.currentDate, { weekStartsOn });
+    const startPosition = this.startPosition ?? "current_week";
+    
+    let start: Date;
+    if (startPosition === "current_week") {
+      // Start from the beginning of the current week
+      start = startOfWeek(this.currentDate, { weekStartsOn });
+    } else {
+      // For week view, when startPosition is "start_of_month", 
+      // we still start from current week since it's a week view
+      start = startOfWeek(this.currentDate, { weekStartsOn });
+    }
+    
     const end = addDays(start, this.weekDays - 1);
 
     return eachDayOfInterval({ start, end });

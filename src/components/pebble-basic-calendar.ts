@@ -24,7 +24,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     ];
 
     // Generate all weeks in a continuous sequence
-    const allWeeks = this.generateWeeks();
+    const allWeeks = this.generateWeeksInMonth();
 
     const textSize = this.textSize;
     const styles = {

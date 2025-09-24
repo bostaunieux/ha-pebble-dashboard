@@ -64,7 +64,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
       );
   }
 
-  protected generateWeeks() {
+  protected generateWeeksInMonth() {
     const numWeeks = this.numWeeks ?? 12;
     const today = Date.now();
     const startPosition = this.startPosition ?? "current_week";
