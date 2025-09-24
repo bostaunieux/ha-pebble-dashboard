@@ -23,7 +23,9 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected numWeeks?: number;
 
-  @property({ attribute: false }) protected startPosition?: "current_week" | "start_of_month";
+  @property({ attribute: false }) protected monthCalendarStart?: "current_week" | "start_of_month";
+
+  @property({ attribute: false }) protected weekCalendarStart?: "current_week" | "current_day";
 
   @property({ attribute: false }) protected events: CalendarEvent[];
 
@@ -41,7 +43,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
     super();
     this.weekStartsOn = 0;
     this.numWeeks = 12;
-    this.startPosition = "current_week";
+    this.monthCalendarStart = "current_week";
     this.events = [];
     this.localize = (arg) => arg;
   }
@@ -67,7 +69,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
   protected generateWeeksInMonth() {
     const numWeeks = this.numWeeks ?? 12;
     const today = Date.now();
-    const startPosition = this.startPosition ?? "current_week";
+    const startPosition = this.monthCalendarStart ?? "current_week";
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
 
     let startDate: Date;

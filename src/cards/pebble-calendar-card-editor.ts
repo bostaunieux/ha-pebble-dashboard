@@ -25,6 +25,7 @@ class PebbleCalendarCardEditor extends LitElement {
       calendars: [],
       num_weeks: 12,
       month_calendar_start: "current_week",
+      week_calendar_start: "current_week",
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
@@ -179,6 +180,24 @@ class PebbleCalendarCardEditor extends LitElement {
                   },
                 },
               },
+              {
+                label: this.localize("calendar.editor.form.week-calendar-start.label"),
+                name: "week_calendar_start",
+                selector: {
+                  select: {
+                    options: [
+                      {
+                        value: "current_week",
+                        label: this.localize("calendar.editor.form.week-calendar-start.option.current_week"),
+                      },
+                      {
+                        value: "current_day",
+                        label: this.localize("calendar.editor.form.week-calendar-start.option.current_day"),
+                      },
+                    ],
+                  },
+                },
+              },
             ]
           : []),
       ],
@@ -245,9 +264,9 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, month_calendar_start, num_weeks, view_type, week_days } = ev.detail.value;
+    const { week_start, month_calendar_start, week_calendar_start, num_weeks, view_type, week_days } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, month_calendar_start, num_weeks, view_type, week_days };
+    this._config = { ...this._config, week_start, month_calendar_start, week_calendar_start, num_weeks, view_type, week_days };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 

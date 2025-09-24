@@ -191,15 +191,14 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   private generateWeekDays() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    const startPosition = this.startPosition ?? "current_week";
+    const weekCalendarStart = this.weekCalendarStart ?? "current_week";
     
     let start: Date;
-    if (startPosition === "current_week") {
-      // Start from the beginning of the current week
-      start = startOfWeek(this.currentDate, { weekStartsOn });
+    if (weekCalendarStart === "current_day") {
+      // Start from the current day
+      start = startOfDay(this.currentDate);
     } else {
-      // For week view, when startPosition is "start_of_month", 
-      // we still start from current week since it's a week view
+      // Start from the beginning of the current week
       start = startOfWeek(this.currentDate, { weekStartsOn });
     }
     
@@ -314,10 +313,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   render() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const weekDays = this.generateWeekDays();
-    const adjustedDaysOfWeek = [
-      ...DAYS_OF_WEEK.slice(weekStartsOn),
-      ...DAYS_OF_WEEK.slice(0, weekStartsOn),
-    ].slice(0, this.weekDays);
 
     // Get events organized by weekdays if spanning is enabled
     let weekEvents: Array<Array<CalendarEvent>> = [];
@@ -359,8 +354,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           <!-- Day headers -->
           <div class="day-headers">
             <div class="time-labels-spacer"></div>
-            ${weekDays.map((date, index) => {
-              const dayName = adjustedDaysOfWeek[index];
+            ${weekDays.map((date) => {
+              const dayName = DAYS_OF_WEEK[date.getDay()];
               return html`
                 <div class="wk-day-header ${classMap({ today: isToday(date) })}">
                   <div class="wk-day-name">

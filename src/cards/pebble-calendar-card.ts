@@ -214,6 +214,7 @@ class PebbleCalendarCard extends LitElement {
           .weekDays=${this.config?.week_days ?? 7}
           .textSize=${this.config?.text_size}
           .eventsSpanDays=${this.config?.events_span_days ?? false}
+          .weekCalendarStart=${this.config?.week_calendar_start ?? "current_week"}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
@@ -231,7 +232,7 @@ class PebbleCalendarCard extends LitElement {
         ? html`<pebble-spanning-calendar
             .weekStartsOn=${this.config?.week_start}
             .numWeeks=${this.config?.num_weeks}
-            .startPosition=${this.config?.month_calendar_start}
+            .monthCalendarStart=${this.config?.month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}
             .weatherForecast=${this.weatherForecast}
@@ -241,7 +242,7 @@ class PebbleCalendarCard extends LitElement {
         : html`<pebble-basic-calendar
             .weekStartsOn=${this.config?.week_start}
             .numWeeks=${this.config?.num_weeks}
-            .startPosition=${this.config?.month_calendar_start}
+            .monthCalendarStart=${this.config?.month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}
             .weatherForecast=${this.weatherForecast}

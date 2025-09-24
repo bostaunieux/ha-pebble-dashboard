@@ -8,6 +8,7 @@ export type CalendarCardConfig = {
   num_weeks?: number;
   week_start: "0" | "1" | "2" | "3" | "4" | "5" | "6";
   month_calendar_start?: "current_week" | "start_of_month";
+  week_calendar_start?: "current_week" | "current_day";
   events_span_days?: boolean;
   event_refresh_interval?: number;
   enable_weather?: boolean;
