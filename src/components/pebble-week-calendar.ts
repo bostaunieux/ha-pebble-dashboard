@@ -1,4 +1,4 @@
-import { html, css } from "lit";
+import { html, css, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, query, state } from "lit/decorators.js";
@@ -369,14 +369,19 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             })}
           </div>
 
-          <div class="forecast-row">
-            <div></div>
-            ${weekDays.map((date) => {
-              const forecast = this.weatherForecast?.get(getDayOfYear(date));
-              return html` <div class="forecast-cell">${this.renderForecast(forecast)}</div> `;
-            })}
-          </div>
-
+          ${this.weatherForecast
+            ? html`
+                <div class="forecast-row">
+                  <div></div>
+                  ${weekDays.map((date) => {
+                    const forecast = this.weatherForecast?.get(getDayOfYear(date));
+                    return html`
+                      <div class="forecast-cell">${this.renderForecast(forecast)}</div>
+                    `;
+                  })}
+                </div>
+              `
+            : nothing}
           <!-- All day events row -->
           <div class="all-day-events">
             <div class="time-labels-spacer"></div>
