@@ -81,6 +81,24 @@ class PebbleCalendarCardEditor extends LitElement {
       title: this.localize("calendar.editor.form.calendar-view.title"),
       schema: [
         {
+          label: this.localize("calendar.editor.form.view-type.label"),
+          name: "view_type",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "month",
+                  label: this.localize("calendar.editor.form.view-type.option.month"),
+                },
+                {
+                  value: "week",
+                  label: this.localize("calendar.editor.form.view-type.option.week"),
+                },
+              ],
+            },
+          },
+        },
+        {
           label: this.localize("calendar.editor.form.week-start.label"),
           name: "week_start",
           selector: {
@@ -120,70 +138,39 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.month-calendar-start.label"),
-          name: "month_calendar_start",
-          selector: {
-            select: {
-              options: [
-                {
-                  value: "current_week",
-                  label: this.localize(
-                    "calendar.editor.form.month-calendar-start.option.current_week",
-                  ),
-                },
-                {
-                  value: "start_of_month",
-                  label: this.localize(
-                    "calendar.editor.form.month-calendar-start.option.start_of_month",
-                  ),
-                },
-              ],
-            },
-          },
-        },
-        {
           label: this.localize("calendar.editor.form.num-weeks.label"),
           name: "num_weeks",
           selector: { number: { mode: "box", min: 1, max: 52 } },
         },
-        {
-          label: this.localize("calendar.editor.form.view-type.label"),
-          name: "view_type",
-          selector: {
-            select: {
-              options: [
-                {
-                  value: "month",
-                  label: this.localize("calendar.editor.form.view-type.option.month"),
-                },
-                {
-                  value: "week",
-                  label: this.localize("calendar.editor.form.view-type.option.week"),
-                },
-              ],
-            },
-          },
-        },
-        ...(this._config.view_type === "week"
+        ...(this._config.view_type === "month"
           ? [
               {
-                label: this.localize("calendar.editor.form.week-days.label"),
-                name: "week_days",
+                label: this.localize("calendar.editor.form.month-calendar-start.label"),
+                name: "month_calendar_start",
                 selector: {
                   select: {
                     options: [
                       {
-                        value: 5,
-                        label: this.localize("calendar.editor.form.week-days.option.5"),
+                        value: "current_week",
+                        label: this.localize(
+                          "calendar.editor.form.month-calendar-start.option.current_week",
+                        ),
                       },
                       {
-                        value: 7,
-                        label: this.localize("calendar.editor.form.week-days.option.7"),
+                        value: "start_of_month",
+                        label: this.localize(
+                          "calendar.editor.form.month-calendar-start.option.start_of_month",
+                        ),
                       },
                     ],
                   },
                 },
               },
+            ]
+          : []),
+
+        ...(this._config.view_type === "week"
+          ? [
               {
                 label: this.localize("calendar.editor.form.week-calendar-start.label"),
                 name: "week_calendar_start",
@@ -202,6 +189,24 @@ class PebbleCalendarCardEditor extends LitElement {
                       //     "calendar.editor.form.week-calendar-start.option.current_day",
                       //   ),
                       // },
+                    ],
+                  },
+                },
+              },
+              {
+                label: this.localize("calendar.editor.form.week-days.label"),
+                name: "week_days",
+                selector: {
+                  select: {
+                    options: [
+                      {
+                        value: 5,
+                        label: this.localize("calendar.editor.form.week-days.option.5"),
+                      },
+                      {
+                        value: 7,
+                        label: this.localize("calendar.editor.form.week-days.option.7"),
+                      },
                     ],
                   },
                 },
