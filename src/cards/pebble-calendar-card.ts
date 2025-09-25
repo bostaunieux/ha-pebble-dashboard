@@ -60,7 +60,7 @@ class PebbleCalendarCard extends LitElement {
       week_start: "0",
       calendars: [],
       view_type: "month",
-      week_days: 7,
+      week_calendar_view: "current_week",
     };
     this._retryCount = 0;
     this.weather = null;
@@ -211,10 +211,9 @@ class PebbleCalendarCard extends LitElement {
       return html`
         <pebble-week-calendar
           .weekStartsOn=${this.config?.week_start}
-          .weekDays=${this.config?.week_days ?? 7}
+          .weekCalendarView=${this.config?.week_calendar_view ?? "current_week"}
           .textSize=${this.config?.text_size}
           .eventsSpanDays=${this.config?.events_span_days ?? false}
-          .weekCalendarStart=${this.config?.week_calendar_start ?? "current_week"}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}

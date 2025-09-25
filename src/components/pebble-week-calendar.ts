@@ -40,9 +40,8 @@ interface EventPosition {
 @customElement("pebble-week-calendar")
 class PebbleWeekCalendar extends PebbleBaseCalendar {
   @property({ attribute: false }) protected weekStartsOn: Day = 0;
-  @property({ attribute: false }) protected weekDays: 5 | 7 = 7;
+  @property({ attribute: false }) protected weekCalendarView: "current_week" | "next_5_days" | "next_7_days" = "current_week";
   @property({ attribute: false }) protected eventsSpanDays: boolean = false;
-  @property({ attribute: false }) protected weekCalendarStart?: "current_week" | "current_day";
 
   @state() private currentDate = startOfDay(Date.now());
   @state() private currentTime = new Date();
@@ -195,19 +194,32 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   }
 
   private generateWeekDays() {
+    const weekCalendarView = this.weekCalendarView ?? "current_week";
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    const weekCalendarStart = this.weekCalendarStart ?? "current_week";
 
     let start: Date;
-    if (weekCalendarStart === "current_day") {
-      // Start from the current day
-      start = startOfDay(this.currentDate);
-    } else {
-      // Start from the beginning of the current week
-      start = startOfWeek(this.currentDate, { weekStartsOn });
-    }
+    let end: Date;
 
-    const end = addDays(start, this.weekDays - 1);
+    switch (weekCalendarView) {
+      case "current_week":
+        // Start from the beginning of the current week, show 7 days
+        start = startOfWeek(this.currentDate, { weekStartsOn });
+        end = addDays(start, 6);
+        break;
+      case "next_5_days":
+        // Start from current day, show next 5 days
+        start = startOfDay(this.currentDate);
+        end = addDays(start, 4);
+        break;
+      case "next_7_days":
+        // Start from current day, show next 7 days
+        start = startOfDay(this.currentDate);
+        end = addDays(start, 6);
+        break;
+      default:
+        start = startOfWeek(this.currentDate, { weekStartsOn });
+        end = addDays(start, 6);
+    }
 
     return eachDayOfInterval({ start, end });
   }
@@ -277,8 +289,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   }
 
   private navigateWeek(direction: "prev" | "next") {
-    const days = direction === "prev" ? -this.weekDays : this.weekDays;
-    this.currentDate = addDays(this.currentDate, days);
+    const weekCalendarView = this.weekCalendarView ?? "current_week";
+    const multiplier = direction === "prev" ? -1 : 1;
+    const days = weekCalendarView === "next_5_days" ? 5 : 7;
+
+    this.currentDate = addDays(this.currentDate, days * multiplier);
     this.recordUserInteraction();
   }
 
@@ -320,13 +335,16 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     // Get events organized by weekdays if spanning is enabled
     let weekEvents: Array<Array<CalendarEvent>> = [];
     if (this.eventsSpanDays) {
-      const weekStart = startOfWeek(weekDays[0], { weekStartsOn });
-      const weekEnd = endOfWeek(weekDays[weekDays.length - 1], { weekStartsOn });
+      const weekCalendarView = this.weekCalendarView ?? "current_week";
+      const adjustedWeekStartsOn = weekCalendarView === "next_5_days" || weekCalendarView === "next_7_days" ? this.currentDate.getDay() as Day : weekStartsOn;
+      
+      const weekStart = startOfWeek(weekDays[0], { weekStartsOn: adjustedWeekStartsOn });
+      const weekEnd = endOfWeek(weekDays[weekDays.length - 1], { weekStartsOn: adjustedWeekStartsOn });
       weekEvents = getEventsByWeekdays(
         this.getEventsForWeek(weekStart, weekEnd),
         weekStart,
         weekEnd,
-        weekStartsOn,
+        adjustedWeekStartsOn,
       );
     }
 
@@ -335,7 +353,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
         : undefined,
-      "--week-days": this.weekDays,
+      "--week-days": weekDays.length,
     };
 
     return html`
@@ -513,11 +531,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     const content = event.title;
     let daysInterval = event.daysInterval;
+    const weekDays = this.generateWeekDays();
     if (daysInterval > 1) {
       if (isSameDay(event.start, date)) {
-        daysInterval = Math.min(this.weekDays - date.getDay() + weekStartsOn, daysInterval);
+        daysInterval = Math.min(weekDays.length - date.getDay() + weekStartsOn, daysInterval);
       } else {
-        daysInterval = Math.min(this.weekDays, daysInterval - differenceInDays(date, event.start));
+        daysInterval = Math.min(weekDays.length, daysInterval - differenceInDays(date, event.start));
       }
     }
 

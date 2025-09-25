@@ -25,13 +25,12 @@ class PebbleCalendarCardEditor extends LitElement {
       calendars: [],
       num_weeks: 12,
       month_calendar_start: "current_week",
-      week_calendar_start: "current_week",
+      week_calendar_view: "current_week",
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
       view_type: "month",
-      week_days: 7,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -172,40 +171,22 @@ class PebbleCalendarCardEditor extends LitElement {
         ...(this._config.view_type === "week"
           ? [
               {
-                label: this.localize("calendar.editor.form.week-calendar-start.label"),
-                name: "week_calendar_start",
+                label: "Week calendar view",
+                name: "week_calendar_view",
                 selector: {
                   select: {
                     options: [
                       {
                         value: "current_week",
-                        label: this.localize(
-                          "calendar.editor.form.week-calendar-start.option.current_week",
-                        ),
-                      },
-                      // {
-                      //   value: "current_day",
-                      //   label: this.localize(
-                      //     "calendar.editor.form.week-calendar-start.option.current_day",
-                      //   ),
-                      // },
-                    ],
-                  },
-                },
-              },
-              {
-                label: this.localize("calendar.editor.form.week-days.label"),
-                name: "week_days",
-                selector: {
-                  select: {
-                    options: [
-                      {
-                        value: 5,
-                        label: this.localize("calendar.editor.form.week-days.option.5"),
+                        label: "Current week",
                       },
                       {
-                        value: 7,
-                        label: this.localize("calendar.editor.form.week-days.option.7"),
+                        value: "next_5_days",
+                        label: "Next 5 days",
+                      },
+                      {
+                        value: "next_7_days",
+                        label: "Next 7 days",
                       },
                     ],
                   },
@@ -280,20 +261,18 @@ class PebbleCalendarCardEditor extends LitElement {
     const {
       week_start,
       month_calendar_start,
-      week_calendar_start,
+      week_calendar_view,
       num_weeks,
       view_type,
-      week_days,
     } = ev.detail.value;
 
     this._config = {
       ...this._config,
       week_start,
       month_calendar_start,
-      week_calendar_start,
+      week_calendar_view,
       num_weeks,
       view_type,
-      week_days,
     };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
