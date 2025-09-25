@@ -196,12 +196,12 @@ class PebbleCalendarCardEditor extends LitElement {
                           "calendar.editor.form.week-calendar-start.option.current_week",
                         ),
                       },
-                      {
-                        value: "current_day",
-                        label: this.localize(
-                          "calendar.editor.form.week-calendar-start.option.current_day",
-                        ),
-                      },
+                      // {
+                      //   value: "current_day",
+                      //   label: this.localize(
+                      //     "calendar.editor.form.week-calendar-start.option.current_day",
+                      //   ),
+                      // },
                     ],
                   },
                 },
