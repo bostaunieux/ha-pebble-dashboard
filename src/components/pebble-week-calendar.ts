@@ -90,12 +90,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   private startInactivityTracking() {
     this.resetInactivityTimer();
-    
+
     // Add scroll listener and store reference for cleanup
     this.scrollListener = () => {
       this.recordUserInteraction();
     };
-    this.timeGridContainer?.addEventListener('scroll', this.scrollListener);
+    this.timeGridContainer?.addEventListener("scroll", this.scrollListener);
   }
 
   private stopInactivityTracking() {
@@ -108,7 +108,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       this.autoScrollInterval = undefined;
     }
     if (this.scrollListener) {
-      this.timeGridContainer?.removeEventListener('scroll', this.scrollListener);
+      this.timeGridContainer?.removeEventListener("scroll", this.scrollListener);
       this.scrollListener = undefined;
     }
   }
@@ -127,15 +127,17 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     }, 60 * 1_000); // 1 minute
   }
 
-
   private startAutoScroll() {
     if (this.autoScrollInterval) return; // Already running
 
-    this.autoScrollInterval = window.setInterval(() => {
-      if (this.isCurrentWeek()) {
-        this.scrollToCurrentTime('smooth');
-      }
-    }, 60 * 60 * 1_000); // every hour
+    this.autoScrollInterval = window.setInterval(
+      () => {
+        if (this.isCurrentWeek()) {
+          this.scrollToCurrentTime("smooth");
+        }
+      },
+      60 * 60 * 1_000,
+    ); // every hour
   }
 
   private recordUserInteraction() {
@@ -161,12 +163,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return isSameDay(date, this.currentTime);
   }
 
-  private scrollToCurrentTime(behavior: 'smooth' | 'instant' = 'instant') {
+  private scrollToCurrentTime(behavior: "smooth" | "instant" = "instant") {
     if (!this.isCurrentWeek()) return;
-    
+
     const currentHour = this.getCurrentHour();
     const currentMinute = this.getCurrentMinute();
-    
+
     const scrollPosition = (currentHour * 60 + currentMinute) * (60 / 60); // 60px per hour
     this.timeGridContainer?.scroll({
       top: Math.max(0, scrollPosition - 200),
@@ -195,7 +197,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private generateWeekDays() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const weekCalendarStart = this.weekCalendarStart ?? "current_week";
-    
+
     let start: Date;
     if (weekCalendarStart === "current_day") {
       // Start from the current day
@@ -204,7 +206,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       // Start from the beginning of the current week
       start = startOfWeek(this.currentDate, { weekStartsOn });
     }
-    
+
     const end = addDays(start, this.weekDays - 1);
 
     return eachDayOfInterval({ start, end });
@@ -214,10 +216,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const weekInterval = { start: weekStart, end: weekEnd };
 
     return this.events
-      .filter((event) =>
-        isWithinInterval(event.start, weekInterval) ||
-        isWithinInterval(event.end, weekInterval) ||
-        (event.start <= weekStart && event.end >= weekEnd)
+      .filter(
+        (event) =>
+          isWithinInterval(event.start, weekInterval) ||
+          isWithinInterval(event.end, weekInterval) ||
+          (event.start <= weekStart && event.end >= weekEnd),
       )
       .sort(
         (a, b) =>
@@ -226,10 +229,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       );
   }
 
-  private getEventPosition(
-    event: CalendarEvent,
-    allEventsForDay: CalendarEvent[],
-  ): EventPosition {
+  private getEventPosition(event: CalendarEvent, allEventsForDay: CalendarEvent[]): EventPosition {
     if (event.allDay) {
       return {
         event,
@@ -287,7 +287,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   private organizeAllDayEventsIntoPositions(events: CalendarEvent[]): (CalendarEvent | null)[] {
     if (events.length === 0) return [];
-    
+
     // Sort events by start time
     const sortedEvents = [...events].sort((a, b) => {
       const diff = a.start.getTime() - b.start.getTime();
@@ -297,11 +297,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       }
       return diff;
     });
-    
+
     // Initialize array to hold events at specific positions
     const positions: (CalendarEvent | null)[] = [];
-    
-    sortedEvents.forEach(event => {
+
+    sortedEvents.forEach((event) => {
       // Find the next available position
       let position = 0;
       while (positions[position]) {
@@ -309,7 +309,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       }
       positions[position] = event;
     });
-    
+
     return positions;
   }
 
@@ -363,9 +363,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                   <div class="day-name">
                     ${this.localize(`calendar.card.calendar.week-days.${dayName}`)}
                   </div>
-                  <div class="numeral">
-                    ${date.getDate()}
-                  </div>
+                  <div class="numeral">${date.getDate()}</div>
                 </div>
               `;
             })}
@@ -375,11 +373,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             <div></div>
             ${weekDays.map((date) => {
               const forecast = this.weatherForecast?.get(getDayOfYear(date));
-              return html`
-                <div class="forecast-cell">
-                  ${this.renderForecast(forecast)}
-                </div>
-              `;
+              return html` <div class="forecast-cell">${this.renderForecast(forecast)}</div> `;
             })}
           </div>
 
@@ -395,21 +389,22 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                 // Use simple per-day logic
                 allDayEvents = this.getEventsForDay(date).filter((e) => e.allDay);
               }
-              
+
               // Organize events into positions (like spanning calendar)
               const eventPositions = this.organizeAllDayEventsIntoPositions(allDayEvents);
-              
+
               return html`
                 <div class="all-day-column">
-                  ${eventPositions.map((event) => 
-                    event ? html`
-                      <div>
-                        ${this.eventsSpanDays 
-                          ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
-                          : this.renderAllDayEvent(event)
-                        }
-                      </div>
-                    ` : html`<div></div>`
+                  ${eventPositions.map((event) =>
+                    event
+                      ? html`
+                          <div>
+                            ${this.eventsSpanDays
+                              ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
+                              : this.renderAllDayEvent(event)}
+                          </div>
+                        `
+                      : html`<div></div>`,
                   )}
                 </div>
               `;
@@ -418,46 +413,59 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
           <!-- Time grid -->
           <div class="time-grid-container">
-            
-
             <div class="time-grid">
-            <div class="time-labels">
-              ${HOURS.map(
-                (hour) => html`
-                  <div class="time-label ${classMap({
-                    'current-hour': this.isCurrentWeek() && hour === this.getCurrentHour()
-                  })}">
-                    <span class="text">${format(setHours(setMinutes(new Date(), 0), hour), "h")}
+              <div class="time-labels">
+                ${HOURS.map(
+                  (hour) => html`
+                    <div
+                      class="time-label ${classMap({
+                        "current-hour": this.isCurrentWeek() && hour === this.getCurrentHour(),
+                      })}"
+                    >
+                      <span class="text"
+                        >${format(setHours(setMinutes(new Date(), 0), hour), "h")}
 
-                      <span class="am-pm">${format(setHours(setMinutes(new Date(), 0), hour), "a")}</span>  
-                    </span>  
-                    
-                  </div>
-                `,
-              )}
-            </div>
+                        <span class="am-pm"
+                          >${format(setHours(setMinutes(new Date(), 0), hour), "a")}</span
+                        >
+                      </span>
+                    </div>
+                  `,
+                )}
+              </div>
 
               ${weekDays.map((date) => {
                 const dayEvents = this.getEventsForDay(date).filter((e) => !e.allDay);
                 const isCurrentDay = this.isCurrentDay(date);
                 return html`
-                  <div class="day-column ${classMap({
-                    'current-day': isCurrentDay
-                  })}">
-                    ${HOURS.map((hour) => html`
-                      <div class="hour-slot ${classMap({
-                        'current-hour': this.isCurrentWeek() && hour === this.getCurrentHour()
-                      })}"></div>
-                    `)}
+                  <div
+                    class="day-column ${classMap({
+                      "current-day": isCurrentDay,
+                    })}"
+                  >
+                    ${HOURS.map(
+                      (hour) => html`
+                        <div
+                          class="hour-slot ${classMap({
+                            "current-hour": this.isCurrentWeek() && hour === this.getCurrentHour(),
+                          })}"
+                        ></div>
+                      `,
+                    )}
                     ${dayEvents.map((event) => {
                       const position = this.getEventPosition(event, dayEvents);
                       return this.renderTimedEvent(event, position);
                     })}
-                    ${isCurrentDay && this.isCurrentWeek() ? html`
-                      <div class="current-time-line" style=${styleMap({
-                        top: `${(this.getCurrentHour() * 60 + this.getCurrentMinute()) * (60 / 60)}px`
-                      })}></div>
-                    ` : ''}
+                    ${isCurrentDay && this.isCurrentWeek()
+                      ? html`
+                          <div
+                            class="current-time-line"
+                            style=${styleMap({
+                              top: `${(this.getCurrentHour() * 60 + this.getCurrentMinute()) * (60 / 60)}px`,
+                            })}
+                          ></div>
+                        `
+                      : ""}
                   </div>
                 `;
               })}
@@ -476,9 +484,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
-      "event": true,
+      event: true,
       "all-day": true,
-      "past": isPast(event.end),
+      past: isPast(event.end),
     };
 
     return html`
@@ -543,7 +551,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     const classes = {
       "timed-event": true,
-      "past": isPast(event.end),
+      past: isPast(event.end),
     };
 
     const styles = {
@@ -851,7 +859,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         .current-time-line::before {
-          content: '';
+          content: "";
           position: absolute;
           left: -4px;
           top: -3px;

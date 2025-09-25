@@ -127,11 +127,15 @@ class PebbleCalendarCardEditor extends LitElement {
               options: [
                 {
                   value: "current_week",
-                  label: this.localize("calendar.editor.form.month-calendar-start.option.current_week"),
+                  label: this.localize(
+                    "calendar.editor.form.month-calendar-start.option.current_week",
+                  ),
                 },
                 {
                   value: "start_of_month",
-                  label: this.localize("calendar.editor.form.month-calendar-start.option.start_of_month"),
+                  label: this.localize(
+                    "calendar.editor.form.month-calendar-start.option.start_of_month",
+                  ),
                 },
               ],
             },
@@ -188,11 +192,15 @@ class PebbleCalendarCardEditor extends LitElement {
                     options: [
                       {
                         value: "current_week",
-                        label: this.localize("calendar.editor.form.week-calendar-start.option.current_week"),
+                        label: this.localize(
+                          "calendar.editor.form.week-calendar-start.option.current_week",
+                        ),
                       },
                       {
                         value: "current_day",
-                        label: this.localize("calendar.editor.form.week-calendar-start.option.current_day"),
+                        label: this.localize(
+                          "calendar.editor.form.week-calendar-start.option.current_day",
+                        ),
                       },
                     ],
                   },
@@ -264,9 +272,24 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, month_calendar_start, week_calendar_start, num_weeks, view_type, week_days } = ev.detail.value;
+    const {
+      week_start,
+      month_calendar_start,
+      week_calendar_start,
+      num_weeks,
+      view_type,
+      week_days,
+    } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, month_calendar_start, week_calendar_start, num_weeks, view_type, week_days };
+    this._config = {
+      ...this._config,
+      week_start,
+      month_calendar_start,
+      week_calendar_start,
+      num_weeks,
+      view_type,
+      week_days,
+    };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 

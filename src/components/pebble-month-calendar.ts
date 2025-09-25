@@ -1,12 +1,6 @@
 import { css, CSSResultGroup } from "lit";
 import { property } from "lit/decorators.js";
-import {
-  Day,
-  startOfWeek,
-  startOfMonth,
-  addDays,
-  eachDayOfInterval,
-} from "date-fns";
+import { Day, startOfWeek, startOfMonth, addDays, eachDayOfInterval } from "date-fns";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
 
@@ -55,7 +49,6 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     return [
       COLOR_CSS_VARS,
       css`
-
         ha-card {
           font-size: var(--pebble-font-size, var(--card-primary-font-size, 16px));
           padding: 16px;
