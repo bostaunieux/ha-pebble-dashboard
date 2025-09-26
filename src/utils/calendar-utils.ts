@@ -1,5 +1,4 @@
 import {
-  Day,
   differenceInCalendarDays,
   endOfDay,
   parseISO,
@@ -7,6 +6,7 @@ import {
   subDays,
   max,
   min,
+  eachDayOfInterval,
 } from "date-fns";
 import type { HomeAssistant } from "../types";
 
@@ -144,14 +144,22 @@ export const getEventsByWeekdays = (
   events: ReadonlyArray<CalendarEvent>,
   weekStart: Date,
   weekEnd: Date,
-  weekStartsOn: Day,
 ) => {
-  // Initialize an array with 7 empty arrays, one for each weekday
-  const weekdays: Array<Array<CalendarEvent>> = [[], [], [], [], [], [], []];
+  // Generate all days in the interval using date-fns
+  const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  
+  // Initialize an array with the correct number of empty arrays
+  const weekdays: Array<Array<CalendarEvent>> = Array.from({ length: days.length }, () => []);
 
-  // Function to get the day index (0-6) from a date
-  function getDayIndex(date: Date) {
-    return (date.getDay() + (7 - weekStartsOn)) % 7;
+  // Create a map of dates to their indices in the displayed range
+  const dateToIndex = new Map<string, number>();
+  days.forEach((day, index) => {
+    dateToIndex.set(day.toDateString(), index);
+  });
+
+  // Function to get the day index from a date
+  function getDayIndex(date: Date): number | null {
+    return dateToIndex.get(date.toDateString()) ?? null;
   }
 
   // Helper function to find the next available position for an event on a given day
@@ -177,20 +185,26 @@ export const getEventsByWeekdays = (
   sortedEvents.forEach((event) => {
     const startDate = max([event.start, weekStart]);
     const endDate = min([event.end, weekEnd]);
+    
     // Calculate the starting and ending day indices
     const startDayIndex = getDayIndex(startDate);
     const endDayIndex = getDayIndex(endDate);
+
+    // Skip if the event doesn't fall within our displayed range
+    if (startDayIndex === null || endDayIndex === null) {
+      return;
+    }
 
     // Find the starting position for the event on its first day
     const startPos = findNextAvailablePosition(weekdays[startDayIndex]);
 
     let currentDayIndex = startDayIndex;
     // Add event to each relevant day
-    while (currentDayIndex <= endDayIndex && currentDayIndex < 7) {
+    while (currentDayIndex <= endDayIndex && currentDayIndex < days.length) {
       weekdays[currentDayIndex][startPos] = event;
       currentDayIndex++;
     }
   });
-
+  
   return weekdays;
 };

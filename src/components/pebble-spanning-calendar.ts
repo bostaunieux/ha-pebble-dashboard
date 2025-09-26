@@ -89,7 +89,6 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
                   this.getEventsForWeek(weekStart, weekEnd),
                   weekStart,
                   weekEnd,
-                  weekStartsOn,
                 );
 
                 return html`

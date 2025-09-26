@@ -156,29 +156,77 @@ class PebbleCalendarCard extends LitElement {
     }, delay);
   }
 
-  async _fetchEvents() {
-    if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
-      return;
-    }
-
+  private calculateDateRange(): { start: Date; end: Date } {
     const today = startOfDay(Date.now());
+    const weekStartsOn = +(this.config.week_start ?? "0") as Day;
+    const viewType = this.config.view_type ?? "month";
+
+    if (viewType === "week") {
+      return this.calculateWeekViewDateRange(today, weekStartsOn);
+    } else {
+      return this.calculateMonthViewDateRange(today, weekStartsOn);
+    }
+  }
+
+  private calculateWeekViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
+    const weekCalendarView = this.config.week_calendar_view ?? "current_week";
+
+    switch (weekCalendarView) {
+      case "current_week": {
+        // Start from the beginning of the current week, show 7 days
+        const weekStart = startOfWeek(today, { weekStartsOn });
+        return {
+          start: weekStart,
+          end: addDays(weekStart, 6),
+        };
+      }
+      case "next_5_days":
+        // Start from current day, show next 5 days
+        return {
+          start: startOfDay(today),
+          end: addDays(today, 4),
+        };
+      case "next_7_days":
+        // Start from current day, show next 7 days
+        return {
+          start: startOfDay(today),
+          end: addDays(today, 6),
+        };
+      default: {
+        const defaultWeekStart = startOfWeek(today, { weekStartsOn });
+        return {
+          start: defaultWeekStart,
+          end: addDays(defaultWeekStart, 6),
+        };
+      }
+    }
+  }
+
+  private calculateMonthViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
     const numWeeks = this.config.num_weeks ?? 12;
     const monthCalendarStart = this.config.month_calendar_start ?? "current_week";
 
     const startDate =
       monthCalendarStart === "start_of_month"
         ? startOfMonth(today)
-        : startOfWeek(today, {
-            weekStartsOn: +(this.config.week_start ?? "0") as Day,
-          });
+        : startOfWeek(today, { weekStartsOn });
 
-    const weekStartsOn = +(this.config.week_start ?? "0") as Day;
     const startWeekStart = startOfWeek(startDate, { weekStartsOn });
     const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
     const endWeekEnd = addDays(endWeekStart, 6);
 
-    const start = startWeekStart;
-    const end = endWeekEnd;
+    return {
+      start: startWeekStart,
+      end: endWeekEnd,
+    };
+  }
+
+  async _fetchEvents() {
+    if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
+      return;
+    }
+
+    const { start, end } = this.calculateDateRange();
 
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
@@ -204,6 +252,8 @@ class PebbleCalendarCard extends LitElement {
   private handleViewChange = (view: "month" | "week") => {
     this.currentView = view;
     this.config = { ...this.config, view_type: view };
+    // Refresh events when view type changes since date range will be different
+    this._fetchEvents();
   };
 
   render() {

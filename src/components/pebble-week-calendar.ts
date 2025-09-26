@@ -6,6 +6,7 @@ import {
   format,
   startOfDay,
   isToday,
+  isBefore,
   Day,
   addDays,
   isSameDay,
@@ -16,10 +17,8 @@ import {
   getMinutes,
   setHours,
   setMinutes,
-  endOfWeek,
   isSameWeek,
   isPast,
-  differenceInDays,
   getDayOfYear,
 } from "date-fns";
 import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
@@ -144,10 +143,20 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   }
 
   private isCurrentWeek(): boolean {
+    const weekCalendarView = this.weekCalendarView ?? "current_week";
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    const weekStart = startOfWeek(this.currentDate, { weekStartsOn });
-    const currentWeekStart = startOfWeek(this.currentTime, { weekStartsOn });
-    return isSameWeek(weekStart, currentWeekStart, { weekStartsOn });
+    
+    if (weekCalendarView === "current_week") {
+      // For current week view, check if we're showing the current week
+      const weekStart = startOfWeek(this.currentDate, { weekStartsOn });
+      const currentWeekStart = startOfWeek(this.currentTime, { weekStartsOn });
+      return isSameWeek(weekStart, currentWeekStart, { weekStartsOn });
+    } else {
+      // For next_5_days and next_7_days, check if today is within the displayed range
+      const weekDays = this.generateWeekDays();
+      const today = startOfDay(this.currentTime);
+      return weekDays.some(day => isSameDay(day, today));
+    }
   }
 
   private getCurrentHour(): number {
@@ -300,54 +309,23 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private navigatePrev = () => this.navigateWeek("prev");
   private navigateNext = () => this.navigateWeek("next");
 
-  private organizeAllDayEventsIntoPositions(events: CalendarEvent[]): (CalendarEvent | null)[] {
-    if (events.length === 0) return [];
-
-    // Sort events by start time
-    const sortedEvents = [...events].sort((a, b) => {
-      const diff = a.start.getTime() - b.start.getTime();
-      if (diff === 0) {
-        // for events with the same start date, put event with longer end dates first
-        return b.end.getTime() - a.end.getTime();
-      }
-      return diff;
-    });
-
-    // Initialize array to hold events at specific positions
-    const positions: (CalendarEvent | null)[] = [];
-
-    sortedEvents.forEach((event) => {
-      // Find the next available position
-      let position = 0;
-      while (positions[position]) {
-        position++;
-      }
-      positions[position] = event;
-    });
-
-    return positions;
-  }
 
   render() {
-    const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const weekDays = this.generateWeekDays();
 
     // Get events organized by weekdays if spanning is enabled
     let weekEvents: Array<Array<CalendarEvent>> = [];
     if (this.eventsSpanDays) {
-      const weekCalendarView = this.weekCalendarView ?? "current_week";
-      const adjustedWeekStartsOn = weekCalendarView === "next_5_days" || weekCalendarView === "next_7_days" ? this.currentDate.getDay() as Day : weekStartsOn;
-      
-      const weekStart = startOfWeek(weekDays[0], { weekStartsOn: adjustedWeekStartsOn });
-      const weekEnd = endOfWeek(weekDays[weekDays.length - 1], { weekStartsOn: adjustedWeekStartsOn });
+      // Use the actual displayed date range, not the week boundaries
+      const weekStart = weekDays[0];
+      const weekEnd = weekDays[weekDays.length - 1];
       weekEvents = getEventsByWeekdays(
         this.getEventsForWeek(weekStart, weekEnd),
         weekStart,
         weekEnd,
-        adjustedWeekStartsOn,
       );
     }
-
+    
     const textSize = this.textSize;
     const styles = {
       "--pebble-font-size": textSize
@@ -413,17 +391,14 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                 allDayEvents = this.getEventsForDay(date).filter((e) => e.allDay);
               }
 
-              // Organize events into positions (like spanning calendar)
-              const eventPositions = this.organizeAllDayEventsIntoPositions(allDayEvents);
-
               return html`
                 <div class="all-day-column">
-                  ${eventPositions.map((event) =>
+                  ${allDayEvents.map((event) =>
                     event
                       ? html`
                           <div>
                             ${this.eventsSpanDays
-                              ? this.renderSpanningAllDayEvent(event, date, weekStartsOn)
+                              ? this.renderSpanningAllDayEvent(event, date, weekDays[0], weekDays[weekDays.length - 1])
                               : this.renderAllDayEvent(event)}
                           </div>
                         `
@@ -519,24 +494,50 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     `;
   }
 
-  renderSpanningAllDayEvent(event: CalendarEvent, date: Date, weekStartsOn: Day) {
+  renderSpanningAllDayEvent(event: CalendarEvent, date: Date, weekStart: Date, weekEnd: Date) {
     if (event == null) {
       return html`<span></span>`;
     }
 
-    // Only render the event on its start day or if it's the first day of the week
-    if (!isSameDay(event.start, date) && date.getDay() !== weekStartsOn) {
+    const weekDays = this.generateWeekDays();
+    
+    // Only render the event on its start day or if it's the first day of the displayed range
+    const isFirstDayOfRange = isSameDay(date, weekDays[0]);
+    if (!isSameDay(event.start, date) && !isFirstDayOfRange) {
       return html`<span></span>`;
     }
 
     const content = event.title;
     let daysInterval = event.daysInterval;
-    const weekDays = this.generateWeekDays();
+    
     if (daysInterval > 1) {
       if (isSameDay(event.start, date)) {
-        daysInterval = Math.min(weekDays.length - date.getDay() + weekStartsOn, daysInterval);
+        // Event starts on this day - calculate how many days it can span within the displayed range
+        const startIndex = weekDays.findIndex(day => isSameDay(day, date));
+        const endIndex = weekDays.findIndex(day => isSameDay(day, event.end));
+        
+        if (endIndex !== -1) {
+          // Event ends within the displayed range
+          daysInterval = endIndex - startIndex + 1;
+        } else {
+          // Event ends beyond the displayed range
+          const remainingDays = weekDays.length - startIndex;
+          daysInterval = Math.min(remainingDays, daysInterval);
+        }
       } else {
-        daysInterval = Math.min(weekDays.length, daysInterval - differenceInDays(date, event.start));
+        // Event continues from a previous day
+        const startIndex = weekDays.findIndex(day => isSameDay(day, event.start));
+        const currentIndex = weekDays.findIndex(day => isSameDay(day, date));
+        const endIndex = weekDays.findIndex(day => isSameDay(day, event.end));
+        
+        if (endIndex !== -1) {
+          // Event ends within the displayed range
+          daysInterval = endIndex - currentIndex + 1;
+        } else {
+          // Event ends beyond the displayed range
+          const remainingDays = weekDays.length - currentIndex;
+          daysInterval = Math.min(remainingDays, daysInterval - (currentIndex - startIndex));
+        }
       }
     }
 
@@ -551,7 +552,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       "all-day": true,
       "spanning-event": true,
       begin: isSameDay(event.start, date),
-      end: isSameWeek(event.end, date, { weekStartsOn }),
+      end: isBefore(event.end, addDays(weekEnd, 1)),
       past: isPast(event.end),
     };
 
