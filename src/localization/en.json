@@ -133,6 +133,12 @@
         "calendar-view": {
           "title": "Calendar View"
         },
+        "month-config": {
+          "title": "Month view"
+        },
+        "week-config": {
+          "title": "Week view"
+        },
         "events": {
           "title": "Events"
         },
@@ -140,7 +146,7 @@
           "label": "Number of weeks to show"
         },
         "view-type": {
-          "label": "Default view type",
+          "label": "Default view",
           "option": {
             "month": "Month view",
             "week": "Week view"
