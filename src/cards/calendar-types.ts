@@ -14,4 +14,5 @@ export type CalendarCardConfig = {
   enable_weather?: boolean;
   weather_entity?: string;
   view_type?: "month" | "week";
+  show_view_toggle?: boolean;
 } & CardTextOptions;

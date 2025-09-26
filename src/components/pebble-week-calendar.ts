@@ -39,7 +39,10 @@ interface EventPosition {
 @customElement("pebble-week-calendar")
 class PebbleWeekCalendar extends PebbleBaseCalendar {
   @property({ attribute: false }) protected weekStartsOn: Day = 0;
-  @property({ attribute: false }) protected weekCalendarView: "current_week" | "next_5_days" | "next_7_days" = "current_week";
+  @property({ attribute: false }) protected weekCalendarView:
+    | "current_week"
+    | "next_5_days"
+    | "next_7_days" = "current_week";
   @property({ attribute: false }) protected eventsSpanDays: boolean = false;
 
   @state() private currentDate = startOfDay(Date.now());
@@ -145,7 +148,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private isCurrentWeek(): boolean {
     const weekCalendarView = this.weekCalendarView ?? "current_week";
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    
+
     if (weekCalendarView === "current_week") {
       // For current week view, check if we're showing the current week
       const weekStart = startOfWeek(this.currentDate, { weekStartsOn });
@@ -155,7 +158,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       // For next_5_days and next_7_days, check if today is within the displayed range
       const weekDays = this.generateWeekDays();
       const today = startOfDay(this.currentTime);
-      return weekDays.some(day => isSameDay(day, today));
+      return weekDays.some((day) => isSameDay(day, today));
     }
   }
 
@@ -309,7 +312,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private navigatePrev = () => this.navigateWeek("prev");
   private navigateNext = () => this.navigateWeek("next");
 
-
   render() {
     const weekDays = this.generateWeekDays();
 
@@ -325,7 +327,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         weekEnd,
       );
     }
-    
+
     const textSize = this.textSize;
     const styles = {
       "--pebble-font-size": textSize
@@ -398,7 +400,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                       ? html`
                           <div>
                             ${this.eventsSpanDays
-                              ? this.renderSpanningAllDayEvent(event, date, weekDays[0], weekDays[weekDays.length - 1])
+                              ? this.renderSpanningAllDayEvent(
+                                  event,
+                                  date,
+                                  weekDays[0],
+                                  weekDays[weekDays.length - 1],
+                                )
                               : this.renderAllDayEvent(event)}
                           </div>
                         `
@@ -500,7 +507,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     }
 
     const weekDays = this.generateWeekDays();
-    
+
     // Only render the event on its start day or if it's the first day of the displayed range
     const isFirstDayOfRange = isSameDay(date, weekDays[0]);
     if (!isSameDay(event.start, date) && !isFirstDayOfRange) {
@@ -509,13 +516,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     const content = event.title;
     let daysInterval = event.daysInterval;
-    
+
     if (daysInterval > 1) {
       if (isSameDay(event.start, date)) {
         // Event starts on this day - calculate how many days it can span within the displayed range
-        const startIndex = weekDays.findIndex(day => isSameDay(day, date));
-        const endIndex = weekDays.findIndex(day => isSameDay(day, event.end));
-        
+        const startIndex = weekDays.findIndex((day) => isSameDay(day, date));
+        const endIndex = weekDays.findIndex((day) => isSameDay(day, event.end));
+
         if (endIndex !== -1) {
           // Event ends within the displayed range
           daysInterval = endIndex - startIndex + 1;
@@ -526,10 +533,10 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
       } else {
         // Event continues from a previous day
-        const startIndex = weekDays.findIndex(day => isSameDay(day, event.start));
-        const currentIndex = weekDays.findIndex(day => isSameDay(day, date));
-        const endIndex = weekDays.findIndex(day => isSameDay(day, event.end));
-        
+        const startIndex = weekDays.findIndex((day) => isSameDay(day, event.start));
+        const currentIndex = weekDays.findIndex((day) => isSameDay(day, date));
+        const endIndex = weekDays.findIndex((day) => isSameDay(day, event.end));
+
         if (endIndex !== -1) {
           // Event ends within the displayed range
           daysInterval = endIndex - currentIndex + 1;

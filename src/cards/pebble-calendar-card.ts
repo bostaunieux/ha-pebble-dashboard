@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit";
+import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, addDays } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
@@ -61,6 +61,7 @@ class PebbleCalendarCard extends LitElement {
       calendars: [],
       view_type: "month",
       week_calendar_view: "current_week",
+      show_view_toggle: true,
     };
     this._retryCount = 0;
     this.weather = null;
@@ -269,10 +270,12 @@ class PebbleCalendarCard extends LitElement {
           .localize=${this.localize}
           .hass=${this._hass}
         ></pebble-week-calendar>
-        <pebble-view-toggle
-          .currentView=${this.currentView}
-          .onViewChange=${this.handleViewChange}
-        ></pebble-view-toggle>
+        ${this.config?.show_view_toggle !== false
+          ? html`<pebble-view-toggle
+              .currentView=${this.currentView}
+              .onViewChange=${this.handleViewChange}
+            ></pebble-view-toggle>`
+          : nothing}
       `;
     }
 
@@ -298,10 +301,12 @@ class PebbleCalendarCard extends LitElement {
             .localize=${this.localize}
             .hass=${this._hass}
           ></pebble-basic-calendar>`}
-      <pebble-view-toggle
-        .currentView=${this.currentView}
-        .onViewChange=${this.handleViewChange}
-      ></pebble-view-toggle>
+      ${this.config?.show_view_toggle !== false
+        ? html`<pebble-view-toggle
+            .currentView=${this.currentView}
+            .onViewChange=${this.handleViewChange}
+          ></pebble-view-toggle>`
+        : nothing}
     `;
   }
 

@@ -147,7 +147,7 @@ export const getEventsByWeekdays = (
 ) => {
   // Generate all days in the interval using date-fns
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  
+
   // Initialize an array with the correct number of empty arrays
   const weekdays: Array<Array<CalendarEvent>> = Array.from({ length: days.length }, () => []);
 
@@ -185,7 +185,7 @@ export const getEventsByWeekdays = (
   sortedEvents.forEach((event) => {
     const startDate = max([event.start, weekStart]);
     const endDate = min([event.end, weekEnd]);
-    
+
     // Calculate the starting and ending day indices
     const startDayIndex = getDayIndex(startDate);
     const endDayIndex = getDayIndex(endDate);
@@ -205,6 +205,6 @@ export const getEventsByWeekdays = (
       currentDayIndex++;
     }
   });
-  
+
   return weekdays;
 };
