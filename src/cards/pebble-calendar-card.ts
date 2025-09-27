@@ -1,6 +1,14 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, addDays } from "date-fns";
+import {
+  startOfDay,
+  startOfWeek,
+  Day,
+  getDayOfYear,
+  startOfMonth,
+  addDays,
+  endOfDay,
+} from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
 import {
@@ -173,31 +181,25 @@ class PebbleCalendarCard extends LitElement {
     const weekCalendarView = this.config.week_calendar_view ?? "current_week";
 
     switch (weekCalendarView) {
-      case "current_week": {
-        // Start from the beginning of the current week, show 7 days
-        const weekStart = startOfWeek(today, { weekStartsOn });
-        return {
-          start: weekStart,
-          end: addDays(weekStart, 6),
-        };
-      }
       case "next_5_days":
         // Start from current day, show next 5 days
         return {
           start: startOfDay(today),
-          end: addDays(today, 4),
+          end: endOfDay(addDays(today, 4)),
         };
       case "next_7_days":
         // Start from current day, show next 7 days
         return {
           start: startOfDay(today),
-          end: addDays(today, 6),
+          end: endOfDay(addDays(today, 6)),
         };
+      case "current_week":
       default: {
-        const defaultWeekStart = startOfWeek(today, { weekStartsOn });
+        // Start from the beginning of the current week, show 7 days
+        const weekStart = startOfWeek(today, { weekStartsOn });
         return {
-          start: defaultWeekStart,
-          end: addDays(defaultWeekStart, 6),
+          start: weekStart,
+          end: endOfDay(addDays(weekStart, 6)),
         };
       }
     }
@@ -214,7 +216,7 @@ class PebbleCalendarCard extends LitElement {
 
     const startWeekStart = startOfWeek(startDate, { weekStartsOn });
     const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
-    const endWeekEnd = addDays(endWeekStart, 6);
+    const endWeekEnd = endOfDay(addDays(endWeekStart, 6));
 
     return {
       start: startWeekStart,

@@ -187,24 +187,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     });
   }
 
-  protected getEventsForDay(currentDate: Date) {
-    return this.events
-      .filter(
-        (event) =>
-          isSameDay(event.start, currentDate) ||
-          (event.allDay &&
-            isWithinInterval(currentDate, {
-              start: event.start,
-              end: event.end ?? event.start,
-            })),
-      )
-      .sort(
-        (a, b) =>
-          (a.allDay ? 0 : a.start.getHours() * 60 + a.start.getMinutes()) -
-          (b.allDay ? 0 : b.start.getHours() * 60 + b.start.getMinutes()),
-      );
-  }
-
   private generateWeekDays() {
     const weekCalendarView = this.weekCalendarView ?? "current_week";
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
