@@ -31,7 +31,7 @@ class PebbleCalendarCardEditor extends LitElement {
       enable_weather: false,
       event_refresh_interval: 15,
       view_type: "month",
-      show_view_toggle: true,
+      show_view_toggle: false,
     };
     this.localize = initLocalize(this.hass);
   }

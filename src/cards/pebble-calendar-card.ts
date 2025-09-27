@@ -69,7 +69,7 @@ class PebbleCalendarCard extends LitElement {
       calendars: [],
       view_type: "month",
       week_calendar_view: "current_week",
-      show_view_toggle: true,
+      show_view_toggle: false,
     };
     this._retryCount = 0;
     this.weather = null;
@@ -272,7 +272,7 @@ class PebbleCalendarCard extends LitElement {
           .localize=${this.localize}
           .hass=${this._hass}
         ></pebble-week-calendar>
-        ${this.config?.show_view_toggle !== false
+        ${this.config?.show_view_toggle
           ? html`<pebble-view-toggle
               .currentView=${this.currentView}
               .onViewChange=${this.handleViewChange}
@@ -303,7 +303,7 @@ class PebbleCalendarCard extends LitElement {
             .localize=${this.localize}
             .hass=${this._hass}
           ></pebble-basic-calendar>`}
-      ${this.config?.show_view_toggle !== false
+      ${this.config?.show_view_toggle
         ? html`<pebble-view-toggle
             .currentView=${this.currentView}
             .onViewChange=${this.handleViewChange}
