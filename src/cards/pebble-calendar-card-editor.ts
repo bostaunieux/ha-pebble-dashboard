@@ -24,11 +24,14 @@ class PebbleCalendarCardEditor extends LitElement {
       type: "custom:pebble-calendar-card",
       calendars: [],
       num_weeks: 12,
-      start_position: "current_week",
+      month_calendar_start: "current_week",
+      week_calendar_view: "current_week",
       week_start: "0",
       events_span_days: false,
       enable_weather: false,
       event_refresh_interval: 15,
+      view_type: "month",
+      show_view_toggle: false,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -71,73 +74,145 @@ class PebbleCalendarCardEditor extends LitElement {
     };
   }
 
-  _getCalendarViewSchema() {
+  _getSharedConfigSchema() {
+    return [
+      {
+        label: this.localize("calendar.editor.form.show-view-toggle.label"),
+        name: "show_view_toggle",
+        selector: { boolean: {} },
+      },
+      {
+        label: this.localize("calendar.editor.form.view-type.label"),
+        name: "view_type",
+        selector: {
+          select: {
+            options: [
+              {
+                value: "month",
+                label: this.localize("calendar.editor.form.view-type.option.month"),
+              },
+              {
+                value: "week",
+                label: this.localize("calendar.editor.form.view-type.option.week"),
+              },
+            ],
+          },
+        },
+      },
+      {
+        label: this.localize("calendar.editor.form.week-start.label"),
+        name: "week_start",
+        selector: {
+          select: {
+            options: [
+              // select only supports string value, so they must be converted when the config is used in the card
+              {
+                label: this.localize("calendar.editor.form.week-start.days.sun"),
+                value: "0",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.mon"),
+                value: "1",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.tue"),
+                value: "2",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.wed"),
+                value: "3",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.thu"),
+                value: "4",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.fri"),
+                value: "5",
+              },
+              {
+                label: this.localize("calendar.editor.form.week-start.days.sat"),
+                value: "6",
+              },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  _getMonthConfigSchema() {
     return {
       name: "",
       type: "expandable",
-      title: this.localize("calendar.editor.form.calendar-view.title"),
+      title: this.localize("calendar.editor.form.month-config.title"),
+      expanded: false,
       schema: [
         {
-          label: this.localize("calendar.editor.form.week-start.label"),
-          name: "week_start",
-          selector: {
-            select: {
-              options: [
-                // select only supports string value, so they must be converted when the config is used in the card
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.sun"),
-                  value: "0",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.mon"),
-                  value: "1",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.tue"),
-                  value: "2",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.wed"),
-                  value: "3",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.thu"),
-                  value: "4",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.fri"),
-                  value: "5",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.sat"),
-                  value: "6",
-                },
-              ],
-            },
-          },
+          label: this.localize("calendar.editor.form.num-weeks.label"),
+          name: "num_weeks",
+          selector: { number: { mode: "box", min: 1, max: 52 } },
         },
         {
-          label: this.localize("calendar.editor.form.start-position.label"),
-          name: "start_position",
+          label: this.localize("calendar.editor.form.month-calendar-start.label"),
+          name: "month_calendar_start",
           selector: {
             select: {
               options: [
                 {
                   value: "current_week",
-                  label: this.localize("calendar.editor.form.start-position.option.current_week"),
+                  label: this.localize(
+                    "calendar.editor.form.month-calendar-start.option.current_week",
+                  ),
                 },
                 {
                   value: "start_of_month",
-                  label: this.localize("calendar.editor.form.start-position.option.start_of_month"),
+                  label: this.localize(
+                    "calendar.editor.form.month-calendar-start.option.start_of_month",
+                  ),
                 },
               ],
             },
           },
         },
+      ],
+    };
+  }
+
+  _getWeekConfigSchema() {
+    return {
+      name: "",
+      type: "expandable",
+      title: this.localize("calendar.editor.form.week-config.title"),
+      expanded: false,
+      schema: [
         {
-          label: this.localize("calendar.editor.form.num-weeks.label"),
-          name: "num_weeks",
-          selector: { number: { mode: "box", min: 1, max: 52 } },
+          label: this.localize("calendar.editor.form.week-calendar-view.label"),
+          name: "week_calendar_view",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "current_week",
+                  label: this.localize(
+                    "calendar.editor.form.week-calendar-view.option.current_week",
+                  ),
+                },
+                {
+                  value: "next_5_days",
+                  label: this.localize(
+                    "calendar.editor.form.week-calendar-view.option.next_5_days",
+                  ),
+                },
+                {
+                  value: "next_7_days",
+                  label: this.localize(
+                    "calendar.editor.form.week-calendar-view.option.next_7_days",
+                  ),
+                },
+              ],
+            },
+          },
         },
       ],
     };
@@ -203,9 +278,24 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, start_position, num_weeks } = ev.detail.value;
+    const {
+      week_start,
+      month_calendar_start,
+      week_calendar_view,
+      num_weeks,
+      view_type,
+      show_view_toggle,
+    } = ev.detail.value;
 
-    this._config = { ...this._config, week_start, start_position, num_weeks };
+    this._config = {
+      ...this._config,
+      week_start,
+      month_calendar_start,
+      week_calendar_view,
+      num_weeks,
+      view_type,
+      show_view_toggle,
+    };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -286,7 +376,23 @@ class PebbleCalendarCardEditor extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
-            .schema=${[this._getCalendarViewSchema()]}
+            .schema=${this._getSharedConfigSchema()}
+            .computeLabel=${computeLabel}
+            @value-changed=${this._changeCalendarView}
+          ></ha-form>
+
+          <ha-form
+            .hass=${this.hass}
+            .data=${this._config}
+            .schema=${[this._getMonthConfigSchema()]}
+            .computeLabel=${computeLabel}
+            @value-changed=${this._changeCalendarView}
+          ></ha-form>
+
+          <ha-form
+            .hass=${this.hass}
+            .data=${this._config}
+            .schema=${[this._getWeekConfigSchema()]}
             .computeLabel=${computeLabel}
             @value-changed=${this._changeCalendarView}
           ></ha-form>

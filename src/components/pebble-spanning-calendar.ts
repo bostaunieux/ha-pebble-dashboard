@@ -19,12 +19,12 @@ import {
   endOfDay,
 } from "date-fns";
 import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
-import { PebbleBaseCalendar } from "./pebble-base-calendar";
+import { PebbleMonthCalendar } from "./pebble-month-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 @customElement("pebble-spanning-calendar")
-class PebbleSpanningCalendar extends PebbleBaseCalendar {
+class PebbleSpanningCalendar extends PebbleMonthCalendar {
   constructor() {
     super();
   }
@@ -56,7 +56,7 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
     ];
 
     // Generate all weeks in a continuous sequence
-    const allWeeks = this.generateWeeks();
+    const allWeeks = this.generateWeeksInMonth();
 
     const textSize = this.textSize;
     const styles = {
@@ -80,7 +80,7 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
+          <div class="calendar-scroll-area">
             <div class="calendar span-events">
               ${allWeeks.map((week, weekIndex) => {
                 const weekStart = startOfWeek(week[0], { weekStartsOn });
@@ -89,7 +89,6 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
                   this.getEventsForWeek(weekStart, weekEnd),
                   weekStart,
                   weekEnd,
-                  weekStartsOn,
                 );
 
                 return html`
@@ -172,7 +171,8 @@ class PebbleSpanningCalendar extends PebbleBaseCalendar {
 
   static get styles() {
     return [
-      super.sharedStyles,
+      super.baseStyles,
+      super.monthStyles,
       css`
         :host {
           --arrow-radius: 4px;

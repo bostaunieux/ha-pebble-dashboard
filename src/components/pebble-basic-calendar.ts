@@ -4,12 +4,12 @@ import { styleMap } from "lit/directives/style-map.js";
 import { customElement } from "lit/decorators.js";
 import { isPast, format, startOfDay, isToday, Day, getDayOfYear, endOfDay } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
-import { PebbleBaseCalendar } from "./pebble-base-calendar";
+import { PebbleMonthCalendar } from "./pebble-month-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 @customElement("pebble-basic-calendar")
-class PebbleBasicCalendar extends PebbleBaseCalendar {
+class PebbleBasicCalendar extends PebbleMonthCalendar {
   constructor() {
     super();
   }
@@ -24,7 +24,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
     ];
 
     // Generate all weeks in a continuous sequence
-    const allWeeks = this.generateWeeks();
+    const allWeeks = this.generateWeeksInMonth();
 
     const textSize = this.textSize;
     const styles = {
@@ -48,7 +48,7 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
                 </div>`,
             )}
           </div>
-          <div class="calendar-scroll-area" .ref=${this.setScrollContainer}>
+          <div class="calendar-scroll-area">
             <div class="calendar">
               ${allWeeks.map((week, weekIndex) => {
                 return html`
@@ -107,7 +107,8 @@ class PebbleBasicCalendar extends PebbleBaseCalendar {
 
   static get styles() {
     return [
-      super.sharedStyles,
+      super.baseStyles,
+      super.monthStyles,
       css`
         .week {
           display: grid;
