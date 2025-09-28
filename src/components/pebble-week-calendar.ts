@@ -557,6 +557,37 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     `;
   }
 
+  private renderEventTime(startTime: Date, endTime: Date) {
+    const startHour = startTime.getHours();
+    const startMinute = startTime.getMinutes();
+    const endHour = endTime.getHours();
+    const endMinute = endTime.getMinutes();
+
+    const startIsAM = startHour < 12;
+    const endIsAM = endHour < 12;
+
+    let startFormatStr = "h";
+    if (startMinute !== 0) {
+      startFormatStr += ":mm";
+    }
+    // Only add AM/PM to start if different from end time
+    if (startIsAM !== endIsAM) {
+      startFormatStr += "a";
+    }
+
+    let endFormatStr = "h";
+    if (endMinute !== 0) {
+      endFormatStr += ":mm";
+    }
+    // Always add AM/PM to end time
+    endFormatStr += "a";
+
+    const startStr = format(startTime, startFormatStr);
+    const endStr = format(endTime, endFormatStr);
+
+    return `${startStr} - ${endStr}`;
+  }
+
   renderTimedEvent(event: CalendarEvent, position: EventPosition) {
     const color = `var(--color-${event.color ?? "blue"})`;
     const onClick = () => {
@@ -579,7 +610,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     return html`
       <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
-        ${event.title}
+        <div class="event-title">${event.title}</div>
+        <div class="event-time">${this.renderEventTime(event.start, event.end)}</div>
       </button>
     `;
   }
@@ -885,6 +917,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
         .timed-event {
           display: flex;
+          flex-direction: column;
           position: absolute;
           border: none;
           border-radius: 4px;
@@ -901,6 +934,20 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           border-left: 5px solid var(--event-color);
           background-color: var(--event-color);
           background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
+        }
+
+        .timed-event .event-title {
+          font-size: 1em;
+          font-weight: 500;
+          line-height: 1.2;
+          margin-bottom: 1px;
+        }
+
+        .timed-event .event-time {
+          font-size: 0.75em;
+          font-weight: 400;
+          line-height: 1.1;
+          opacity: 0.8;
         }
 
         :host {
