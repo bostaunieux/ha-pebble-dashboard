@@ -406,7 +406,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             })}
           </div>
 
-          <!-- Time grid -->
           <div class="time-grid-container">
             <div class="time-grid">
               <div class="time-labels">
@@ -607,13 +606,16 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       past: isPast(event.end),
     };
 
+    const fontSize = Math.min(1, (1 - ((60 - position.height) / 60)) * 1.75);
+
     const styles = {
+      "--event-color": color,
       top: `${position.top}px`,
       height: `${position.height}px`,
       left: `${position.left}%`,
       width: `${position.width}%`,
-      "--event-color": color,
       zIndex: position.zIndex,
+      fontSize: `${fontSize}em`,
     };
 
     return html`
