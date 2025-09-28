@@ -289,6 +289,14 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     this.currentDate = addDays(this.currentDate, days * multiplier);
     this.recordUserInteraction();
+
+    this.dispatchEvent(
+      new CustomEvent("date-range-changed", {
+        detail: {
+          currentDate: this.currentDate,
+        },
+      }),
+    );
   }
 
   private navigatePrev = () => this.navigateWeek("prev");

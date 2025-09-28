@@ -5,11 +5,13 @@ import { LitElement } from "lit";
 @customElement("pebble-view-toggle")
 class PebbleViewToggle extends LitElement {
   @property({ type: String, attribute: "current-view" }) currentView: "month" | "week" = "month";
-  @property({ type: Function, attribute: false }) onViewChange?: (view: "month" | "week") => void;
 
   private handleViewChange(view: "month" | "week") {
     this.currentView = view;
-    this.onViewChange?.(view);
+    
+    this.dispatchEvent(new CustomEvent('view-changed', {
+      detail: {  view }
+    }));
   }
 
   private handleMonthView = () => this.handleViewChange("month");

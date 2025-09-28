@@ -165,8 +165,8 @@ class PebbleCalendarCard extends LitElement {
     }, delay);
   }
 
-  private calculateDateRange(): { start: Date; end: Date } {
-    const today = startOfDay(Date.now());
+  private calculateDateRange(currentDate?: Date | number): { start: Date; end: Date } {
+    const today = startOfDay(currentDate ?? Date.now());
     const weekStartsOn = +(this.config.week_start ?? "0") as Day;
     const viewType = this.config.view_type ?? "month";
 
@@ -224,12 +224,12 @@ class PebbleCalendarCard extends LitElement {
     };
   }
 
-  async _fetchEvents() {
+  async _fetchEvents(currentDate?: Date) {
     if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
       return;
     }
 
-    const { start, end } = this.calculateDateRange();
+    const { start, end } = this.calculateDateRange(currentDate);
 
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
@@ -252,11 +252,16 @@ class PebbleCalendarCard extends LitElement {
     }
   }
 
-  private handleViewChange = (view: "month" | "week") => {
+  private handleViewChange = (event: CustomEvent) => {
+    const view = event.detail.view;
     this.currentView = view;
     this.config = { ...this.config, view_type: view };
     // Refresh events when view type changes since date range will be different
     this._fetchEvents();
+  };
+
+  private handleDateRangeChange = (event: CustomEvent) => {
+    this._fetchEvents(event.detail.currentDate);
   };
 
   render() {
@@ -271,11 +276,12 @@ class PebbleCalendarCard extends LitElement {
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
           .hass=${this._hass}
+          @date-range-changed=${this.handleDateRangeChange}
         ></pebble-week-calendar>
         ${this.config?.show_view_toggle
           ? html`<pebble-view-toggle
               .currentView=${this.currentView}
-              .onViewChange=${this.handleViewChange}
+              @view-changed=${this.handleViewChange}
             ></pebble-view-toggle>`
           : nothing}
       `;
@@ -306,7 +312,7 @@ class PebbleCalendarCard extends LitElement {
       ${this.config?.show_view_toggle
         ? html`<pebble-view-toggle
             .currentView=${this.currentView}
-            .onViewChange=${this.handleViewChange}
+            @view-changed=${this.handleViewChange}
           ></pebble-view-toggle>`
         : nothing}
     `;
