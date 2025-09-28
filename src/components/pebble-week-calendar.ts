@@ -916,38 +916,41 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         .timed-event {
+          --top-spacing: 2px;
           display: flex;
           flex-direction: column;
           position: absolute;
-          border: none;
+          border: 1px solid var(--main-background);
           border-radius: 4px;
           cursor: pointer;
           color: #000;
           font-size: 1em;
-          padding: 2px 4px;
+          padding: var(--top-spacing) 4px;
           overflow: hidden;
           text-overflow: ellipsis;
           box-sizing: border-box;
           text-align: left;
-          margin: 0 2px;
-          border: 1px solid var(--main-background);
-          border-left: 5px solid var(--event-color);
           background-color: var(--event-color);
           background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
         }
 
+        .timed-event::before {
+          content: "";
+          position: absolute;
+          height: calc(100% - var(--top-spacing) * 2);
+          border-left: 4px solid var(--event-color);
+        }
+
         .timed-event .event-title {
           font-size: 1em;
-          font-weight: 500;
-          line-height: 1.2;
-          margin-bottom: 1px;
+          margin-bottom: 2px;
+          margin-left: 6px;
         }
 
         .timed-event .event-time {
           font-size: 0.75em;
-          font-weight: 400;
-          line-height: 1.1;
           opacity: 0.8;
+          margin-left: 6px;
         }
 
         :host {
