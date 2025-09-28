@@ -231,13 +231,13 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
         }
 
         .event.all-day.begin {
-          border-top-left-radius: 4px;
-          border-bottom-left-radius: 4px;
+          border-top-left-radius: var(--arrow-radius);
+          border-bottom-left-radius: var(--arrow-radius);
         }
 
         .event.all-day.end {
-          border-top-right-radius: 4px;
-          border-bottom-right-radius: 4px;
+          border-top-right-radius: var(--arrow-radius);
+          border-bottom-right-radius: var(--arrow-radius);
         }
 
         /* left arrow */
