@@ -8,10 +8,12 @@ class PebbleViewToggle extends LitElement {
 
   private handleViewChange(view: "month" | "week") {
     this.currentView = view;
-    
-    this.dispatchEvent(new CustomEvent('view-changed', {
-      detail: {  view }
-    }));
+
+    this.dispatchEvent(
+      new CustomEvent("view-changed", {
+        detail: { view },
+      }),
+    );
   }
 
   private handleMonthView = () => this.handleViewChange("month");

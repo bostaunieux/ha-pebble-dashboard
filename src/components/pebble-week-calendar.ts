@@ -51,9 +51,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   @query(".time-grid-container") private timeGridContainer?: HTMLDivElement;
 
   private timeUpdateInterval?: number;
-  private inactivityTimer?: number;
-  private autoScrollInterval?: number;
-  private scrollListener?: () => void;
 
   constructor() {
     super();
@@ -62,17 +59,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   connectedCallback() {
     super.connectedCallback();
     this.startCurrentTimeTracking();
-    this.startInactivityTracking();
 
     setTimeout(() => {
-      this.scrollToCurrentTime();
+      this.scrollTo8AM();
     }, 100);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.stopCurrentTimeTracking();
-    this.stopInactivityTracking();
   }
 
   private startCurrentTimeTracking() {
@@ -87,62 +82,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       clearInterval(this.timeUpdateInterval);
       this.timeUpdateInterval = undefined;
     }
-  }
-
-  private startInactivityTracking() {
-    this.resetInactivityTimer();
-
-    // Add scroll listener and store reference for cleanup
-    this.scrollListener = () => {
-      this.recordUserInteraction();
-    };
-    this.timeGridContainer?.addEventListener("scroll", this.scrollListener);
-  }
-
-  private stopInactivityTracking() {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-      this.inactivityTimer = undefined;
-    }
-    if (this.autoScrollInterval) {
-      clearInterval(this.autoScrollInterval);
-      this.autoScrollInterval = undefined;
-    }
-    if (this.scrollListener) {
-      this.timeGridContainer?.removeEventListener("scroll", this.scrollListener);
-      this.scrollListener = undefined;
-    }
-  }
-
-  private resetInactivityTimer() {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-    }
-    if (this.autoScrollInterval) {
-      clearInterval(this.autoScrollInterval);
-      this.autoScrollInterval = undefined;
-    }
-
-    this.inactivityTimer = window.setTimeout(() => {
-      this.startAutoScroll();
-    }, 60 * 1_000); // 1 minute
-  }
-
-  private startAutoScroll() {
-    if (this.autoScrollInterval) return; // Already running
-
-    this.autoScrollInterval = window.setInterval(
-      () => {
-        if (this.isCurrentWeek()) {
-          this.scrollToCurrentTime("smooth");
-        }
-      },
-      60 * 60 * 1_000,
-    ); // every hour
-  }
-
-  private recordUserInteraction() {
-    this.resetInactivityTimer();
   }
 
   private isCurrentWeek(): boolean {
@@ -174,16 +113,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return isSameDay(date, this.currentTime);
   }
 
-  private scrollToCurrentTime(behavior: "smooth" | "instant" = "instant") {
-    if (!this.isCurrentWeek()) return;
+  private scrollTo8AM() {
+    const targetHour = 8; // 8am
 
-    const currentHour = this.getCurrentHour();
-    const currentMinute = this.getCurrentMinute();
+    // Calculate the position of 8am (each hour = 60px, so each minute = 1px)
+    const targetPosition = targetHour * 60;
 
-    const scrollPosition = (currentHour * 60 + currentMinute) * (60 / 60); // 60px per hour
     this.timeGridContainer?.scroll({
-      top: Math.max(0, scrollPosition - 200),
-      behavior,
+      top: Math.max(0, targetPosition),
+      behavior: "smooth",
     });
   }
 
@@ -288,7 +226,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const days = weekCalendarView === "next_5_days" ? 5 : 7;
 
     this.currentDate = addDays(this.currentDate, days * multiplier);
-    this.recordUserInteraction();
 
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
@@ -554,7 +491,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     const onClick = () => {
       this.selectedEvent = event;
-      this.recordUserInteraction();
     };
 
     return html`
@@ -606,7 +542,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       past: isPast(event.end),
     };
 
-    const fontSize = Math.min(1, (1 - ((60 - position.height) / 60)) * 1.75);
+    const fontSize = Math.min(1, (1 - (60 - position.height) / 60) * 1.75);
 
     const styles = {
       "--event-color": color,
