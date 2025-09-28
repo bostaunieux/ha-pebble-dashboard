@@ -573,7 +573,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       height: `${position.height}px`,
       left: `${position.left}%`,
       width: `${position.width}%`,
-      backgroundColor: color,
+      "--event-color": color,
       zIndex: position.zIndex,
     };
 
@@ -898,6 +898,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           text-align: left;
           margin: 0 2px;
           border: 1px solid var(--main-background);
+          border-left: 5px solid var(--event-color);
+          background-color: var(--event-color);
+          background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
         }
 
         :host {
