@@ -23,15 +23,19 @@ class PebbleCalendarCardEditor extends LitElement {
     this._config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
+      show_view_toggle: false,
+      view_type: "month",
+      event_refresh_interval: 15,
+      enable_weather: false,
+      // Global fallbacks
       num_weeks: 12,
+      week_start: "0",
       month_calendar_start: "current_week",
       week_calendar_view: "current_week",
-      week_start: "0",
       events_span_days: false,
-      enable_weather: false,
-      event_refresh_interval: 15,
-      view_type: "month",
-      show_view_toggle: false,
+      // View-specific overrides (initially empty)
+      month_view: {},
+      week_view: {},
     };
     this.localize = initLocalize(this.hass);
   }
@@ -74,7 +78,7 @@ class PebbleCalendarCardEditor extends LitElement {
     };
   }
 
-  _getSharedConfigSchema() {
+  _getGlobalConfigSchema() {
     return [
       {
         label: this.localize("calendar.editor.form.show-view-toggle.label"),
@@ -105,7 +109,6 @@ class PebbleCalendarCardEditor extends LitElement {
         selector: {
           select: {
             options: [
-              // select only supports string value, so they must be converted when the config is used in the card
               {
                 label: this.localize("calendar.editor.form.week-start.days.sun"),
                 value: "0",
@@ -137,6 +140,11 @@ class PebbleCalendarCardEditor extends LitElement {
             ],
           },
         },
+      },
+      {
+        label: this.localize("calendar.editor.form.event-format.label"),
+        name: "events_span_days",
+        selector: { boolean: {} },
       },
     ];
   }
@@ -174,6 +182,49 @@ class PebbleCalendarCardEditor extends LitElement {
               ],
             },
           },
+        },
+        {
+          label: "Override week start for month view",
+          name: "week_start",
+          selector: {
+            select: {
+              options: [
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.sun"),
+                  value: "0",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.mon"),
+                  value: "1",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.tue"),
+                  value: "2",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.wed"),
+                  value: "3",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.thu"),
+                  value: "4",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.fri"),
+                  value: "5",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.sat"),
+                  value: "6",
+                },
+              ],
+            },
+          },
+        },
+        {
+          label: "Override event spanning for month view",
+          name: "events_span_days",
+          selector: { boolean: {} },
         },
       ],
     };
@@ -214,6 +265,49 @@ class PebbleCalendarCardEditor extends LitElement {
             },
           },
         },
+        {
+          label: "Override week start for week view",
+          name: "week_start",
+          selector: {
+            select: {
+              options: [
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.sun"),
+                  value: "0",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.mon"),
+                  value: "1",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.tue"),
+                  value: "2",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.wed"),
+                  value: "3",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.thu"),
+                  value: "4",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.fri"),
+                  value: "5",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.sat"),
+                  value: "6",
+                },
+              ],
+            },
+          },
+        },
+        {
+          label: "Override event spanning for week view",
+          name: "events_span_days",
+          selector: { boolean: {} },
+        },
       ],
     };
   }
@@ -224,11 +318,6 @@ class PebbleCalendarCardEditor extends LitElement {
       type: "expandable",
       title: this.localize("calendar.editor.form.events.title"),
       schema: [
-        {
-          label: this.localize("calendar.editor.form.event-format.label"),
-          name: "events_span_days",
-          selector: { boolean: {} },
-        },
         {
           label: this.localize("calendar.editor.form.event-refresh-interval.label"),
           name: "event_refresh_interval",
@@ -278,23 +367,62 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const {
-      week_start,
-      month_calendar_start,
-      week_calendar_view,
-      num_weeks,
-      view_type,
-      show_view_toggle,
-    } = ev.detail.value;
+    const { week_start, events_span_days, view_type, show_view_toggle } = ev.detail.value;
 
     this._config = {
       ...this._config,
       week_start,
-      month_calendar_start,
-      week_calendar_view,
-      num_weeks,
+      events_span_days,
       view_type,
       show_view_toggle,
+    };
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
+  }
+
+  _changeMonthView(ev: CustomEvent) {
+    if (!this._config) return;
+
+    const monthView = ev.detail.value;
+
+    // Clean up empty values
+    const cleanedMonthView = { ...monthView };
+    Object.keys(cleanedMonthView).forEach((key) => {
+      if (
+        cleanedMonthView[key] === "" ||
+        cleanedMonthView[key] === null ||
+        cleanedMonthView[key] === undefined
+      ) {
+        delete cleanedMonthView[key];
+      }
+    });
+
+    this._config = {
+      ...this._config,
+      month_view: cleanedMonthView,
+    };
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
+  }
+
+  _changeWeekView(ev: CustomEvent) {
+    if (!this._config) return;
+
+    const weekView = ev.detail.value;
+
+    // Clean up empty values
+    const cleanedWeekView = { ...weekView };
+    Object.keys(cleanedWeekView).forEach((key) => {
+      if (
+        cleanedWeekView[key] === "" ||
+        cleanedWeekView[key] === null ||
+        cleanedWeekView[key] === undefined
+      ) {
+        delete cleanedWeekView[key];
+      }
+    });
+
+    this._config = {
+      ...this._config,
+      week_view: cleanedWeekView,
     };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
@@ -302,9 +430,9 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeEvents(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { events_span_days, event_refresh_interval } = ev.detail.value;
+    const { event_refresh_interval } = ev.detail.value;
 
-    this._config = { ...this._config, events_span_days, event_refresh_interval };
+    this._config = { ...this._config, event_refresh_interval };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
@@ -376,25 +504,25 @@ class PebbleCalendarCardEditor extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
-            .schema=${this._getSharedConfigSchema()}
+            .schema=${this._getGlobalConfigSchema()}
             .computeLabel=${computeLabel}
             @value-changed=${this._changeCalendarView}
           ></ha-form>
 
           <ha-form
             .hass=${this.hass}
-            .data=${this._config}
+            .data=${this._config?.month_view ?? {}}
             .schema=${[this._getMonthConfigSchema()]}
             .computeLabel=${computeLabel}
-            @value-changed=${this._changeCalendarView}
+            @value-changed=${this._changeMonthView}
           ></ha-form>
 
           <ha-form
             .hass=${this.hass}
-            .data=${this._config}
+            .data=${this._config?.week_view ?? {}}
             .schema=${[this._getWeekConfigSchema()]}
             .computeLabel=${computeLabel}
-            @value-changed=${this._changeCalendarView}
+            @value-changed=${this._changeWeekView}
           ></ha-form>
 
           <ha-form
