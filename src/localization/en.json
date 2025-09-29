@@ -104,12 +104,7 @@
           "label": "Start of week",
           "days": {
             "sun": "Sunday",
-            "mon": "Monday",
-            "tue": "Tuesday",
-            "wed": "Wednesday",
-            "thu": "Thursday",
-            "fri": "Friday",
-            "sat": "Saturday"
+            "mon": "Monday"
           }
         },
         "add-calendar": {
@@ -170,6 +165,12 @@
             "next_5_days": "Next 5 days",
             "next_7_days": "Next 7 days"
           }
+        },
+        "override-week-start": {
+          "label": "Override week start"
+        },
+        "override-events-span-days": {
+          "label": "Override consolidate multi-day events (BETA)"
         }
       }
     }

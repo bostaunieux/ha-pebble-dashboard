@@ -86,60 +86,46 @@ class PebbleCalendarCardEditor extends LitElement {
         selector: { boolean: {} },
       },
       {
-        label: this.localize("calendar.editor.form.view-type.label"),
-        name: "view_type",
-        selector: {
-          select: {
-            options: [
-              {
-                value: "month",
-                label: this.localize("calendar.editor.form.view-type.option.month"),
+        name: "",
+        type: "grid",
+        schema: [
+          {
+            label: this.localize("calendar.editor.form.view-type.label"),
+            name: "view_type",
+            selector: {
+              select: {
+                options: [
+                  {
+                    value: "month",
+                    label: this.localize("calendar.editor.form.view-type.option.month"),
+                  },
+                  {
+                    value: "week",
+                    label: this.localize("calendar.editor.form.view-type.option.week"),
+                  },
+                ],
               },
-              {
-                value: "week",
-                label: this.localize("calendar.editor.form.view-type.option.week"),
-              },
-            ],
+            },
           },
-        },
-      },
-      {
-        label: this.localize("calendar.editor.form.week-start.label"),
-        name: "week_start",
-        selector: {
-          select: {
-            options: [
-              {
-                label: this.localize("calendar.editor.form.week-start.days.sun"),
-                value: "0",
+          {
+            label: this.localize("calendar.editor.form.week-start.label"),
+            name: "week_start",
+            selector: {
+              select: {
+                options: [
+                  {
+                    label: this.localize("calendar.editor.form.week-start.days.sun"),
+                    value: "0",
+                  },
+                  {
+                    label: this.localize("calendar.editor.form.week-start.days.mon"),
+                    value: "1",
+                  },
+                ],
               },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.mon"),
-                value: "1",
-              },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.tue"),
-                value: "2",
-              },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.wed"),
-                value: "3",
-              },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.thu"),
-                value: "4",
-              },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.fri"),
-                value: "5",
-              },
-              {
-                label: this.localize("calendar.editor.form.week-start.days.sat"),
-                value: "6",
-              },
-            ],
+            },
           },
-        },
+        ],
       },
       {
         label: this.localize("calendar.editor.form.event-format.label"),
@@ -157,34 +143,40 @@ class PebbleCalendarCardEditor extends LitElement {
       expanded: false,
       schema: [
         {
-          label: this.localize("calendar.editor.form.num-weeks.label"),
-          name: "num_weeks",
-          selector: { number: { mode: "box", min: 1, max: 52 } },
-        },
-        {
-          label: this.localize("calendar.editor.form.month-calendar-start.label"),
-          name: "month_calendar_start",
-          selector: {
-            select: {
-              options: [
-                {
-                  value: "current_week",
-                  label: this.localize(
-                    "calendar.editor.form.month-calendar-start.option.current_week",
-                  ),
+          name: "",
+          type: "grid",
+          schema: [
+            {
+              label: this.localize("calendar.editor.form.month-calendar-start.label"),
+              name: "month_calendar_start",
+              selector: {
+                select: {
+                  options: [
+                    {
+                      value: "current_week",
+                      label: this.localize(
+                        "calendar.editor.form.month-calendar-start.option.current_week",
+                      ),
+                    },
+                    {
+                      value: "start_of_month",
+                      label: this.localize(
+                        "calendar.editor.form.month-calendar-start.option.start_of_month",
+                      ),
+                    },
+                  ],
                 },
-                {
-                  value: "start_of_month",
-                  label: this.localize(
-                    "calendar.editor.form.month-calendar-start.option.start_of_month",
-                  ),
-                },
-              ],
+              },
             },
-          },
+            {
+              label: this.localize("calendar.editor.form.num-weeks.label"),
+              name: "num_weeks",
+              selector: { number: { min: 1, max: 24 } },
+            },
+          ],
         },
         {
-          label: "Override week start for month view",
+          label: this.localize("calendar.editor.form.override-week-start.label"),
           name: "week_start",
           selector: {
             select: {
@@ -197,32 +189,12 @@ class PebbleCalendarCardEditor extends LitElement {
                   label: this.localize("calendar.editor.form.week-start.days.mon"),
                   value: "1",
                 },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.tue"),
-                  value: "2",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.wed"),
-                  value: "3",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.thu"),
-                  value: "4",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.fri"),
-                  value: "5",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.sat"),
-                  value: "6",
-                },
               ],
             },
           },
         },
         {
-          label: "Override event spanning for month view",
+          label: this.localize("calendar.editor.form.override-events-span-days.label"),
           name: "events_span_days",
           selector: { boolean: {} },
         },
@@ -266,7 +238,7 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: "Override week start for week view",
+          label: this.localize("calendar.editor.form.override-week-start.label"),
           name: "week_start",
           selector: {
             select: {
@@ -279,32 +251,12 @@ class PebbleCalendarCardEditor extends LitElement {
                   label: this.localize("calendar.editor.form.week-start.days.mon"),
                   value: "1",
                 },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.tue"),
-                  value: "2",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.wed"),
-                  value: "3",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.thu"),
-                  value: "4",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.fri"),
-                  value: "5",
-                },
-                {
-                  label: this.localize("calendar.editor.form.week-start.days.sat"),
-                  value: "6",
-                },
               ],
             },
           },
         },
         {
-          label: "Override event spanning for week view",
+          label: this.localize("calendar.editor.form.override-events-span-days.label"),
           name: "events_span_days",
           selector: { boolean: {} },
         },
@@ -500,7 +452,7 @@ class PebbleCalendarCardEditor extends LitElement {
 
     return html`
       <div class="card-config">
-        <div id="editor">
+        <div class="editor">
           <ha-form
             .hass=${this.hass}
             .data=${this._config}
@@ -590,6 +542,12 @@ class PebbleCalendarCardEditor extends LitElement {
     return [
       COLOR_CSS_VARS,
       css`
+        .editor {
+          display: grid;
+          gap: 16px;
+        }
+
+
         .box {
           margin-top: 8px;
           border: 1px solid var(--divider-color);
