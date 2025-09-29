@@ -121,7 +121,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     this.timeGridContainer?.scroll({
       top: Math.max(0, targetPosition),
-      behavior: "smooth",
     });
   }
 
