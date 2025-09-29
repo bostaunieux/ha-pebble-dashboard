@@ -165,12 +165,6 @@
             "next_5_days": "Next 5 days",
             "next_7_days": "Next 7 days"
           }
-        },
-        "override-week-start": {
-          "label": "Override week start"
-        },
-        "override-events-span-days": {
-          "label": "Override consolidate multi-day events (BETA)"
         }
       }
     }

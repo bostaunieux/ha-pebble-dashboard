@@ -74,12 +74,6 @@ class PebbleCalendarCard extends LitElement {
       view_type: "month",
       event_refresh_interval: 15,
       enable_weather: false,
-      // Global fallbacks
-      week_start: "0",
-      events_span_days: false,
-      num_weeks: 12,
-      month_calendar_start: "current_week",
-      week_calendar_view: "current_week",
       // View-specific overrides (initially empty)
       month_view: {},
       week_view: {},

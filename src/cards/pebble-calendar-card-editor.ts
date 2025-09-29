@@ -27,12 +27,6 @@ class PebbleCalendarCardEditor extends LitElement {
       view_type: "month",
       event_refresh_interval: 15,
       enable_weather: false,
-      // Global fallbacks
-      num_weeks: 12,
-      week_start: "0",
-      month_calendar_start: "current_week",
-      week_calendar_view: "current_week",
-      events_span_days: false,
       // View-specific overrides (initially empty)
       month_view: {},
       week_view: {},
@@ -86,51 +80,22 @@ class PebbleCalendarCardEditor extends LitElement {
         selector: { boolean: {} },
       },
       {
-        name: "",
-        type: "grid",
-        schema: [
-          {
-            label: this.localize("calendar.editor.form.view-type.label"),
-            name: "view_type",
-            selector: {
-              select: {
-                options: [
-                  {
-                    value: "month",
-                    label: this.localize("calendar.editor.form.view-type.option.month"),
-                  },
-                  {
-                    value: "week",
-                    label: this.localize("calendar.editor.form.view-type.option.week"),
-                  },
-                ],
+        label: this.localize("calendar.editor.form.view-type.label"),
+        name: "view_type",
+        selector: {
+          select: {
+            options: [
+              {
+                value: "month",
+                label: this.localize("calendar.editor.form.view-type.option.month"),
               },
-            },
-          },
-          {
-            label: this.localize("calendar.editor.form.week-start.label"),
-            name: "week_start",
-            selector: {
-              select: {
-                options: [
-                  {
-                    label: this.localize("calendar.editor.form.week-start.days.sun"),
-                    value: "0",
-                  },
-                  {
-                    label: this.localize("calendar.editor.form.week-start.days.mon"),
-                    value: "1",
-                  },
-                ],
+              {
+                value: "week",
+                label: this.localize("calendar.editor.form.view-type.option.week"),
               },
-            },
+            ],
           },
-        ],
-      },
-      {
-        label: this.localize("calendar.editor.form.event-format.label"),
-        name: "events_span_days",
-        selector: { boolean: {} },
+        },
       },
     ];
   }
@@ -176,7 +141,7 @@ class PebbleCalendarCardEditor extends LitElement {
           ],
         },
         {
-          label: this.localize("calendar.editor.form.override-week-start.label"),
+          label: this.localize("calendar.editor.form.week-start.label"),
           name: "week_start",
           selector: {
             select: {
@@ -194,7 +159,7 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.override-events-span-days.label"),
+          label: this.localize("calendar.editor.form.event-format.label"),
           name: "events_span_days",
           selector: { boolean: {} },
         },
@@ -238,7 +203,7 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.override-week-start.label"),
+          label: this.localize("calendar.editor.form.week-start.label"),
           name: "week_start",
           selector: {
             select: {
@@ -256,7 +221,7 @@ class PebbleCalendarCardEditor extends LitElement {
           },
         },
         {
-          label: this.localize("calendar.editor.form.override-events-span-days.label"),
+          label: this.localize("calendar.editor.form.event-format.label"),
           name: "events_span_days",
           selector: { boolean: {} },
         },
@@ -319,12 +284,10 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { week_start, events_span_days, view_type, show_view_toggle } = ev.detail.value;
+    const { view_type, show_view_toggle } = ev.detail.value;
 
     this._config = {
       ...this._config,
-      week_start,
-      events_span_days,
       view_type,
       show_view_toggle,
     };

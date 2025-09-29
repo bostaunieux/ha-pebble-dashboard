@@ -12,7 +12,7 @@ export function getWeekStart(config: CalendarCardConfig, viewType: "month" | "we
   if (viewType === "week" && config.week_view?.week_start) {
     return +config.week_view.week_start as Day;
   }
-  return +(config.week_start ?? "0") as Day;
+  return 0; // Default to Sunday
 }
 
 export function getEventsSpanDays(config: CalendarCardConfig, viewType: "month" | "week"): boolean {
@@ -22,12 +22,12 @@ export function getEventsSpanDays(config: CalendarCardConfig, viewType: "month" 
   if (viewType === "week" && config.week_view?.events_span_days !== undefined) {
     return config.week_view.events_span_days;
   }
-  return config.events_span_days ?? false;
+  return false; // Default to no spanning
 }
 
 export function getResolvedMonthViewConfig(config: CalendarCardConfig): ResolvedMonthViewConfig {
   return {
-    week_start: getWeekStart(config, "month") as Day,
+    week_start: getWeekStart(config, "month"),
     events_span_days: getEventsSpanDays(config, "month"),
     num_weeks: config.month_view?.num_weeks ?? config.num_weeks ?? 12,
     month_calendar_start:
@@ -37,7 +37,7 @@ export function getResolvedMonthViewConfig(config: CalendarCardConfig): Resolved
 
 export function getResolvedWeekViewConfig(config: CalendarCardConfig): ResolvedWeekViewConfig {
   return {
-    week_start: getWeekStart(config, "week") as Day,
+    week_start: getWeekStart(config, "week"),
     events_span_days: getEventsSpanDays(config, "week"),
     week_calendar_view:
       config.week_view?.week_calendar_view ?? config.week_calendar_view ?? "current_week",
