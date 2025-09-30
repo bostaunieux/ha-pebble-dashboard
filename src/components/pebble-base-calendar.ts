@@ -39,8 +39,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
       )
       .sort(
         (a, b) =>
-          (a.allDay ? 0 : a.start.getHours() * 60 + a.start.getMinutes()) -
-          (b.allDay ? 0 : b.start.getHours() * 60 + b.start.getMinutes()),
+          (a.allDay ? -1 : a.start.getHours() * 60 + a.start.getMinutes()) -
+          (b.allDay ? -1 : b.start.getHours() * 60 + b.start.getMinutes()),
       );
   }
 
