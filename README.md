@@ -91,8 +91,8 @@ Options
 | `show_seconds` | boolean | false | Show seconds in the time display |
 | `show_date` | boolean | false | Show the current date below the time |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage (5-100%) |
-| `bg_blur` | number | 0 | Background blur amount in pixels | 
+| `text_size` | number | 100 | Text size as a percentage |
+| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
 
 ### Weather Card
 
@@ -100,6 +100,8 @@ Options
 | -- | -- |
 | <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;">| <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
 
+
+The total number of forecast units will depend on the weather entity used. If more entries are available than fix in view, the forecast will be scrollable horizontally.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -109,15 +111,15 @@ Options
 | `today_description_inline` | boolean | false | Show weather description inline |
 | `hide_forecast` | boolean | false | Hide weather forecast |
 | `forecast_type` | string | "hourly" | Forecast type: "hourly", "daily", "twice_daily". Options dependent on selected `entity` |
-| `forecast_count` | number | 4 | Number of forecast periods to show |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage (5-100%) |
-| `bg_blur` | number | 0 | Background blur amount in pixels | 
+| `text_size` | number | 100 | Text size as a percentage |
+| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
 
 ### Calendar Card
 
 Note the "Consolidate multi-day events" option is experimantal and only works in modern browsers (from 2023+)
 
+If enabled, weather entries will be added to all available days, showing the high and low temps, as well as a descriptive weather icon.
 
 | Monthly Calendar | Weekly Calendar |
 | -- | -- |
@@ -133,16 +135,16 @@ Note the "Consolidate multi-day events" option is experimantal and only works in
 | `weather_entity` | string | - | Weather entity for calendar (if enabled) |
 | **Month View Options** | | | |
 | `month_calendar_start` | string | "current_week" | Start point: "current_week" or "start_of_month" |
-| `num_weeks` | number | - | Number of weeks to show (1-24) |
-| `week_start` | string | - | Week start day: "0" (Sunday) or "1" (Monday) |
+| `num_weeks` | number | 12 | Number of weeks to show (1-24) |
+| `week_start` | string | "0" | Week start day: "0" (Sunday) or "1" (Monday) |
 | `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
 | **Week View Options** | | | |
 | `week_calendar_view` | string | "current_week" | View type: "current_week", "next_5_days", "next_7_days" |
-| `week_start` | string | - | Week start day: "0" (Sunday) or "1" (Monday) |
+| `week_start` | string | "0" | Week start day: "0" (Sunday) or "1" (Monday) |
 | `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage (5-100%) |
-| `bg_blur` | number | 0 | Background blur amount in pixels | 
+| `text_size` | number | 100 | Text size as a percentage |
+| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
 
 ## Disclaimer
 
