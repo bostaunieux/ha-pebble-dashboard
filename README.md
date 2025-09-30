@@ -2,7 +2,7 @@
 
 Customizable dashboard for Home Assistant
 
-![Dashboard Screenshot](./static/pebble-dashboard-screenshot.webp)
+![Dashboard Screenshot](./static/pebble-dashboard-screenshot-v0.5.0.webp)
 
 Included cards
 
@@ -13,7 +13,7 @@ Included cards
 Additional features
 
 - Dynamic background images behind sections
-- Resizable dual section layout
+- Resizable two section layout
 - All cards are configurable via the UI
 - Designed for use on a full screen dashboard
 
@@ -23,6 +23,9 @@ Additional features
 
 This plugin is available in HACS (Home Assistant Community Store)
 
+<details>
+  <summary><h4 style="display: inline-block">Installation instructions</h4></summary>
+
 1. Open HACS within your Home Assistant instance
 2. Select the More Options menu (top right icon) and open "Custom repositories"
 3. Add this repository:
@@ -30,8 +33,15 @@ This plugin is available in HACS (Home Assistant Community Store)
    - Type: Dashboard
 4. Close the dialog and search for "Pebble Dashboard"
 5. Click the Download button
+</details>
+
 
 ### Manual
+
+Altneratively, you can manually install from the Home Assistant UI
+
+<details>
+  <summary><h4 style="display: inline-block">Installation instructions</h4></summary>
 
 1. Download the `pebble-dashboard.js` file from the [latest release](https://github.com/bostaunieux/ha-pebble-dashboard/releases)
 2. Copy the `pebble-dashboard.js` file into your config/www folder
@@ -41,6 +51,9 @@ This plugin is available in HACS (Home Assistant Community Store)
       - Url: `/local/pebble-dashboard.js`
       - Resource type: JavaScript Module
    - Note: If the Resources menu is not available, verify you have enabled Advanced Mode in your User Profile
+</details>
+
+
 
 ## Configuration
 
@@ -69,17 +82,73 @@ All cards are configurable via the UI
 
 #### Clock Card
 
-![Clock Card Config](./static/pebble-clock-card-editor.webp)
+![Clock Card](./static/pebble-clock-card.webp)
+
+Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `show_seconds` | boolean | false | Show seconds in the time display |
+| `show_date` | boolean | false | Show the current date below the time |
+| **Standard Card Options** | | | |
+| `text_size` | number | 100 | Text size as a percentage (5-100%) |
+| `bg_blur` | number | 0 | Background blur amount in pixels | 
 
 #### Weather Card
 
-![Weather Card Config](./static/pebble-weather-card-editor.webp)
+Hourly weather
+
+![Hourly Weather Card](./static/pebble-hourly-weather-card.webp)
+
+Daily weather
+
+![Daily Weather Card](./static/pebble-daily-weather-card.webp)
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `entity` | string | - | Weather entity to display (required) |
+| `hide_today` | boolean | false | Hide current weather conditions |
+| `today_secondary` | array | - | Additional info to show: "sun", "wind" |
+| `today_description_inline` | boolean | false | Show weather description inline |
+| `hide_forecast` | boolean | false | Hide weather forecast |
+| `forecast_type` | string | "hourly" | Forecast type: "hourly", "daily", "twice_daily". Options dependent on selected `entity` |
+| `forecast_count` | number | 4 | Number of forecast periods to show |
+| **Standard Card Options** | | | |
+| `text_size` | number | 100 | Text size as a percentage (5-100%) |
+| `bg_blur` | number | 0 | Background blur amount in pixels | 
 
 #### Calendar Card
 
 Note the "Consolidate multi-day events" option is experimantal and only works in modern browsers (from 2023+)
 
-![Weather Card Config](./static/pebble-calendar-card-editor.webp)
+Monthly calendar
+
+![Month Calendar Card](./static/pebble-month-calendar-card.webp)
+
+Weekly calendar
+
+![Week Calendar Card](./static/pebble-week-calendar-card.webp)
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `calendars` | array | [] | List of calendar entities to display |
+| `show_view_toggle` | boolean | false | Show toggle to switch between month/week views |
+| `view_type` | string | "month" | Default view: "month" or "week" |
+| `event_refresh_interval` | number | 15 | How often to refresh events (minutes) |
+| `enable_weather` | boolean | false | Enable weather display in calendar |
+| `weather_entity` | string | - | Weather entity for calendar (if enabled) |
+| **Month View Options** | | | |
+| `month_calendar_start` | string | "current_week" | Start point: "current_week" or "start_of_month" |
+| `num_weeks` | number | - | Number of weeks to show (1-24) |
+| `week_start` | string | - | Week start day: "0" (Sunday) or "1" (Monday) |
+| `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
+| **Week View Options** | | | |
+| `week_calendar_view` | string | "current_week" | View type: "current_week", "next_5_days", "next_7_days" |
+| `week_start` | string | - | Week start day: "0" (Sunday) or "1" (Monday) |
+| `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
+| **Standard Card Options** | | | |
+| `text_size` | number | 100 | Text size as a percentage (5-100%) |
+| `bg_blur` | number | 0 | Background blur amount in pixels | 
 
 ## Disclaimer
 
