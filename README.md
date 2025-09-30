@@ -80,7 +80,7 @@ Cards can be used on any type of dashboard, but are designed for use with Pebble
 
 All cards are configurable via the UI
 
-#### Clock Card
+### Clock Card
 
 ![Clock Card](./static/pebble-clock-card.webp)
 
@@ -94,15 +94,18 @@ Options
 | `text_size` | number | 100 | Text size as a percentage (5-100%) |
 | `bg_blur` | number | 0 | Background blur amount in pixels | 
 
-#### Weather Card
+### Weather Card
 
-Hourly weather
-
-![Hourly Weather Card](./static/pebble-hourly-weather-card.webp)
-
-Daily weather
-
-![Daily Weather Card](./static/pebble-daily-weather-card.webp)
+<div style="display: flex; gap: 20px; align-items: flex-start;">
+  <div style="flex: 1;">
+    <h4>Hourly weather</h4>
+    <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;">
+  </div>
+  <div style="flex: 1;">
+    <h4>Daily weather</h4>
+    <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;">
+  </div>
+</div>
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -117,17 +120,20 @@ Daily weather
 | `text_size` | number | 100 | Text size as a percentage (5-100%) |
 | `bg_blur` | number | 0 | Background blur amount in pixels | 
 
-#### Calendar Card
+### Calendar Card
 
 Note the "Consolidate multi-day events" option is experimantal and only works in modern browsers (from 2023+)
 
-Monthly calendar
-
-![Month Calendar Card](./static/pebble-month-calendar-card.webp)
-
-Weekly calendar
-
-![Week Calendar Card](./static/pebble-week-calendar-card.webp)
+<div style="display: flex; gap: 20px; align-items: flex-start;">
+  <div style="flex: 1;">
+    <h4>Monthly calendar</h4>
+    <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 400px;">
+  </div>
+  <div style="flex: 1;">
+    <h4>Weekly calendar</h4>
+    <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 400px;">
+  </div>
+</div>
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
