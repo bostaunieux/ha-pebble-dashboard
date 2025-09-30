@@ -510,7 +510,6 @@ class PebbleCalendarCardEditor extends LitElement {
           gap: 16px;
         }
 
-
         .box {
           margin-top: 8px;
           border: 1px solid var(--divider-color);

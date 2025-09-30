@@ -541,7 +541,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       past: isPast(event.end),
     };
 
-    const fontSize = Math.min(1, (1 - (60 - position.height) / 60) * 1.75);
+    const area = position.width * position.height;
+    const baseArea = 4500; // Reference area for 1em font size
+    const fontSize = Math.max(0.5, Math.min(1, Math.round((100 * area) / baseArea) / 100));
 
     const styles = {
       "--event-color": color,
@@ -782,7 +784,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         .time-label {
           height: 60px;
           font-size: 0.8em;
-          color: var(--secondary-text-color, #666);
+          color: var(--ha-color-text-secondary, #ccc);
           border-bottom: 1px solid var(--divider-color, #e0e0e0);
           display: flex;
           align-items: start;
@@ -887,14 +889,11 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         }
 
         .timed-event .event-title {
-          font-size: 1em;
-          margin-bottom: 2px;
           margin-left: 6px;
         }
 
         .timed-event .event-time {
           font-size: 0.75em;
-          opacity: 0.8;
           margin-left: 6px;
         }
 
