@@ -96,16 +96,10 @@ Options
 
 ### Weather Card
 
-<div style="display: flex; gap: 20px; align-items: flex-start;">
-  <div style="flex: 1;">
-    <h4>Hourly weather</h4>
-    <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;">
-  </div>
-  <div style="flex: 1;">
-    <h4>Daily weather</h4>
-    <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;">
-  </div>
-</div>
+| Hourly Weather | Daily Weather |
+| -- | -- |
+| <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;">| <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
+
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -124,17 +118,11 @@ Options
 
 Note the "Consolidate multi-day events" option is experimantal and only works in modern browsers (from 2023+)
 
-<div style="display: flex; gap: 20px; align-items: flex-start;">
-  <div style="flex: 1;">
-    <h4>Monthly calendar</h4>
-    <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 400px;">
-  </div>
-  <div style="flex: 1;">
-    <h4>Weekly calendar</h4>
-    <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 400px;">
-  </div>
-</div>
 
+| Monthly Calendar | Weekly Calendar |
+| -- | -- |
+| <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 400px;"> | <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 400px;"> |
+  
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `calendars` | array | [] | List of calendar entities to display |
