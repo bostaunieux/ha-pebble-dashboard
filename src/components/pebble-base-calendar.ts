@@ -310,6 +310,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
         .calendar-event.timed .event-time {
           font-size: 0.75em;
+          line-height: 100%;
           margin-left: 6px;
         }
       `,
