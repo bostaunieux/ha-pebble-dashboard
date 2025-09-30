@@ -155,8 +155,9 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
     };
 
     const classes = {
-      event: true,
+      "calendar-event": true,
       "all-day": event.allDay,
+      spanning: true,
       begin: isSameDay(event.start, date),
       end: isSameWeek(event.end, date, { weekStartsOn }),
       past: isPast(event.end),
@@ -165,7 +166,7 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
       this.selectedEvent = event;
     };
     return html`<button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
-      <span class="text">${content}</span>
+      <span class="event-text">${content}</span>
     </button>`;
   }
 
@@ -174,10 +175,6 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
       super.baseStyles,
       super.monthStyles,
       css`
-        :host {
-          --arrow-radius: 4px;
-        }
-
         .week {
           display: grid;
           grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -191,115 +188,6 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
           display: grid;
           grid-template-rows: subgrid;
           grid-row: span 100;
-        }
-
-        .event {
-          font-size: 0.5em;
-          line-height: 120%;
-          margin: 4px 0;
-          text-align: left;
-          text-overflow: ellipsis;
-          cursor: pointer;
-          /* reset button styles */
-          font-family: var(--mdc-typography-font-family);
-          border: none;
-          background: none;
-          -webkit-font-smoothing: inherit;
-          -moz-osx-font-smoothing: inherit;
-          -webkit-appearance: none;
-        }
-
-        .event .text {
-          /* line clamp */
-          display: -webkit-box;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 1;
-          overflow-y: hidden;
-          white-space: normal;
-          word-break: break-all;
-        }
-
-        .event.all-day {
-          color: #000;
-          padding: 2px 6px;
-          background-color: #bad455;
-          /* push on top of stub spans in same row of this event */
-          z-index: 1;
-          box-sizing: border-box;
-
-          position: relative;
-        }
-
-        .event.all-day.begin {
-          border-top-left-radius: var(--arrow-radius);
-          border-bottom-left-radius: var(--arrow-radius);
-        }
-
-        .event.all-day.end {
-          border-top-right-radius: var(--arrow-radius);
-          border-bottom-right-radius: var(--arrow-radius);
-        }
-
-        /* left arrow */
-        .event.all-day:not(.begin):before {
-          content: "";
-          display: block;
-          width: 0;
-          height: 0;
-          clip-path: polygon(100% 0, 0 50%, 100% 100%);
-          position: absolute;
-          top: 0px;
-          left: -12px;
-          width: 12.5px; /* intentional extra half pixel to avoid gap */
-          height: 100%;
-          background: inherit;
-
-          aspect-ratio: cos(30deg);
-          mask:
-            linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius) at calc(var(--arrow-radius) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-          -webkit-mask:
-            linear-gradient(90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius) at calc(var(--arrow-radius) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-        }
-
-        /* right arrow */
-        .event.all-day:not(.end):after {
-          content: "";
-          display: block;
-          width: 0;
-          height: 0;
-          clip-path: polygon(0 0, 0 100%, 100% 50%);
-          position: absolute;
-          top: 0px;
-          right: -12px;
-          width: 12px;
-          height: 100%;
-          background: inherit;
-
-          aspect-ratio: cos(30deg);
-          mask:
-            linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius) at calc(100% - var(--arrow-radius) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-          -webkit-mask:
-            linear-gradient(-90deg, #0000 calc(var(--arrow-radius) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius) at calc(100% - var(--arrow-radius) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
         }
       `,
     ];

@@ -93,7 +93,7 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
       color: !event.allDay ? color : "#000",
     };
     const classes = {
-      event: true,
+      "calendar-event": true,
       "all-day": event.allDay,
       past: event.allDay ? isPast(endOfDay(date)) : isPast(event.end),
     };
@@ -119,29 +119,9 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
           overflow: visible;
         }
 
-        .event {
-          font-size: 0.5em;
-          line-height: 120%;
-          margin: 4px 0;
-          text-align: left;
-          cursor: pointer;
-          /* reset button styles */
-          font-family: var(--mdc-typography-font-family);
-          border: none;
-          background: none;
-          width: 100%;
-          -webkit-font-smoothing: inherit;
-          -moz-osx-font-smoothing: inherit;
-          -webkit-appearance: none;
-        }
-
-        .event.all-day {
-          color: #000;
-          padding: 2px 6px;
-          background-color: #bad455;
-          border-radius: 4px;
-
-          box-sizing: border-box;
+        .day {
+          display: flex;
+          flex-direction: column;
         }
       `,
     ];

@@ -320,7 +320,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
               }
 
               return html`
-                <div class="all-day-column">
+                <div class="all-day-column ${classMap({ spanning: this.eventsSpanDays })}">
                   ${allDayEvents.map((event) =>
                     event
                       ? html`
@@ -414,7 +414,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
-      event: true,
+      "calendar-event": true,
       "all-day": true,
       past: isPast(event.end),
     };
@@ -481,8 +481,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
+      "calendar-event": true,
       "all-day": true,
-      "spanning-event": true,
+      spanning: true,
       begin: isSameDay(event.start, date),
       end: isBefore(event.end, addDays(weekEnd, 1)),
       past: isPast(event.end),
@@ -494,7 +495,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     return html`
       <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
-        <span class="text">${content}</span>
+        <span class="event-text">${content}</span>
       </button>
     `;
   }
@@ -537,7 +538,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     };
 
     const classes = {
-      "timed-event": true,
+      "calendar-event": true,
+      timed: true,
       past: isPast(event.end),
     };
 
@@ -649,119 +651,23 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
         .all-day-events {
           display: grid;
           grid-template-columns: 60px repeat(var(--week-days, 7), 1fr);
+          align-items: start;
           border-bottom: 1px solid var(--divider-color, #e0e0e0);
           min-height: 40px;
+          font-size: 2em;
+          line-height: 0.5em;
         }
 
         .all-day-column {
           gap: 2px;
           display: grid;
-          grid-template-rows: subgrid;
-          grid-row: span 100;
+          align-items: start;
           margin: var(--day-margin, 5px);
         }
 
-        .event.all-day,
-        .spanning-event.all-day {
-          font-size: 1em;
-          padding: 2px 6px;
-          border-radius: 4px;
-          border: none;
-          cursor: pointer;
-          text-align: left;
-          color: #000;
-        }
-
-        .event.all-day {
-          width: 100%;
-        }
-
-        .spanning-event.all-day {
-          position: relative;
-          z-index: 1;
-          box-sizing: border-box;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        }
-
-        .spanning-event.all-day .text {
-          /* line clamp */
-          display: -webkit-box;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 1;
-          overflow-y: hidden;
-          white-space: normal;
-          word-break: break-all;
-        }
-
-        .spanning-event.all-day.begin {
-          border-top-left-radius: var(--arrow-radius);
-          border-bottom-left-radius: var(--arrow-radius);
-        }
-
-        .spanning-event.all-day.end {
-          border-top-right-radius: var(--arrow-radius);
-          border-bottom-right-radius: var(--arrow-radius);
-        }
-
-        /* left arrow for spanning events */
-        .spanning-event.all-day:not(.begin):before {
-          content: "";
-          display: block;
-          width: 0;
-          height: 0;
-          clip-path: polygon(100% 0, 0 50%, 100% 100%);
-          position: absolute;
-          top: 0px;
-          left: -11px;
-          width: 12.5px; /* intentional extra half pixel to avoid gap */
-          height: 100%;
-          background: inherit;
-          aspect-ratio: cos(30deg);
-          mask:
-            linear-gradient(90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius, 4px) at calc(var(--arrow-radius, 4px) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-          -webkit-mask:
-            linear-gradient(90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius, 4px) at calc(var(--arrow-radius, 4px) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-        }
-
-        /* right arrow for spanning events */
-        .spanning-event.all-day:not(.end):after {
-          content: "";
-          display: block;
-          width: 0;
-          height: 0;
-          clip-path: polygon(0 0, 0 100%, 100% 50%);
-          position: absolute;
-          top: 0px;
-          right: -11px;
-          width: 12px;
-          height: 100%;
-          background: inherit;
-          aspect-ratio: cos(30deg);
-          mask:
-            linear-gradient(-90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius, 4px) at calc(100% - var(--arrow-radius, 4px) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
-          -webkit-mask:
-            linear-gradient(-90deg, #0000 calc(var(--arrow-radius, 4px) / sqrt(2)), #000 0),
-            radial-gradient(
-              var(--arrow-radius, 4px) at calc(100% - var(--arrow-radius, 4px) * sqrt(2)) 50%,
-              #000 98%,
-              #0000 101%
-            );
+        .all-day-column.spanning {
+          grid-template-rows: subgrid;
+          grid-row: span 100;
         }
 
         .time-grid-container {
@@ -862,44 +768,8 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           border-radius: 50%;
         }
 
-        .timed-event {
-          --top-spacing: 2px;
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          border: 1px solid var(--main-background);
-          border-radius: 4px;
-          cursor: pointer;
-          color: #000;
-          font-size: 1em;
-          padding: var(--top-spacing) 4px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          box-sizing: border-box;
-          text-align: left;
-          background-color: var(--event-color);
-          background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
-        }
-
-        .timed-event::before {
-          content: "";
-          position: absolute;
-          height: calc(100% - var(--top-spacing) * 2);
-          border-left: 4px solid var(--event-color);
-        }
-
-        .timed-event .event-title {
-          margin-left: 6px;
-        }
-
-        .timed-event .event-time {
-          font-size: 0.75em;
-          margin-left: 6px;
-        }
-
         :host {
           --week-days: 7;
-          --arrow-radius: 4px;
           --mdc-icon-size: 28px;
           --mdc-icon-button-size: 44px;
         }
