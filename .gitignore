@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.agent/
 .hass_dev/*
 !.hass_dev/configuration.yaml
 !.hass_dev/lovelace.yaml
