@@ -291,6 +291,9 @@
           "title": "Formatting",
           "text-scale": {
             "label": "Text scale"
+          },
+          "bg-blur": {
+            "label": "Background blur"
           }
         }
       }

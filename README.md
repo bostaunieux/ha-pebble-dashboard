@@ -66,6 +66,11 @@ When creating a new dashboard, select the `Pebble Sections (pebble-dashboard)` l
 - The two sections will extend the full height of the browser viewport
 - The edit menu for each section allows setting an image source to use as a background behind all cards
 
+### Stack Section
+
+Stack sections provide formatting and background image options for organizing cards within the Pebble Dashboard layout. This section type is selected automatically when using this layout type.
+
+
 Section background images can be configured to pull from the following sources
 
 - None - Don't set a background image
@@ -74,9 +79,23 @@ Section background images can be configured to pull from the following sources
 - Entity - Sources the image from a sensor or image entity within Home Assistant. This allows setting up automations to update the image on a schedule, sourcing it from public APIs or other integrations. More details to come...
 - Photo URLs - Manually curate a list of image URLS accessible on the Internet
 
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `vertical_align` | string | "start" | Vertical alignment of cards in section: "start", "middle", "end", "between", "around" |
+| `horizontal_align` | string | "start" | Horizontal alignment of cards in section: "start", "middle", "end" |
+| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur |
+| `border_radius` | number | "none" | Border radius in pixels (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24) or "none" |
+| `photo_source` | string | "none" | Background image source: "none", "local_media", "picsum", "entity", "remote" |
+| `refresh_interval` | number | - | How often to refresh background images (minutes) |
+| **Photo Source Options** | | | |
+| `media_source` | string | - | **Local Media**: Media source path |
+| `collection` | string | "all" | **Picsum**: Collection type ("all" or "nature") |
+| `entity_id` | string | - | **Entity**: Entity ID (sensor, image, or input_text domain) |
+| `photos` | array | [] | **Remote**: Array of photo URLs |
+
 ### Cards
 
-Cards can be used on any type of dashboard, but are designed for use with Pebble Dashboard. Add them to existing dashboards using the standard add card flow.
+Cards can be used on any type of dashboard, but are designed for use with Pebble Dashboard. Add them to existing dashboards using the standard add card flow. They will generally have a transparent background set to allow a section's background image to be visible, if configured.
 
 All cards are configurable via the UI
 
@@ -91,8 +110,7 @@ Options
 | `show_seconds` | boolean | false | Show seconds in the time display |
 | `show_date` | boolean | false | Show the current date below the time |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage |
-| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
+| `text_size` | number | 100 | Text size as a percentage | 
 
 ### Weather Card
 
@@ -112,8 +130,7 @@ The total number of forecast units will depend on the weather entity used. If mo
 | `hide_forecast` | boolean | false | Hide weather forecast |
 | `forecast_type` | string | "hourly" | Forecast type: "hourly", "daily", "twice_daily". Options dependent on selected `entity` |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage |
-| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
+| `text_size` | number | 100 | Text size as a percentage | 
 
 ### Calendar Card
 
@@ -143,8 +160,7 @@ If enabled, weather entries will be added to all available days, showing the hig
 | `week_start` | string | "0" | Week start day: "0" (Sunday) or "1" (Monday) |
 | `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
 | **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage |
-| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur | 
+| `text_size` | number | 100 | Text size as a percentage | 
 
 ## Disclaimer
 
