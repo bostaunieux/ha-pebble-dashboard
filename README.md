@@ -86,7 +86,7 @@ Section background images can be configured to pull from the following sources
 | `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur |
 | `border_radius` | number | "none" | Border radius in pixels (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24) or "none" |
 | `photo_source` | string | "none" | Background image source: "none", "local_media", "picsum", "entity", "remote" |
-| `refresh_interval` | number | - | How often to refresh background images (minutes) |
+| `refresh_interval` | number | 60 | How often to refresh background images (minutes) |
 | **Photo Source Options** | | | |
 | `media_source` | string | - | **Local Media**: Media source path |
 | `collection` | string | "all" | **Picsum**: Collection type ("all" or "nature") |
