@@ -153,9 +153,7 @@ class PebbleWeatherCard extends LitElement {
                   ${!today_description_inline ? this._renderDescription(weather, false) : nothing}
                 </div>
               </div>`}
-          ${this.config.hide_forecast
-            ? null
-            : this._renderForecast(forecast, hourly)}
+          ${this.config.hide_forecast ? null : this._renderForecast(forecast, hourly)}
         </div>
       </ha-card>
     `;

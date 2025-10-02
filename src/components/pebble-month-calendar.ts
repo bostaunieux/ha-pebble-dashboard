@@ -78,6 +78,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           overflow-x: hidden;
           scroll-behavior: smooth;
           scrollbar-width: thin;
+          scrollbar-color: var(--divider-color, #e0e0e0) transparent;
           scroll-snap-type: y mandatory;
         }
 

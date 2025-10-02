@@ -678,6 +678,25 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           /* 84px = month header; 40px = all day events; 32px = calendar padding */
           max-height: calc(100vh - var(--header-height, 0) - 84px - 40px - 32px - 56px);
           min-height: 0;
+          scrollbar-width: thin;
+          scrollbar-color: var(--divider-color, #e0e0e0) transparent;
+        }
+
+        .time-grid-container::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .time-grid-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .time-grid-container::-webkit-scrollbar-thumb {
+          background-color: var(--divider-color, #e0e0e0);
+          border-radius: 3px;
+        }
+
+        .time-grid-container::-webkit-scrollbar-thumb:hover {
+          background-color: var(--secondary-text-color, #666);
         }
 
         .time-labels {
