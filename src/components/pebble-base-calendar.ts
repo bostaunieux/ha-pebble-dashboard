@@ -139,8 +139,18 @@ export abstract class PebbleBaseCalendar extends LitElement {
           align-items: end;
         }
 
-        .past {
+        .calendar-event.past.spanning {
           opacity: 0.6;
+        }
+
+        .calendar-event.past:not(.spanning)::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.6);
         }
 
         .forecast {
