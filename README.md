@@ -35,7 +35,6 @@ This plugin is available in HACS (Home Assistant Community Store)
 5. Click the Download button
 </details>
 
-
 ### Manual
 
 Altneratively, you can manually install from the Home Assistant UI
@@ -51,9 +50,7 @@ Altneratively, you can manually install from the Home Assistant UI
       - Url: `/local/pebble-dashboard.js`
       - Resource type: JavaScript Module
    - Note: If the Resources menu is not available, verify you have enabled Advanced Mode in your User Profile
-</details>
-
-
+   </details>
 
 ## Configuration
 
@@ -70,7 +67,6 @@ When creating a new dashboard, select the `Pebble Sections (pebble-dashboard)` l
 
 Stack sections provide formatting and background image options for organizing cards within the Pebble Dashboard layout. This section type is selected automatically when using this layout type.
 
-
 Section background images can be configured to pull from the following sources
 
 - None - Don't set a background image
@@ -79,19 +75,19 @@ Section background images can be configured to pull from the following sources
 - Entity - Sources the image from a sensor or image entity within Home Assistant. This allows setting up automations to update the image on a schedule, sourcing it from public APIs or other integrations. More details to come...
 - Photo URLs - Manually curate a list of image URLS accessible on the Internet
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `vertical_align` | string | "start" | Vertical alignment of cards in section: "start", "middle", "end", "between", "around" |
-| `horizontal_align` | string | "start" | Horizontal alignment of cards in section: "start", "middle", "end" |
-| `bg_blur` | number | 0 | Background blur amount in pixels; 0 will disable blur |
-| `border_radius` | number | "none" | Border radius in pixels (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24) or "none" |
-| `photo_source` | string | "none" | Background image source: "none", "local_media", "picsum", "entity", "remote" |
-| `refresh_interval` | number | 60 | How often to refresh background images (minutes) |
-| **Photo Source Options** | | | |
-| `media_source` | string | - | **Local Media**: Media source path |
-| `collection` | string | "all" | **Picsum**: Collection type ("all" or "nature") |
-| `entity_id` | string | - | **Entity**: Entity ID (sensor, image, or input_text domain) |
-| `photos` | array | [] | **Remote**: Array of photo URLs |
+| Option                   | Type   | Default | Description                                                                           |
+| ------------------------ | ------ | ------- | ------------------------------------------------------------------------------------- |
+| `vertical_align`         | string | "start" | Vertical alignment of cards in section: "start", "middle", "end", "between", "around" |
+| `horizontal_align`       | string | "start" | Horizontal alignment of cards in section: "start", "middle", "end"                    |
+| `bg_blur`                | number | 0       | Background blur amount in pixels; 0 will disable blur                                 |
+| `border_radius`          | number | "none"  | Border radius in pixels (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24) or "none"     |
+| `photo_source`           | string | "none"  | Background image source: "none", "local_media", "picsum", "entity", "remote"          |
+| `refresh_interval`       | number | 60      | How often to refresh background images (minutes)                                      |
+| **Photo Source Options** |        |         |                                                                                       |
+| `media_source`           | string | -       | **Local Media**: Media source path                                                    |
+| `collection`             | string | "all"   | **Picsum**: Collection type ("all" or "nature")                                       |
+| `entity_id`              | string | -       | **Entity**: Entity ID (sensor, image, or input_text domain)                           |
+| `photos`                 | array  | []      | **Remote**: Array of photo URLs                                                       |
 
 ### Cards
 
@@ -105,32 +101,31 @@ All cards are configurable via the UI
 
 Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `show_seconds` | boolean | false | Show seconds in the time display |
-| `show_date` | boolean | false | Show the current date below the time |
-| **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage | 
+| Option                    | Type    | Default | Description                          |
+| ------------------------- | ------- | ------- | ------------------------------------ |
+| `show_seconds`            | boolean | false   | Show seconds in the time display     |
+| `show_date`               | boolean | false   | Show the current date below the time |
+| **Standard Card Options** |         |         |                                      |
+| `text_size`               | number  | 100     | Text size as a percentage            |
 
 ### Weather Card
 
-| Hourly Weather | Daily Weather |
-| -- | -- |
-| <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;">| <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
-
+| Hourly Weather                                                                                                        | Daily Weather                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;"> | <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
 
 The total number of forecast units will depend on the weather entity used. If more entries are available than fix in view, the forecast will be scrollable horizontally.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `entity` | string | - | Weather entity to display (required) |
-| `hide_today` | boolean | false | Hide current weather conditions |
-| `today_secondary` | array | - | Additional info to show: "sun", "wind" |
-| `today_description_inline` | boolean | false | Show weather description inline |
-| `hide_forecast` | boolean | false | Hide weather forecast |
-| `forecast_type` | string | "hourly" | Forecast type: "hourly", "daily", "twice_daily". Options dependent on selected `entity` |
-| **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage | 
+| Option                     | Type    | Default  | Description                                                                             |
+| -------------------------- | ------- | -------- | --------------------------------------------------------------------------------------- |
+| `entity`                   | string  | -        | Weather entity to display (required)                                                    |
+| `hide_today`               | boolean | false    | Hide current weather conditions                                                         |
+| `today_secondary`          | array   | -        | Additional info to show: "sun", "wind"                                                  |
+| `today_description_inline` | boolean | false    | Show weather description inline                                                         |
+| `hide_forecast`            | boolean | false    | Hide weather forecast                                                                   |
+| `forecast_type`            | string  | "hourly" | Forecast type: "hourly", "daily", "twice_daily". Options dependent on selected `entity` |
+| **Standard Card Options**  |         |          |                                                                                         |
+| `text_size`                | number  | 100      | Text size as a percentage                                                               |
 
 ### Calendar Card
 
@@ -138,29 +133,29 @@ Note the "Consolidate multi-day events" option is experimantal and only works in
 
 If enabled, weather entries will be added to all available days, showing the high and low temps, as well as a descriptive weather icon.
 
-| Monthly Calendar | Weekly Calendar |
-| -- | -- |
+| Monthly Calendar                                                                                                      | Weekly Calendar                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 400px;"> | <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 400px;"> |
-  
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `calendars` | array | [] | List of calendar entities to display |
-| `show_view_toggle` | boolean | false | Show toggle to switch between month/week views |
-| `view_type` | string | "month" | Default view: "month" or "week" |
-| `event_refresh_interval` | number | 15 | How often to refresh events (minutes) |
-| `enable_weather` | boolean | false | Enable weather display in calendar |
-| `weather_entity` | string | - | Weather entity for calendar (if enabled) |
-| **Month View Options** | | | |
-| `month_calendar_start` | string | "current_week" | Start point: "current_week" or "start_of_month" |
-| `num_weeks` | number | 12 | Number of weeks to show (1-24) |
-| `week_start` | string | "0" | Week start day: "0" (Sunday) or "1" (Monday) |
-| `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
-| **Week View Options** | | | |
-| `week_calendar_view` | string | "current_week" | View type: "current_week", "next_5_days", "next_7_days" |
-| `week_start` | string | "0" | Week start day: "0" (Sunday) or "1" (Monday) |
-| `events_span_days` | boolean | false | Consolidate multi-day events (experimental) |
-| **Standard Card Options** | | | |
-| `text_size` | number | 100 | Text size as a percentage | 
+
+| Option                    | Type    | Default        | Description                                             |
+| ------------------------- | ------- | -------------- | ------------------------------------------------------- |
+| `calendars`               | array   | []             | List of calendar entities to display                    |
+| `show_view_toggle`        | boolean | false          | Show toggle to switch between month/week views          |
+| `view_type`               | string  | "month"        | Default view: "month" or "week"                         |
+| `event_refresh_interval`  | number  | 15             | How often to refresh events (minutes)                   |
+| `enable_weather`          | boolean | false          | Enable weather display in calendar                      |
+| `weather_entity`          | string  | -              | Weather entity for calendar (if enabled)                |
+| **Month View Options**    |         |                |                                                         |
+| `month_calendar_start`    | string  | "current_week" | Start point: "current_week" or "start_of_month"         |
+| `num_weeks`               | number  | 12             | Number of weeks to show (1-24)                          |
+| `week_start`              | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)            |
+| `events_span_days`        | boolean | false          | Consolidate multi-day events (experimental)             |
+| **Week View Options**     |         |                |                                                         |
+| `week_calendar_view`      | string  | "current_week" | View type: "current_week", "next_5_days", "next_7_days" |
+| `week_start`              | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)            |
+| `events_span_days`        | boolean | false          | Consolidate multi-day events (experimental)             |
+| **Standard Card Options** |         |                |                                                         |
+| `text_size`               | number  | 100            | Text size as a percentage                               |
 
 ## Disclaimer
 
