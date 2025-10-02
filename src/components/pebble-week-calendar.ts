@@ -262,11 +262,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       "--week-days": weekDays.length,
     };
 
+    const monthName = format(this.isCurrentWeek() ? this.currentDate : weekDays[1], "MMMM u");
+
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="week-calendar">
           <div class="month-header">
-            <div class="month-name">${format(weekDays[1], "MMMM u")}</div>
+            <div class="month-name">${monthName}</div>
             <div class="navigation">
               <ha-icon-button @click=${this.navigatePrev}>
                 <ha-icon icon="mdi:chevron-left"></ha-icon>
