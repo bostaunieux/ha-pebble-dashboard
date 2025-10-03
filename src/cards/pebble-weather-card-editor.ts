@@ -31,7 +31,6 @@ class PebbleWeatherCardEditor extends LitElement {
       forecast_type: "hourly",
       hide_today: false,
       hide_forecast: false,
-      forecast_count: 4,
     };
     this.localize = initLocalize(this.hass);
   }
@@ -162,11 +161,6 @@ class PebbleWeatherCardEditor extends LitElement {
                           options: forecastOptions,
                         },
                       },
-                    },
-                    {
-                      label: this.localize("weather.editor.form.forecast.forecast-count.label"),
-                      name: "forecast_count",
-                      selector: { number: { mode: "box", min: 1 } },
                     },
                   ]),
             ],

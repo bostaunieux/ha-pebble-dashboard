@@ -104,12 +104,7 @@
           "label": "Start of week",
           "days": {
             "sun": "Sunday",
-            "mon": "Monday",
-            "tue": "Tuesday",
-            "wed": "Wednesday",
-            "thu": "Thursday",
-            "fri": "Friday",
-            "sat": "Saturday"
+            "mon": "Monday"
           }
         },
         "add-calendar": {
@@ -133,17 +128,42 @@
         "calendar-view": {
           "title": "Calendar View"
         },
+        "month-config": {
+          "title": "Month view"
+        },
+        "week-config": {
+          "title": "Week view"
+        },
         "events": {
           "title": "Events"
         },
         "num-weeks": {
           "label": "Number of weeks to show"
         },
-        "start-position": {
-          "label": "Calendar start position",
+        "view-type": {
+          "label": "Default view",
+          "option": {
+            "month": "Month view",
+            "week": "Week view"
+          }
+        },
+        "month-calendar-start": {
+          "label": "Month calendar start position",
           "option": {
             "current_week": "Current week",
             "start_of_month": "Start of month"
+          }
+        },
+
+        "show-view-toggle": {
+          "label": "Show view toggle buttons"
+        },
+        "week-calendar-view": {
+          "label": "Week calendar view",
+          "option": {
+            "current_week": "Current week",
+            "next_5_days": "Next 5 days",
+            "next_7_days": "Next 7 days"
           }
         }
       }
@@ -271,6 +291,9 @@
           "title": "Formatting",
           "text-scale": {
             "label": "Text scale"
+          },
+          "bg-blur": {
+            "label": "Background blur"
           }
         }
       }

@@ -1,6 +1,14 @@
-import { LitElement, html } from "lit";
+import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { startOfDay, startOfWeek, Day, getDayOfYear, startOfMonth, addDays } from "date-fns";
+import {
+  startOfDay,
+  startOfWeek,
+  Day,
+  getDayOfYear,
+  startOfMonth,
+  addDays,
+  endOfDay,
+} from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
 import {
@@ -8,6 +16,10 @@ import {
   fetchCalendarEvents,
   getTimeUntilNextInterval,
 } from "../utils/calendar-utils";
+import {
+  getResolvedMonthViewConfig,
+  getResolvedWeekViewConfig,
+} from "../utils/calendar-config-helpers";
 import { getColor } from "../utils/colors";
 import type { HomeAssistant } from "../types";
 import initLocalize, { LocalizationKey } from "../localize";
@@ -16,6 +28,8 @@ import { ForecastAttribute, ForecastEvent } from "./weather-types";
 import { ForecastFeatures, supportsFeature } from "../utils/weather-utils";
 import "../components/pebble-basic-calendar";
 import "../components/pebble-spanning-calendar";
+import "../components/pebble-week-calendar";
+import "../components/pebble-view-toggle";
 
 const WEATHER_RETRIES = [1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 60_000, 60_000];
 
@@ -30,6 +44,8 @@ class PebbleCalendarCard extends LitElement {
   @state() private weather: HassEntity | null;
 
   @state() private weatherForecast?: Map<number, ForecastAttribute>;
+
+  @state() private currentView: "month" | "week" = "month";
 
   private _retryCount: number;
 
@@ -53,8 +69,14 @@ class PebbleCalendarCard extends LitElement {
     super();
     this.config = {
       type: "custom:pebble-calendar-card",
-      week_start: "0",
       calendars: [],
+      show_view_toggle: false,
+      view_type: "month",
+      event_refresh_interval: 15,
+      enable_weather: false,
+      // View-specific overrides (initially empty)
+      month_view: {},
+      week_view: {},
     };
     this._retryCount = 0;
     this.weather = null;
@@ -85,6 +107,7 @@ class PebbleCalendarCard extends LitElement {
   setConfig(config: CalendarCardConfig) {
     const prevConfig = this.config;
     this.config = config;
+    this.currentView = config.view_type ?? "month";
 
     if (config.calendars && config.calendars.length === 0) {
       this.events = [];
@@ -149,29 +172,74 @@ class PebbleCalendarCard extends LitElement {
     }, delay);
   }
 
-  async _fetchEvents() {
+  private calculateDateRange(currentDate?: Date | number): { start: Date; end: Date } {
+    const today = startOfDay(currentDate ?? Date.now());
+    const viewType = this.config.view_type ?? "month";
+
+    if (viewType === "week") {
+      const weekConfig = getResolvedWeekViewConfig(this.config);
+      return this.calculateWeekViewDateRange(today, weekConfig.week_start as Day);
+    } else {
+      const monthConfig = getResolvedMonthViewConfig(this.config);
+      return this.calculateMonthViewDateRange(today, monthConfig.week_start as Day);
+    }
+  }
+
+  private calculateWeekViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
+    const weekConfig = getResolvedWeekViewConfig(this.config);
+    const weekCalendarView = weekConfig.week_calendar_view;
+
+    switch (weekCalendarView) {
+      case "next_5_days":
+        // Start from current day, show next 5 days
+        return {
+          start: startOfDay(today),
+          end: endOfDay(addDays(today, 4)),
+        };
+      case "next_7_days":
+        // Start from current day, show next 7 days
+        return {
+          start: startOfDay(today),
+          end: endOfDay(addDays(today, 6)),
+        };
+      case "current_week":
+      default: {
+        // Start from the beginning of the current week, show 7 days
+        const weekStart = startOfWeek(today, { weekStartsOn });
+        return {
+          start: weekStart,
+          end: endOfDay(addDays(weekStart, 6)),
+        };
+      }
+    }
+  }
+
+  private calculateMonthViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
+    const monthConfig = getResolvedMonthViewConfig(this.config);
+    const numWeeks = monthConfig.num_weeks;
+    const monthCalendarStart = monthConfig.month_calendar_start;
+
+    const startDate =
+      monthCalendarStart === "start_of_month"
+        ? startOfMonth(today)
+        : startOfWeek(today, { weekStartsOn });
+
+    const startWeekStart = startOfWeek(startDate, { weekStartsOn });
+    const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
+    const endWeekEnd = endOfDay(addDays(endWeekStart, 6));
+
+    return {
+      start: startWeekStart,
+      end: endWeekEnd,
+    };
+  }
+
+  async _fetchEvents(currentDate?: Date) {
     if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
       return;
     }
 
-    const today = startOfDay(Date.now());
-    const numWeeks = this.config.num_weeks ?? 12;
-    const startPosition = this.config.start_position ?? "current_week";
-
-    const startDate =
-      startPosition === "start_of_month"
-        ? startOfMonth(today)
-        : startOfWeek(today, {
-            weekStartsOn: +(this.config.week_start ?? "0") as Day,
-          });
-
-    const weekStartsOn = +(this.config.week_start ?? "0") as Day;
-    const startWeekStart = startOfWeek(startDate, { weekStartsOn });
-    const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
-    const endWeekEnd = addDays(endWeekStart, 6);
-
-    const start = startWeekStart;
-    const end = endWeekEnd;
+    const { start, end } = this.calculateDateRange(currentDate);
 
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
@@ -194,28 +262,70 @@ class PebbleCalendarCard extends LitElement {
     }
   }
 
+  private handleViewChange = (event: CustomEvent) => {
+    const view = event.detail.view;
+    this.currentView = view;
+    this.config = { ...this.config, view_type: view };
+    // Refresh events when view type changes since date range will be different
+    this._fetchEvents();
+  };
+
+  private handleDateRangeChange = (event: CustomEvent) => {
+    this._fetchEvents(event.detail.currentDate);
+  };
+
   render() {
-    return this.config?.events_span_days
-      ? html`<pebble-spanning-calendar
-          .weekStartsOn=${this.config?.week_start}
-          .numWeeks=${this.config?.num_weeks}
-          .startPosition=${this.config?.start_position}
+    if (this.currentView === "week") {
+      return html`
+        <pebble-week-calendar
+          .weekStartsOn=${getResolvedWeekViewConfig(this.config).week_start}
+          .weekCalendarView=${getResolvedWeekViewConfig(this.config).week_calendar_view}
           .textSize=${this.config?.text_size}
+          .eventsSpanDays=${getResolvedWeekViewConfig(this.config).events_span_days}
           .events=${this.events}
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
           .hass=${this._hass}
-        ></pebble-spanning-calendar>`
-      : html`<pebble-basic-calendar
-          .weekStartsOn=${this.config?.week_start}
-          .numWeeks=${this.config?.num_weeks}
-          .startPosition=${this.config?.start_position}
-          .textSize=${this.config?.text_size}
-          .events=${this.events}
-          .weatherForecast=${this.weatherForecast}
-          .localize=${this.localize}
-          .hass=${this._hass}
-        ></pebble-basic-calendar>`;
+          @date-range-changed=${this.handleDateRangeChange}
+        ></pebble-week-calendar>
+        ${this.config?.show_view_toggle
+          ? html`<pebble-view-toggle
+              .currentView=${this.currentView}
+              @view-changed=${this.handleViewChange}
+            ></pebble-view-toggle>`
+          : nothing}
+      `;
+    }
+
+    return html`
+      ${getResolvedMonthViewConfig(this.config).events_span_days
+        ? html`<pebble-spanning-calendar
+            .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
+            .numWeeks=${getResolvedMonthViewConfig(this.config).num_weeks}
+            .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
+            .textSize=${this.config?.text_size}
+            .events=${this.events}
+            .weatherForecast=${this.weatherForecast}
+            .localize=${this.localize}
+            .hass=${this._hass}
+          ></pebble-spanning-calendar>`
+        : html`<pebble-basic-calendar
+            .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
+            .numWeeks=${getResolvedMonthViewConfig(this.config).num_weeks}
+            .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
+            .textSize=${this.config?.text_size}
+            .events=${this.events}
+            .weatherForecast=${this.weatherForecast}
+            .localize=${this.localize}
+            .hass=${this._hass}
+          ></pebble-basic-calendar>`}
+      ${this.config?.show_view_toggle
+        ? html`<pebble-view-toggle
+            .currentView=${this.currentView}
+            @view-changed=${this.handleViewChange}
+          ></pebble-view-toggle>`
+        : nothing}
+    `;
   }
 
   async _subscribeToWeather() {

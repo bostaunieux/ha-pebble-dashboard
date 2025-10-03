@@ -39,7 +39,6 @@ class PebbleWeatherCard extends LitElement {
       hide_today: false,
       hide_forecast: false,
       forecast_type: "hourly",
-      forecast_count: 4,
     };
     this.isNight = false;
     this.weather = null;
@@ -111,7 +110,7 @@ class PebbleWeatherCard extends LitElement {
       return nothing;
     }
 
-    const { forecast_type, forecast_count, today_description_inline } = this.config;
+    const { forecast_type, today_description_inline } = this.config;
     const hourly = forecast_type === "hourly";
     const forecast = this.forecastEvent?.forecast ?? [];
 
@@ -154,9 +153,7 @@ class PebbleWeatherCard extends LitElement {
                   ${!today_description_inline ? this._renderDescription(weather, false) : nothing}
                 </div>
               </div>`}
-          ${this.config.hide_forecast
-            ? null
-            : this._renderForecast(forecast, forecast_count ?? 4, hourly)}
+          ${this.config.hide_forecast ? null : this._renderForecast(forecast, hourly)}
         </div>
       </ha-card>
     `;
@@ -214,7 +211,7 @@ class PebbleWeatherCard extends LitElement {
     `;
   }
 
-  _renderForecast(forecast: ForecastAttribute[], count: number, hourly: boolean) {
+  _renderForecast(forecast: ForecastAttribute[], hourly: boolean) {
     const sunset = this._hass.states?.["sun.sun"].attributes?.next_setting;
     const sunrise = this._hass.states?.["sun.sun"].attributes?.next_rising;
 

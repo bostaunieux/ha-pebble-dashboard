@@ -25,6 +25,5 @@ export type WeatherCardConfig = {
   hide_today?: boolean;
   today_secondary?: ReadonlyArray<"wind" | "sun">;
   hide_forecast?: boolean;
-  forecast_count?: number;
   today_description_inline?: boolean;
 } & CardTextOptions;
