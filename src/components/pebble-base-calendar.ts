@@ -151,7 +151,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
           left: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.3);
+          background-color: rgba(0, 0, 0, 0.4);
         }
 
         .forecast {
@@ -312,8 +312,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
         }
 
         .calendar-event.timed.past {
-          --highlight-color: hsl(from var(--event-color) h s calc(l - 30));
-          --text-color: var(--event-color);
+          --highlight-color: hsl(from var(--event-color) h s calc(l - 10));
+          --text-color: hsl(from var(--event-color) h s calc(l + 10))
         }
 
         .calendar-event.timed::before {
