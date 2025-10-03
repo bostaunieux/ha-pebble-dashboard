@@ -258,8 +258,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       ...weekEvents.map((day) => day.filter((event) => event.allDay).length),
     );
 
-    console.log(weekEvents, maxEventsPerDay);
-
     const textSize = this.textSize;
     const styles = {
       "--pebble-font-size": textSize
