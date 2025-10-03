@@ -254,12 +254,19 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       );
     }
 
+    const maxEventsPerDay = Math.max(
+      ...weekEvents.map((day) => day.filter((event) => event.allDay).length),
+    );
+
+    console.log(weekEvents, maxEventsPerDay);
+
     const textSize = this.textSize;
     const styles = {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
         : undefined,
       "--week-days": weekDays.length,
+      "--max-events-per-day": maxEventsPerDay,
     };
 
     const monthName = format(this.isCurrentWeek() ? this.currentDate : weekDays[1], "MMMM u");
@@ -581,7 +588,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 0 12px 16px;
+          padding-bottom: 16px;
           border-bottom: 2px solid var(--divider-color, #e0e0e0);
         }
 
@@ -672,13 +679,17 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           grid-row: span 100;
         }
 
+        /* prettier-ignore */
         .time-grid-container {
           flex: 1;
           position: relative;
           overflow-y: auto;
-          /* max-height: 70vh; */
-          /* 84px = month header; 40px = all day events; 32px = calendar padding */
-          max-height: calc(100vh - var(--header-height, 0) - 84px - 40px - 32px - 56px);
+          --month-height: 62px;
+          --week-day-height: 70px;
+          --all-day-events-height: calc(10px + var(--max-events-per-day, 0) * 33px);
+          max-height: calc(
+            100vh - var(--header-height, 0) - var(--month-height) - var(--week-day-height) - var(--card-padding) - var(--all-day-events-height)
+          );
           min-height: 0;
           scrollbar-width: thin;
           scrollbar-color: var(--divider-color, #e0e0e0) transparent;

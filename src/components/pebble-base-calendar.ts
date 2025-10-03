@@ -128,11 +128,12 @@ export abstract class PebbleBaseCalendar extends LitElement {
         :host {
           --day-margin: 5px;
           --arrow-radius: 4px;
+          --card-padding: 16px;
         }
 
         ha-card {
           font-size: var(--pebble-font-size, var(--card-primary-font-size, 16px));
-          padding: 16px;
+          padding: var(--card-padding);
           background-size: cover;
           height: 100%;
           display: grid;
@@ -305,6 +306,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
           text-align: left;
           background-color: var(--event-color);
           background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
+          margin: 0;
         }
 
         .calendar-event.timed::before {
