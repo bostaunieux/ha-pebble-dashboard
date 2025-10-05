@@ -21,20 +21,16 @@ import {
   isPast,
   getDayOfYear,
 } from "date-fns";
-import { CalendarEvent, getEventsByWeekdays } from "../utils/calendar-utils";
+import {
+  CalendarEvent,
+  getEventsByWeekdays,
+  getEventPosition,
+  TimedEventPosition,
+} from "../utils/calendar-utils";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
-interface EventPosition {
-  event: CalendarEvent;
-  top: number;
-  height: number;
-  left: number;
-  width: number;
-  zIndex: number;
-}
 
 @customElement("pebble-week-calendar")
 class PebbleWeekCalendar extends PebbleBaseCalendar {
@@ -170,53 +166,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           (a.allDay ? -1 : a.start.getHours() * 60 + a.start.getMinutes()) -
           (b.allDay ? -1 : b.start.getHours() * 60 + b.start.getMinutes()),
       );
-  }
-
-  private getEventPosition(event: CalendarEvent, allEventsForDay: CalendarEvent[]): EventPosition {
-    if (event.allDay) {
-      return {
-        event,
-        top: 0,
-        height: 30,
-        left: 0,
-        width: 100,
-        zIndex: 1,
-      };
-    }
-
-    // Calculate time-based positioning
-    const eventStart = event.start;
-    const eventEnd = event.end;
-
-    // Convert to minutes from start of day
-    const startMinutes = getHours(eventStart) * 60 + getMinutes(eventStart);
-    const endMinutes = getHours(eventEnd) * 60 + getMinutes(eventEnd);
-
-    // Calculate position (each hour = 60px, so each minute = 1px)
-    const top = startMinutes;
-    const height = endMinutes - startMinutes;
-
-    // Handle overlapping events
-    const overlappingEvents = allEventsForDay.filter(
-      (e) => !e.allDay && e !== event && e.start < eventEnd && e.end > eventStart,
-    );
-
-    const totalOverlapping = overlappingEvents.length + 1;
-    const eventIndex = allEventsForDay
-      .filter((e) => !e.allDay && e.start < eventEnd && e.end > eventStart)
-      .indexOf(event);
-
-    const width = 100 / totalOverlapping;
-    const left = eventIndex * width;
-
-    return {
-      event,
-      top,
-      height,
-      left,
-      width,
-      zIndex: 2,
-    };
   }
 
   private navigateWeek(direction: "prev" | "next") {
@@ -390,7 +339,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
                       `,
                     )}
                     ${dayEvents.map((event) => {
-                      const position = this.getEventPosition(event, dayEvents);
+                      const position = getEventPosition(event, dayEvents);
                       return this.renderTimedEvent(event, position);
                     })}
                     ${isCurrentDay && this.isCurrentWeek()
@@ -538,7 +487,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return `${startStr} - ${endStr}`;
   }
 
-  renderTimedEvent(event: CalendarEvent, position: EventPosition) {
+  renderTimedEvent(event: CalendarEvent, position: TimedEventPosition) {
     const color = `var(--color-${event.color ?? "blue"})`;
     const onClick = () => {
       this.selectedEvent = event;
