@@ -140,18 +140,18 @@ export abstract class PebbleBaseCalendar extends LitElement {
           align-items: end;
         }
 
-        .calendar-event.past.spanning {
+        .calendar-event.past:not(.timed) {
           opacity: 0.6;
         }
 
-        .calendar-event.past:not(.spanning)::after {
+        .calendar-event.past.timed::after {
           content: "";
           position: absolute;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.6);
+          background-color: rgba(0, 0, 0, 0.4);
         }
 
         .forecast {
@@ -291,13 +291,15 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
         .calendar-event.timed {
           --top-spacing: 2px;
+          --highlight-color: var(--event-color);
+          --text-color: hsl(from var(--event-color) h s calc(l + 15));
           display: flex;
           flex-direction: column;
           position: absolute;
           border: 1px solid var(--main-background);
           border-radius: 4px;
           cursor: pointer;
-          color: #000;
+          color: var(--text-color);
           font-size: 1em;
           padding: var(--top-spacing) 4px;
           overflow: hidden;
@@ -305,15 +307,20 @@ export abstract class PebbleBaseCalendar extends LitElement {
           box-sizing: border-box;
           text-align: left;
           background-color: var(--event-color);
-          background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
+          background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
           margin: 0;
+        }
+
+        .calendar-event.timed.past {
+          --highlight-color: hsl(from var(--event-color) h s calc(l - 10));
+          --text-color: hsl(from var(--event-color) h s calc(l + 10));
         }
 
         .calendar-event.timed::before {
           content: "";
           position: absolute;
           height: calc(100% - var(--top-spacing) * 2);
-          border-left: 4px solid var(--event-color);
+          border-left: 4px solid var(--highlight-color);
         }
 
         .calendar-event.timed .event-title {

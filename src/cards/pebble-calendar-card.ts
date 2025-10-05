@@ -57,6 +57,8 @@ class PebbleCalendarCard extends LitElement {
 
   private localize: (key: LocalizationKey) => string;
 
+  private activeDate?: Date;
+
   static get properties() {
     return {
       hass: { attribute: false },
@@ -234,13 +236,12 @@ class PebbleCalendarCard extends LitElement {
     };
   }
 
-  async _fetchEvents(currentDate?: Date) {
+  async _fetchEvents() {
     if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
       return;
     }
 
-    const { start, end } = this.calculateDateRange(currentDate);
-
+    const { start, end } = this.calculateDateRange(this.activeDate);
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
       start,
@@ -271,7 +272,8 @@ class PebbleCalendarCard extends LitElement {
   };
 
   private handleDateRangeChange = (event: CustomEvent) => {
-    this._fetchEvents(event.detail.currentDate);
+    this.activeDate = event.detail.currentDate;
+    this._fetchEvents();
   };
 
   render() {

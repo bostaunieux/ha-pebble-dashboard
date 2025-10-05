@@ -7,7 +7,9 @@
     "start": "rollup -c --watch",
     "build": "rollup -c",
     "start:hass": "docker run --rm -p8123:8123 -v ${PWD}/.hass_dev:/config homeassistant/home-assistant:beta",
-    "format": "prettier --print-width 100 --write ."
+    "format": "prettier --print-width 100 --write .",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "Damien Angelos",
   "repository": {
@@ -39,16 +41,19 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
+    "@types/jest": "^30.0.0",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-lit": "^2.1.1",
     "eslint-plugin-lit-a11y": "^5.1.1",
     "eslint-plugin-wc": "^3.0.1",
     "globals": "^16.4.0",
+    "jest": "^30.2.0",
     "jiti": "^2.0.0",
     "prettier": "^3.2.5",
     "rollup": "^4.16.1",
     "rollup-plugin-serve": "^3.0.0",
+    "ts-jest": "^29.4.4",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.43.0"

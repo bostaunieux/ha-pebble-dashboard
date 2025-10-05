@@ -7,6 +7,8 @@ import {
   max,
   min,
   eachDayOfInterval,
+  getHours,
+  getMinutes,
 } from "date-fns";
 import type { HomeAssistant } from "../types";
 
@@ -41,6 +43,14 @@ export interface CalendarEventData {
   dtend: string;
   rrule?: string;
   description?: string;
+}
+export interface TimedEventPosition {
+  event: CalendarEvent;
+  top: number;
+  height: number;
+  left: number;
+  width: number;
+  zIndex: number;
 }
 
 export const fetchCalendarEvents = async (
@@ -207,4 +217,160 @@ export const getEventsByWeekdays = (
   });
 
   return weekdays;
+};
+
+/**
+ * Calculates the position and dimensions of an event within a calendar day view.
+ * Handles overlapping events by distributing them efficiently across available space.
+ */
+export const getEventPosition = (
+  event: CalendarEvent,
+  allEventsForDay: CalendarEvent[],
+): TimedEventPosition => {
+  if (event.allDay) {
+    return {
+      event,
+      top: 0,
+      height: 30,
+      left: 0,
+      width: 100,
+      zIndex: 1,
+    };
+  }
+
+  const eventStart = event.start;
+  const eventEnd = event.end;
+
+  // Convert to minutes from start of day
+  const startMinutes = getHours(eventStart) * 60 + getMinutes(eventStart);
+  const endMinutes = getHours(eventEnd) * 60 + getMinutes(eventEnd);
+
+  // Calculate position (each hour = 60px, so each minute = 1px)
+  const top = startMinutes;
+  const height = endMinutes - startMinutes;
+
+  // Get all non-all-day events for the day
+  const timeEvents = allEventsForDay.filter((e) => !e.allDay);
+
+  // Find the position of this event within its overlap group
+  const position = getEventPositionInOverlapGroup(event, timeEvents);
+
+  // Find the maximum number of simultaneous overlapping events for this specific event
+  const maxOverlaps = getMaxSimultaneousOverlaps(event, timeEvents);
+
+  // Calculate width as the remaining space from start position to 100%
+  const left = (position / maxOverlaps) * 100;
+  const width = 100 - left;
+
+  // Calculate zIndex based on left position - events further right appear on top
+  const zIndex = 2 + Math.round(left);
+
+  return {
+    event,
+    top,
+    height,
+    left,
+    width,
+    zIndex,
+  };
+};
+
+/**
+ * Calculates the maximum number of simultaneous overlapping events for a given target event.
+ */
+const getMaxSimultaneousOverlaps = (
+  targetEvent: CalendarEvent,
+  allEvents: CalendarEvent[],
+): number => {
+  // Find all events that overlap with the target event
+  const overlappingEvents = allEvents.filter(
+    (e) => e !== targetEvent && e.start < targetEvent.end && e.end > targetEvent.start,
+  );
+
+  if (overlappingEvents.length === 0) {
+    return 1;
+  }
+
+  // Create time points for all overlapping events (including target)
+  const timePoints: Array<{ time: Date; type: "start" | "end"; event: CalendarEvent }> = [];
+
+  // Add target event
+  timePoints.push({ time: targetEvent.start, type: "start", event: targetEvent });
+  timePoints.push({ time: targetEvent.end, type: "end", event: targetEvent });
+
+  // Add overlapping events
+  for (const event of overlappingEvents) {
+    timePoints.push({ time: event.start, type: "start", event });
+    timePoints.push({ time: event.end, type: "end", event });
+  }
+
+  // Sort by time
+  timePoints.sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  let maxOverlaps = 0;
+  let currentOverlaps = 0;
+
+  const activeEvents = new Set<CalendarEvent>();
+
+  for (const point of timePoints) {
+    if (point.type === "start") {
+      activeEvents.add(point.event);
+      currentOverlaps = activeEvents.size;
+      maxOverlaps = Math.max(maxOverlaps, currentOverlaps);
+    } else {
+      activeEvents.delete(point.event);
+      currentOverlaps = activeEvents.size;
+    }
+  }
+
+  return maxOverlaps;
+};
+
+/**
+ * Determines the position of an event within its overlap group using a greedy algorithm.
+ * This function calculates positions globally for all events to ensure consistency.
+ */
+const getEventPositionInOverlapGroup = (
+  targetEvent: CalendarEvent,
+  allEvents: CalendarEvent[],
+): number => {
+  // Calculate positions for all events globally
+  const globalPositions = calculateGlobalEventPositions(allEvents);
+  return globalPositions.get(targetEvent) || 0;
+};
+
+/**
+ * Calculates positions for all events globally using a greedy algorithm.
+ * This ensures consistent positioning across all events.
+ */
+const calculateGlobalEventPositions = (allEvents: CalendarEvent[]): Map<CalendarEvent, number> => {
+  const positions: Map<CalendarEvent, number> = new Map();
+
+  // Sort events by start time for consistent processing order
+  const sortedEvents = [...allEvents].sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  for (const event of sortedEvents) {
+    // Find the first available position for this event
+    let position = 0;
+    while (true) {
+      // Check if this position conflicts with any already placed events
+      const conflicts = sortedEvents.some((placedEvent) => {
+        const placedPosition = positions.get(placedEvent);
+        if (placedPosition === undefined || placedPosition !== position) {
+          return false;
+        }
+        // Check if events overlap in time
+        return placedEvent.start < event.end && placedEvent.end > event.start;
+      });
+
+      if (!conflicts) {
+        break;
+      }
+      position++;
+    }
+
+    positions.set(event, position);
+  }
+
+  return positions;
 };
