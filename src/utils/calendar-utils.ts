@@ -258,8 +258,12 @@ export const getEventPosition = (
   // Find the maximum number of simultaneous overlapping events for this specific event
   const maxOverlaps = getMaxSimultaneousOverlaps(event, timeEvents);
 
-  const width = 100 / maxOverlaps;
-  const left = position * width;
+  // Calculate width as the remaining space from start position to 100%
+  const left = (position / maxOverlaps) * 100;
+  const width = 100 - left;
+
+  // Calculate zIndex based on left position - events further right appear on top
+  const zIndex = 2 + Math.round(left);
 
   return {
     event,
@@ -267,7 +271,7 @@ export const getEventPosition = (
     height,
     left,
     width,
-    zIndex: 2,
+    zIndex,
   };
 };
 
