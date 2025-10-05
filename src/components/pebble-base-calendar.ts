@@ -313,7 +313,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
         .calendar-event.timed.past {
           --highlight-color: hsl(from var(--event-color) h s calc(l - 10));
-          --text-color: hsl(from var(--event-color) h s calc(l + 10))
+          --text-color: hsl(from var(--event-color) h s calc(l + 10));
         }
 
         .calendar-event.timed::before {
