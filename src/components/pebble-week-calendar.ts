@@ -806,7 +806,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           right: 0;
           height: 2px;
           background-color: var(--primary-color, #03a9f4);
-          z-index: 20;
+          z-index: 200;
           pointer-events: none;
         }
 
