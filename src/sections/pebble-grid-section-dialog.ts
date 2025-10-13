@@ -274,10 +274,10 @@ export default class PebbleGridSectionDialog extends LitElement {
                               .configKey=${"media_source"}
                               @input=${this._onInputChange}
                             ></ha-textfield>
-                            <mwc-button @click=${this.onExplore} slot="trigger"
+                            <ha-button @click=${this.onExplore} slot="trigger" appearance="plain"
                               >${this.localize(
                                 "section.editor.photo-source.local-media.explore",
-                              )}</mwc-button
+                              )}</ha-button
                             >
                           </div>
                         </div>`
@@ -426,13 +426,18 @@ export default class PebbleGridSectionDialog extends LitElement {
             : nothing}
         </div>
 
-        <mwc-button @click=${this._dismiss} slot="secondaryAction" ?dialogInitialFocus=${false}>
+        <ha-button
+          @click=${this._dismiss}
+          slot="secondaryAction"
+          appearance="plain"
+          ?dialogInitialFocus=${false}
+        >
           ${this.localize("dialogs.generic.cancel")}
-        </mwc-button>
+        </ha-button>
 
-        <mwc-button @click=${this._confirm} ?dialogInitialFocus=${false} slot="primaryAction">
+        <ha-button @click=${this._confirm} ?dialogInitialFocus=${false} slot="primaryAction">
           ${this.localize("dialogs.generic.save")}
-        </mwc-button>
+        </ha-button>
       </ha-dialog>
     `;
   }

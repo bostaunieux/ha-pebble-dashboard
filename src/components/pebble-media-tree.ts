@@ -94,14 +94,15 @@ export class PebbleMediaTree extends LitElement {
             : nothing}
           ${isFolder
             ? html`
-                <mwc-button
+                <ha-button
                   class="select-button"
+                  appearance="plain"
                   @click=${onSelect}
                   @keydown=${onSelect}
                   aria-label="Select ${item.title}"
                 >
                   Select
-                </mwc-button>
+                </ha-button>
               `
             : nothing}
         </div>
