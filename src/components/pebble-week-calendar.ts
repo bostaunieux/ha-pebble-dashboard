@@ -47,6 +47,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   @query(".time-grid-container") private timeGridContainer?: HTMLDivElement;
 
   private timeUpdateInterval?: number;
+  private autoScrollTimeout?: number;
 
   constructor() {
     super();
@@ -58,12 +59,14 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     setTimeout(() => {
       this.scrollTo8AM();
+      this.setupAutoScroll();
     }, 100);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.stopCurrentTimeTracking();
+    this.cleanupAutoScroll();
   }
 
   private startCurrentTimeTracking() {
@@ -126,7 +129,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return isSameDay(date, this.currentTime);
   }
 
-  private scrollTo8AM() {
+  private scrollTo8AM(smooth = false) {
     const targetHour = 8; // 8am
 
     // Calculate the position of 8am (each hour = 60px, so each minute = 1px)
@@ -134,7 +137,56 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     this.timeGridContainer?.scroll({
       top: Math.max(0, targetPosition),
+      behavior: smooth ? 'smooth' : 'auto',
     });
+  }
+
+  private setupAutoScroll() {
+    if (!this.timeGridContainer) return;
+
+    // Listen for scroll events to reset the auto-scroll timer
+    this.timeGridContainer.addEventListener('scroll', this.handleUserActivity);
+  }
+
+  private cleanupAutoScroll() {
+    if (this.timeGridContainer) {
+      this.timeGridContainer.removeEventListener('scroll', this.handleUserActivity);
+    }
+    this.clearAutoScrollTimeout();
+  }
+
+  private handleUserActivity = () => {
+    this.resetAutoScrollTimeout();
+  };
+
+  private isCurrentTimeVisible(): boolean {
+    if (!this.timeGridContainer) return false;
+    
+    const currentTimePosition = this.getCurrentHour() * 60 + this.getCurrentMinute();
+    const scrollTop = this.timeGridContainer.scrollTop;
+    const viewportHeight = this.timeGridContainer.clientHeight;
+    
+    // Check if current time is within the visible viewport
+    return currentTimePosition >= scrollTop && currentTimePosition <= scrollTop + viewportHeight;
+  }
+
+  private resetAutoScrollTimeout() {
+    this.clearAutoScrollTimeout();
+    
+    // Set timeout for 1 minute (60000ms) of inactivity
+    this.autoScrollTimeout = window.setTimeout(() => {
+      // Only scroll to 8am if the current time is not visible
+      if (!this.isCurrentTimeVisible()) {
+        this.scrollTo8AM(true);
+      }
+    }, 10 * 1_000);
+  }
+
+  private clearAutoScrollTimeout() {
+    if (this.autoScrollTimeout) {
+      clearTimeout(this.autoScrollTimeout);
+      this.autoScrollTimeout = undefined;
+    }
   }
 
   private generateWeekDays() {
@@ -191,6 +243,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const days = weekCalendarView === "next_5_days" ? 5 : 7;
 
     this.currentDate = addDays(this.currentDate, days * multiplier);
+
+    // Reset auto-scroll timeout on navigation
+    this.resetAutoScrollTimeout();
 
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
