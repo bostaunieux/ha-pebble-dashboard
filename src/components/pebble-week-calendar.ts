@@ -69,7 +69,24 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
   private startCurrentTimeTracking() {
     this.currentTime = new Date();
     this.timeUpdateInterval = window.setInterval(() => {
-      this.currentTime = new Date();
+      const newTime = new Date();
+      const oldDay = startOfDay(this.currentTime);
+      const newDay = startOfDay(newTime);
+      
+      this.currentTime = newTime;
+      
+      // If the day has changed and we're currently viewing the current week/period,
+      // update currentDate to keep showing the current week/period
+      if (!isSameDay(oldDay, newDay)) {
+        // Check if the displayed date range includes the previous "today"
+        const weekDays = this.generateWeekDays();
+        const wasShowingToday = weekDays.some((day) => isSameDay(day, oldDay));
+        
+        // Only auto-advance if we were showing today before the day changed
+        if (wasShowingToday) {
+          this.currentDate = newDay;
+        }
+      }
     }, 60 * 1_000); // Update every minute
   }
 
