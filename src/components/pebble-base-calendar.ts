@@ -290,7 +290,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
         }
 
         .calendar-event.timed {
-          --top-spacing: 2px;
+          --event-top-spacing: 2px;
           --highlight-color: var(--event-color);
           --text-color: hsl(from var(--event-color) h s calc(l + 15));
           display: flex;
@@ -301,7 +301,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
           cursor: pointer;
           color: var(--text-color);
           font-size: 1em;
-          padding: var(--top-spacing) 4px;
+          padding: var(--event-top-spacing) 4px;
           overflow: hidden;
           text-overflow: ellipsis;
           box-sizing: border-box;
@@ -319,7 +319,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
         .calendar-event.timed::before {
           content: "";
           position: absolute;
-          height: calc(100% - var(--top-spacing) * 2);
+          height: calc(100% - var(--event-top-spacing) * 2);
           border-left: 4px solid var(--highlight-color);
         }
 

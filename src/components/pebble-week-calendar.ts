@@ -503,8 +503,10 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     const baseArea = 4500; // Reference area for 1em font size
     const fontSize = Math.max(0.5, Math.min(1, Math.round((100 * area) / baseArea) / 100));
 
+    const topSpacing = position.height > 15 ? 2 : 1;
     const styles = {
       "--event-color": color,
+      "--event-top-spacing": topSpacing ? `${topSpacing}px` : undefined,
       top: `${position.top}px`,
       height: `${position.height}px`,
       left: `${position.left}%`,
