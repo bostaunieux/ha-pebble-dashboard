@@ -75,16 +75,16 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       const newTime = new Date();
       const oldDay = startOfDay(this.currentTime);
       const newDay = startOfDay(newTime);
-      
+
       this.currentTime = newTime;
-      
+
       // If the day has changed and we're currently viewing the current week/period,
       // update currentDate to keep showing the current week/period
       if (!isSameDay(oldDay, newDay)) {
         // Check if the displayed date range includes the previous "today"
         const weekDays = this.generateWeekDays();
         const wasShowingToday = weekDays.some((day) => isSameDay(day, oldDay));
-        
+
         // Only auto-advance if we were showing today before the day changed
         if (wasShowingToday) {
           this.currentDate = newDay;
@@ -137,7 +137,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
     this.timeGridContainer?.scroll({
       top: Math.max(0, targetPosition),
-      behavior: smooth ? 'smooth' : 'auto',
+      behavior: smooth ? "smooth" : "auto",
     });
   }
 
@@ -145,12 +145,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     if (!this.timeGridContainer) return;
 
     // Listen for scroll events to reset the auto-scroll timer
-    this.timeGridContainer.addEventListener('scroll', this.handleUserActivity);
+    this.timeGridContainer.addEventListener("scroll", this.handleUserActivity);
   }
 
   private cleanupAutoScroll() {
     if (this.timeGridContainer) {
-      this.timeGridContainer.removeEventListener('scroll', this.handleUserActivity);
+      this.timeGridContainer.removeEventListener("scroll", this.handleUserActivity);
     }
     this.clearAutoScrollTimeout();
   }
@@ -161,18 +161,18 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
 
   private isCurrentTimeVisible(): boolean {
     if (!this.timeGridContainer) return false;
-    
+
     const currentTimePosition = this.getCurrentHour() * 60 + this.getCurrentMinute();
     const scrollTop = this.timeGridContainer.scrollTop;
     const viewportHeight = this.timeGridContainer.clientHeight;
-    
+
     // Check if current time is within the visible viewport
     return currentTimePosition >= scrollTop && currentTimePosition <= scrollTop + viewportHeight;
   }
 
   private resetAutoScrollTimeout() {
     this.clearAutoScrollTimeout();
-    
+
     // Set timeout for 1 minute (60000ms) of inactivity
     this.autoScrollTimeout = window.setTimeout(() => {
       // Only scroll to 8am if the current time is not visible
