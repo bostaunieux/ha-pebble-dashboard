@@ -90,7 +90,15 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           isWithinInterval(event.end, weekInterval) ||
           (event.start <= start && event.end >= end),
       )
-      .sort((a, b) => (a.allDay ? -1 : a.start.getTime()) - (b.allDay ? -1 : b.start.getTime()));
+      .sort((a, b) => {
+        // Sort by start date (oldest first)
+        const dateDiff = a.start.getTime() - b.start.getTime();
+        if (dateDiff !== 0) return dateDiff;
+        // Within same start date, all day before not all day
+        if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+        // Otherwise (same start, both allDay or both not), tie-breaker on end date
+        return a.end.getTime() - b.end.getTime();
+      })
   }
 
   private navigateWeek(direction: "prev" | "next") {
