@@ -3,6 +3,7 @@ import {
   CalendarCardConfig,
   ResolvedMonthViewConfig,
   ResolvedWeekViewConfig,
+  ResolvedAgendaViewConfig,
 } from "../cards/calendar-types";
 
 export function getWeekStart(config: CalendarCardConfig, viewType: "month" | "week"): Day {
@@ -33,5 +34,11 @@ export function getResolvedWeekViewConfig(config: CalendarCardConfig): ResolvedW
     week_start: getWeekStart(config, "week"),
     events_span_days: getEventsSpanDays(config, "week"),
     week_calendar_view: config.week_view?.week_calendar_view ?? "current_week",
+  };
+}
+
+export function getResolvedAgendaViewConfig(config: CalendarCardConfig): ResolvedAgendaViewConfig {
+  return {
+    week_start: +(config.agenda_view?.week_start ?? "0") as Day,
   };
 }

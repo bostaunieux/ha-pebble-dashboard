@@ -95,7 +95,11 @@
         },
         "detail": {
           "all-day": "All day"
-        }
+        },
+        "no-events": "No events"
+      },
+      "agenda": {
+        "next-week": "Next Week"
       }
     },
     "editor": {
@@ -134,6 +138,9 @@
         "week-config": {
           "title": "Week view"
         },
+        "agenda-config": {
+          "title": "Agenda view"
+        },
         "events": {
           "title": "Events"
         },
@@ -144,7 +151,8 @@
           "label": "Default view",
           "option": {
             "month": "Month view",
-            "week": "Week view"
+            "week": "Week view",
+            "agenda": "Weekly Agenda"
           }
         },
         "month-calendar-start": {
