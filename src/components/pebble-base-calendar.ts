@@ -1,4 +1,5 @@
 import { LitElement, html, css, CSSResultGroup, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
 import { property } from "lit/decorators.js";
 import { isSameDay, isWithinInterval, format } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
@@ -72,26 +73,32 @@ export abstract class PebbleBaseCalendar extends LitElement {
       return nothing;
     }
 
+    const color = event.color ? `var(--color-${event.color})` : undefined;
+
     // TODO: Need to handle different start/end combinations
     // i.e. different days and all day events
     const formatTokens = "h:mmaaa";
+
+    const iconStyles = styleMap({
+      color,
+    });
 
     return html`
       <ha-dialog
         open
         @closed=${this.closeDialog}
         .heading=${html`<div class="header_title">
-          <span>${event.eventData.summary}</span>
           <ha-icon-button
             .label=${this.hass?.localize("ui.dialogs.generic.close") ?? "Close"}
             dialogAction="close"
             class="header_button"
             ><ha-icon icon="mdi:close"></ha-icon
           ></ha-icon-button>
+          <span>${event.eventData.summary}</span>
         </div>`}
       >
         <div class="event-dialog-content">
-            <ha-icon icon="mdi:calendar-account"></ha-icon>
+            <ha-icon icon="mdi:calendar-account" style=${iconStyles}></ha-icon>
             <div class="event-dialog-info">
               ${this.hass.formatEntityAttributeValue(
                 this.hass.states[event.calendar],
@@ -140,6 +147,11 @@ export abstract class PebbleBaseCalendar extends LitElement {
           align-items: end;
         }
 
+        ha-dialog {
+          --mdc-dialog-min-width: min(400px, 95vw);
+          --mdc-dialog-max-width: min(400px, 95vw);
+        }
+
         .calendar-event.past:not(.timed) {
           opacity: 0.6;
         }
@@ -177,7 +189,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
         .event-dialog-description {
           grid-column: 1 / span 2;
-          white-space: pre;
+          white-space: pre-wrap;
         }
 
         .calendar-event {

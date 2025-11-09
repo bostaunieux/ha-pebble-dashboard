@@ -4,9 +4,10 @@ import { LitElement } from "lit";
 
 @customElement("pebble-view-toggle")
 class PebbleViewToggle extends LitElement {
-  @property({ type: String, attribute: "current-view" }) currentView: "month" | "week" = "month";
+  @property({ type: String, attribute: "current-view" }) currentView: "month" | "week" | "agenda" =
+    "month";
 
-  private handleViewChange(view: "month" | "week") {
+  private handleViewChange(view: "month" | "week" | "agenda") {
     this.currentView = view;
 
     this.dispatchEvent(
@@ -18,6 +19,7 @@ class PebbleViewToggle extends LitElement {
 
   private handleMonthView = () => this.handleViewChange("month");
   private handleWeekView = () => this.handleViewChange("week");
+  private handleAgendaView = () => this.handleViewChange("agenda");
 
   render() {
     return html`
@@ -35,6 +37,13 @@ class PebbleViewToggle extends LitElement {
           title="Week View"
         >
           <ha-icon icon="mdi:calendar-week"></ha-icon>
+        </button>
+        <button
+          class="toggle-button ${this.currentView === "agenda" ? "active" : ""}"
+          @click=${this.handleAgendaView}
+          title="Agenda View"
+        >
+          <ha-icon icon="mdi:format-list-bulleted"></ha-icon>
         </button>
       </div>
     `;

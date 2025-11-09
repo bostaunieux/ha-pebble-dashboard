@@ -19,6 +19,7 @@ import {
 import {
   getResolvedMonthViewConfig,
   getResolvedWeekViewConfig,
+  getResolvedAgendaViewConfig,
 } from "../utils/calendar-config-helpers";
 import { getColor } from "../utils/colors";
 import type { HomeAssistant } from "../types";
@@ -29,6 +30,7 @@ import { ForecastFeatures, supportsFeature } from "../utils/weather-utils";
 import "../components/pebble-basic-calendar";
 import "../components/pebble-spanning-calendar";
 import "../components/pebble-week-calendar";
+import "../components/pebble-agenda-calendar";
 import "../components/pebble-view-toggle";
 
 const WEATHER_RETRIES = [1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 60_000, 60_000];
@@ -45,7 +47,7 @@ class PebbleCalendarCard extends LitElement {
 
   @state() private weatherForecast?: Map<number, ForecastAttribute>;
 
-  @state() private currentView: "month" | "week" = "month";
+  @state() private currentView: "month" | "week" | "agenda" = "month";
 
   private _retryCount: number;
 
@@ -79,6 +81,7 @@ class PebbleCalendarCard extends LitElement {
       // View-specific overrides (initially empty)
       month_view: {},
       week_view: {},
+      agenda_view: {},
     };
     this._retryCount = 0;
     this.weather = null;
@@ -181,6 +184,9 @@ class PebbleCalendarCard extends LitElement {
     if (viewType === "week") {
       const weekConfig = getResolvedWeekViewConfig(this.config);
       return this.calculateWeekViewDateRange(today, weekConfig.week_start as Day);
+    } else if (viewType === "agenda") {
+      const agendaConfig = getResolvedAgendaViewConfig(this.config);
+      return this.calculateAgendaViewDateRange(today, agendaConfig.week_start as Day);
     } else {
       const monthConfig = getResolvedMonthViewConfig(this.config);
       return this.calculateMonthViewDateRange(today, monthConfig.week_start as Day);
@@ -214,6 +220,15 @@ class PebbleCalendarCard extends LitElement {
         };
       }
     }
+  }
+
+  private calculateAgendaViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
+    // Current week + next week (14 days total)
+    const weekStart = startOfWeek(today, { weekStartsOn });
+    return {
+      start: weekStart,
+      end: endOfDay(addDays(weekStart, 13)), // 2 weeks
+    };
   }
 
   private calculateMonthViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
@@ -290,6 +305,26 @@ class PebbleCalendarCard extends LitElement {
           .hass=${this._hass}
           @date-range-changed=${this.handleDateRangeChange}
         ></pebble-week-calendar>
+        ${this.config?.show_view_toggle
+          ? html`<pebble-view-toggle
+              .currentView=${this.currentView}
+              @view-changed=${this.handleViewChange}
+            ></pebble-view-toggle>`
+          : nothing}
+      `;
+    }
+
+    if (this.currentView === "agenda") {
+      return html`
+        <pebble-agenda-calendar
+          .weekStartsOn=${getResolvedAgendaViewConfig(this.config).week_start}
+          .textSize=${this.config?.text_size}
+          .events=${this.events}
+          .weatherForecast=${this.weatherForecast}
+          .localize=${this.localize}
+          .hass=${this._hass}
+          @date-range-changed=${this.handleDateRangeChange}
+        ></pebble-agenda-calendar>
         ${this.config?.show_view_toggle
           ? html`<pebble-view-toggle
               .currentView=${this.currentView}

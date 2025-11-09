@@ -30,6 +30,7 @@ class PebbleCalendarCardEditor extends LitElement {
       // View-specific overrides (initially empty)
       month_view: {},
       week_view: {},
+      agenda_view: {},
     };
     this.localize = initLocalize(this.hass);
   }
@@ -92,6 +93,10 @@ class PebbleCalendarCardEditor extends LitElement {
               {
                 value: "week",
                 label: this.localize("calendar.editor.form.view-type.option.week"),
+              },
+              {
+                value: "agenda",
+                label: this.localize("calendar.editor.form.view-type.option.agenda"),
               },
             ],
           },
@@ -229,6 +234,35 @@ class PebbleCalendarCardEditor extends LitElement {
     };
   }
 
+  _getAgendaConfigSchema() {
+    return {
+      name: "",
+      type: "expandable",
+      title: this.localize("calendar.editor.form.agenda-config.title"),
+      expanded: false,
+      schema: [
+        {
+          label: this.localize("calendar.editor.form.week-start.label"),
+          name: "week_start",
+          selector: {
+            select: {
+              options: [
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.sun"),
+                  value: "0",
+                },
+                {
+                  label: this.localize("calendar.editor.form.week-start.days.mon"),
+                  value: "1",
+                },
+              ],
+            },
+          },
+        },
+      ],
+    };
+  }
+
   _getEventsSchema() {
     return {
       name: "",
@@ -342,6 +376,30 @@ class PebbleCalendarCardEditor extends LitElement {
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }
 
+  _changeAgendaView(ev: CustomEvent) {
+    if (!this._config) return;
+
+    const agendaView = ev.detail.value;
+
+    // Clean up empty values
+    const cleanedAgendaView = { ...agendaView };
+    Object.keys(cleanedAgendaView).forEach((key) => {
+      if (
+        cleanedAgendaView[key] === "" ||
+        cleanedAgendaView[key] === null ||
+        cleanedAgendaView[key] === undefined
+      ) {
+        delete cleanedAgendaView[key];
+      }
+    });
+
+    this._config = {
+      ...this._config,
+      agenda_view: cleanedAgendaView,
+    };
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
+  }
+
   _changeEvents(ev: CustomEvent) {
     if (!this._config) return;
 
@@ -438,6 +496,14 @@ class PebbleCalendarCardEditor extends LitElement {
             .schema=${[this._getWeekConfigSchema()]}
             .computeLabel=${computeLabel}
             @value-changed=${this._changeWeekView}
+          ></ha-form>
+
+          <ha-form
+            .hass=${this.hass}
+            .data=${this._config?.agenda_view ?? {}}
+            .schema=${[this._getAgendaConfigSchema()]}
+            .computeLabel=${computeLabel}
+            @value-changed=${this._changeAgendaView}
           ></ha-form>
 
           <ha-form

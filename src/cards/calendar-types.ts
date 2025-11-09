@@ -15,6 +15,10 @@ export interface WeekViewConfig {
   week_calendar_view?: "current_week" | "next_5_days" | "next_7_days";
 }
 
+export interface AgendaViewConfig {
+  week_start?: "0" | "1" | "2" | "3" | "4" | "5" | "6";
+}
+
 export interface ResolvedMonthViewConfig {
   week_start: number; // Day from date-fns
   events_span_days: boolean;
@@ -28,11 +32,15 @@ export interface ResolvedWeekViewConfig {
   week_calendar_view: "current_week" | "next_5_days" | "next_7_days";
 }
 
+export interface ResolvedAgendaViewConfig {
+  week_start: number; // Day from date-fns
+}
+
 export type CalendarCardConfig = {
   type: "custom:pebble-calendar-card";
   calendars?: Array<CalendarEntity>;
   show_view_toggle?: boolean;
-  view_type?: "month" | "week";
+  view_type?: "month" | "week" | "agenda";
   event_refresh_interval?: number;
   enable_weather?: boolean;
   weather_entity?: string;
@@ -45,4 +53,5 @@ export type CalendarCardConfig = {
   // View-specific overrides
   month_view?: MonthViewConfig;
   week_view?: WeekViewConfig;
+  agenda_view?: AgendaViewConfig;
 } & CardTextOptions;
