@@ -446,7 +446,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           bottom: 4px;
           width: 4px;
           background-color: hsl(from var(--event-color) h s calc(l + 15));
-          /* border-radius: 4px 0 0 4px; */
         }
 
         .agenda-event.past {
@@ -466,9 +465,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         }
 
         .agenda-event.all-day {
-          background-image: none;
-          color: #000;
-          font-weight: 500;
           flex-direction: row;
           align-items: baseline;
         }
