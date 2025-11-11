@@ -67,8 +67,8 @@ class PebbleViewToggle extends LitElement {
       }
 
       .toggle-button {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border: none;
         border-radius: 6px;
         background: transparent;
