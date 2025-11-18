@@ -336,12 +336,12 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         }
 
         .day-card.current-day {
-          border: 2px solid var(--secondary-text-color, #666);
+          border: 2px solid var(--dark-primary-color, #666);
           box-shadow: 0 0 8px rgba(3, 169, 244, 0.3);
         }
 
         .day-card.current-day .day-card-header {
-          background: #666;
+          background: var(--dark-primary-color, #666);
         }
 
         .day-card.next-week-card .day-card-header {
@@ -471,6 +471,9 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         }
 
         .agenda-event.all-day {
+          background-image: none;
+          color: #000;
+          font-weight: bold;
           flex-direction: row;
           align-items: baseline;
         }
