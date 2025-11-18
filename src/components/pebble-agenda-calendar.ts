@@ -310,18 +310,19 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         }
 
         .day-cards-grid {
+          --grid-height: calc(
+            100vh - var(--header-height, 0px) - var(--month-header-height) - var(--card-padding) -
+              32px
+          );
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           grid-template-rows: repeat(2, 1fr);
           gap: 12px;
           flex: 1;
           padding: 16px 0;
-          min-height: 0;
           --month-header-height: 62px;
-          max-height: calc(
-            100vh - var(--header-height, 0px) - var(--month-header-height) - var(--card-padding) -
-              32px
-          );
+          min-height: var(--grid-height);
+          max-height: var(--grid-height);
           overflow: hidden;
         }
 
