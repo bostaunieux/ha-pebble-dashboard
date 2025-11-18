@@ -1,6 +1,6 @@
 {
   "name": "pebble-dashboard",
-  "version": "0.6.0-beta2",
+  "version": "0.6.0-beta3",
   "description": "Custom dashboard for Home Assistant",
   "main": "index.js",
   "scripts": {
