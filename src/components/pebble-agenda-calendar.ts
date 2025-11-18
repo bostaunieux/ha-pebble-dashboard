@@ -188,7 +188,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         </div>
         <div class="day-card-events">
           ${dayEvents.length > 0
-            ? dayEvents.map((event) => this.renderAgendaEvent(event))
+            ? dayEvents.map((event) => this.renderAgendaEvent(event, false, date))
             : html`<div class="no-events">
                 ${this.localize("calendar.card.calendar.no-events")}
               </div>`}
@@ -215,16 +215,22 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     `;
   }
 
-  private renderAgendaEvent(event: CalendarEvent, showDate: boolean = false) {
+  private renderAgendaEvent(event: CalendarEvent, showDate: boolean = false, contextDate?: Date) {
     const color = `var(--color-${event.color ?? "blue"})`;
     const onClick = () => {
       this.selectedEvent = event;
     };
 
+    // For all-day events with a context date, check if the context date is in the past
+    // For other events or when no context date, check if the event's end has passed
+    const isPastEvent = event.allDay && contextDate
+      ? isPast(startOfDay(addDays(contextDate, 1)))
+      : isPast(event.end);
+
     const classes = {
       "agenda-event": true,
       "all-day": event.allDay,
-      past: isPast(event.end),
+      past: isPastEvent,
     };
 
     const styles = {
