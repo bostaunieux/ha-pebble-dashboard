@@ -99,12 +99,22 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
         // Otherwise (same start, both allDay or both not), tie-breaker on end date
         return a.end.getTime() - b.end.getTime();
-      })
+      });
   }
 
-  private navigateWeek(direction: "prev" | "next") {
-    const multiplier = direction === "prev" ? -1 : 1;
-    this.currentDate = addDays(this.currentDate, 7 * multiplier);
+  private handleCalendarNavigated = (event: CustomEvent) => {
+    const type = event.detail.type;
+    if (type === "prev") {
+      this.navigateWeek(addDays(this.currentDate, -7));
+    } else if (type === "next") {
+      this.navigateWeek(addDays(this.currentDate, 7));
+    } else if (type === "today") {
+      this.navigateWeek(startOfDay(Date.now()));
+    }
+  }
+
+  private navigateWeek(targetDate: Date) {
+    this.currentDate = targetDate;
 
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
@@ -114,18 +124,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       }),
     );
   }
-
-  private navigatePrev = () => this.navigateWeek("prev");
-  private navigateNext = () => this.navigateWeek("next");
-  
-  private navigateToToday = () => {
-    this.currentDate = startOfDay(Date.now());
-    this.dispatchEvent(
-      new CustomEvent("date-range-changed", {
-        detail: { currentDate: this.currentDate },
-      })
-    );
-  };
 
   private isCurrentWeek(): boolean {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
@@ -155,11 +153,10 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       <ha-card style=${styleMap(styles)}>
         <div class="agenda-calendar">
           <pebble-calendar-month-header
+            .localize=${this.localize}
             .monthName=${monthName}
             .disabled=${false}
-            .onNavigatePrev=${this.navigatePrev}
-            .onNavigateNext=${this.navigateNext}
-            .onNavigateToday=${this.navigateToToday}
+            @calendar-navigated=${this.handleCalendarNavigated}
           ></pebble-calendar-month-header>
 
           <div class="day-cards-grid">
@@ -184,9 +181,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     return html`
       <div class=${classMap(classes)}>
         <div class="day-card-header">
-          <div class="day-name">
-            ${format(date, "EEEE")}
-          </div>
+          <div class="day-name">${format(date, "EEEE")}</div>
           <div class="day-date">${format(date, "MMM d")}</div>
           ${dayEvents.length > 0
             ? html`<div class="event-count">${dayEvents.length}</div>`
@@ -229,9 +224,8 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
 
     // For all-day events with a context date, check if the context date is in the past
     // For other events or when no context date, check if the event's end has passed
-    const isPastEvent = event.allDay && contextDate
-      ? isPast(startOfDay(addDays(contextDate, 1)))
-      : isPast(event.end);
+    const isPastEvent =
+      event.allDay && contextDate ? isPast(startOfDay(addDays(contextDate, 1))) : isPast(event.end);
 
     const classes = {
       "agenda-event": true,
@@ -306,7 +300,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           gap: 12px;
           flex: 1;
           padding: 16px 0;
-          --month-header-height: 62px;
           min-height: var(--grid-height);
           max-height: var(--grid-height);
           overflow: hidden;

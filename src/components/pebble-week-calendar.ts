@@ -238,6 +238,17 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       );
   }
 
+  private handleCalendarNavigated = (event: CustomEvent) => {
+    const type = event.detail.type;
+    if (type === "prev") {
+      this.navigateWeek("prev");
+    } else if (type === "next") {
+      this.navigateWeek("next");
+    } else if (type === "today") {
+      this.navigateToToday();
+    }
+  }
+
   private navigateWeek(direction: "prev" | "next") {
     const weekCalendarView = this.weekCalendarView ?? "current_week";
     const multiplier = direction === "prev" ? -1 : 1;
@@ -257,16 +268,13 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     );
   }
 
-  private navigatePrev = () => this.navigateWeek("prev");
-  private navigateNext = () => this.navigateWeek("next");
-  
   private navigateToToday = () => {
     this.currentDate = startOfDay(Date.now());
     this.resetAutoScrollTimeout();
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
         detail: { currentDate: this.currentDate },
-      })
+      }),
     );
   };
 
@@ -305,14 +313,12 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       <ha-card style=${styleMap(styles)}>
         <div class="week-calendar">
           <pebble-calendar-month-header
+            .localize=${this.localize}
             .monthName=${monthName}
             .disabled=${false}
-            .onNavigatePrev=${this.navigatePrev}
-            .onNavigateNext=${this.navigateNext}
-            .onNavigateToday=${this.navigateToToday}
+            @calendar-navigated=${this.handleCalendarNavigated}
           ></pebble-calendar-month-header>
 
-          <!-- Day headers -->
           <div class="day-headers">
             <div></div>
             ${weekDays.map((date) => {

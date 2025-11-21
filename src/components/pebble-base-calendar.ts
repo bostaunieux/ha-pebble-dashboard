@@ -136,6 +136,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
           --day-margin: 5px;
           --arrow-radius: 4px;
           --card-padding: 16px;
+
+          --month-header-height: 62px;
         }
 
         ha-card {

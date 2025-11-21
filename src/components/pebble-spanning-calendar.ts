@@ -70,11 +70,10 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
       <ha-card style=${styleMap(styles)}>
         <div class="calendar-container">
           <pebble-calendar-month-header
+            .localize=${this.localize}
             .monthName=${this.displayedMonth}
-            .disabled=${false}
-            .onNavigatePrev=${this.handleNavigatePrev}
-            .onNavigateNext=${this.handleNavigateNext}
-            .onNavigateToday=${this.handleNavigateToday}
+            .disabled=${true}
+            @calendar-navigated=${this.handleCalendarNavigated}
           ></pebble-calendar-month-header>
           <div class="calendar-header">
             ${adjustedDaysOfWeek.map(
@@ -107,10 +106,12 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
                       const forecast = this.weatherForecast?.get(getDayOfYear(date));
                       return html`<div class="day">
                         ${this.renderForecast(forecast)}
-                        <div class="date ${classMap({ 
-                          past: isPast(endOfDay(date)),
-                          loading: this.isInitialRender
-                        })}">
+                        <div
+                          class="date ${classMap({
+                            past: isPast(endOfDay(date)),
+                            loading: this.isInitialRender,
+                          })}"
+                        >
                           ${date.getDate() === 1
                             ? html`<div class="month">${format(date, "MMM")}</div>`
                             : nothing}

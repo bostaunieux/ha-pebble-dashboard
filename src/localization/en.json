@@ -96,7 +96,8 @@
         "detail": {
           "all-day": "All day"
         },
-        "no-events": "No events"
+        "no-events": "No events",
+        "today": "Today"
       },
       "agenda": {
         "next-week": "Next Week"

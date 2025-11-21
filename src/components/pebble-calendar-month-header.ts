@@ -1,42 +1,47 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { LocalizationKey } from "../localize";
 
 @customElement("pebble-calendar-month-header")
 class PebbleCalendarMonthHeader extends LitElement {
+  @property() public localize!: (arg: LocalizationKey) => string;
   @property({ type: String, attribute: "month-name" }) monthName: string = "";
   @property({ type: Boolean }) disabled: boolean = false;
-  @property({ attribute: false }) onNavigatePrev?: () => void;
-  @property({ attribute: false }) onNavigateNext?: () => void;
-  @property({ attribute: false }) onNavigateToday?: () => void;
 
   private handlePrevClick = () => {
-    if (!this.disabled && this.onNavigatePrev) {
-      this.onNavigatePrev();
+    if (!this.disabled) {
+      this.handleNavigated("prev");
     }
   };
 
   private handleNextClick = () => {
-    if (!this.disabled && this.onNavigateNext) {
-      this.onNavigateNext();
+    if (!this.disabled) {
+      this.handleNavigated("next");
     }
   };
 
   private handleTodayClick = () => {
-    if (!this.disabled && this.onNavigateToday) {
-      this.onNavigateToday();
-    }
+    this.handleNavigated("today");
+  };
+
+  private handleNavigated = (type: "prev" | "next" | "today") => {
+    this.dispatchEvent(
+      new CustomEvent("calendar-navigated", {
+        detail: { type },
+      }),
+    );
   };
 
   render() {
     return html`
       <div class="month-header">
         <div class="month-name">${this.monthName}</div>
-        <div class="navigation ${this.disabled ? 'disabled' : ''}">
+        <div class="navigation">
           <ha-icon-button @click=${this.handlePrevClick} ?disabled=${this.disabled}>
             <ha-icon icon="mdi:chevron-left"></ha-icon>
           </ha-icon-button>
-          <button class="today-button" @click=${this.handleTodayClick} ?disabled=${this.disabled}>
-            Today
+          <button class="today-button" @click=${this.handleTodayClick}>
+            ${this.localize("calendar.card.calendar.today")}
           </button>
           <ha-icon-button @click=${this.handleNextClick} ?disabled=${this.disabled}>
             <ha-icon icon="mdi:chevron-right"></ha-icon>
@@ -68,11 +73,6 @@ class PebbleCalendarMonthHeader extends LitElement {
         align-items: center;
       }
 
-      .navigation.disabled {
-        opacity: 0.4;
-        pointer-events: none;
-      }
-
       .today-button {
         background: transparent;
         border: 1px solid var(--divider-color, #e0e0e0);
@@ -85,12 +85,8 @@ class PebbleCalendarMonthHeader extends LitElement {
         transition: background-color 0.2s ease;
       }
 
-      .today-button:hover:not(:disabled) {
+      .today-button:hover {
         background-color: var(--divider-color, #e0e0e0);
-      }
-
-      .today-button:disabled {
-        cursor: not-allowed;
       }
 
       :host {
@@ -106,4 +102,3 @@ declare global {
     "pebble-calendar-month-header": PebbleCalendarMonthHeader;
   }
 }
-

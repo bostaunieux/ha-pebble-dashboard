@@ -1,17 +1,16 @@
 import { css, CSSResultGroup } from "lit";
 import { property, query, state } from "lit/decorators.js";
-import { 
-  Day, 
-  startOfWeek, 
-  startOfMonth, 
-  addDays, 
-  eachDayOfInterval, 
+import {
+  Day,
+  startOfWeek,
+  startOfMonth,
+  addDays,
+  eachDayOfInterval,
   format,
-  subMonths,
   addMonths,
   endOfMonth,
   endOfWeek,
-  isSameDay
+  isSameDay,
 } from "date-fns";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
@@ -25,13 +24,12 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
   @property({ attribute: false }) protected focusMonth: Date = startOfMonth(new Date());
 
-  @property({ attribute: false }) protected onMonthChange?: (date: Date) => void;
-
   @state() protected displayedMonth: string = "";
 
   @state() protected isInitialRender = true;
 
   @query(".calendar-scroll-area") protected scrollArea?: HTMLDivElement;
+
   private intersectionObserver?: IntersectionObserver;
 
   constructor() {
@@ -57,7 +55,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
     super.updated(changedProperties);
-    
+
     // On initial render, wait for events before scrolling
     if (this.isInitialRender && changedProperties.has("events") && this.events.length > 0) {
       this.updateComplete.then(() => {
@@ -80,9 +78,9 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
         (entries) => {
           // Collect all intersecting weeks at the top
           const visibleWeeks: Array<{ weekIndex: number; monthName: string }> = [];
-          
+
           entries.forEach((entry) => {
-            if (entry.isIntersecting ) {
+            if (entry.isIntersecting) {
               const weekElement = entry.target as HTMLElement;
               const weekIndex = parseInt(weekElement.dataset.weekIndex || "0", 10);
               const monthName = weekElement.dataset.monthName || "";
@@ -97,7 +95,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           }
 
           // check if any weeks from the currently displayed month are still visible
-          if (visibleWeeks.some(week => week.monthName === this.displayedMonth)) {
+          if (visibleWeeks.some((week) => week.monthName === this.displayedMonth)) {
             return;
           }
 
@@ -111,7 +109,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           root: this.scrollArea,
           rootMargin: "0px 0px -99% 0px", // only monitor top 1% of the scrollable container
           threshold: 0.01,
-        }
+        },
       );
 
       // observe all week elements
@@ -126,70 +124,42 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     });
   }
 
-  protected handleNavigatePrev = () => {
-    const today = new Date();
-    const currentMonthStart = startOfMonth(today);
-    
-    // Can't navigate before current month
-    if (this.focusMonth <= currentMonthStart) {
+  protected handleCalendarNavigated = () => {
+    this.scrollToInitialPosition("smooth");
+  };
+
+  private scrollToInitialPosition(behavior: ScrollBehavior = "auto") {
+    if (!this.scrollArea) {
       return;
     }
-    
-    // Navigate to previous month
-    this.navigateToMonth(subMonths(this.focusMonth, 1));
-  };
 
-  protected handleNavigateNext = () => {
-    const nextMonth = addMonths(this.focusMonth, 1);
-    this.navigateToMonth(nextMonth);
-  };
-
-  protected handleNavigateToday = () => {
-    const today = new Date();
-    this.navigateToMonth(startOfMonth(today));
-  };
-
-  private navigateToMonth(targetMonth: Date) {
-    this.focusMonth = startOfMonth(targetMonth);
-    
-    // Notify parent to refetch events (async, don't wait)
-    if (this.onMonthChange) {
-      this.onMonthChange(this.focusMonth);
-    }
-    
-    // Scroll will happen in updated() lifecycle
-  }
-
-  private scrollToInitialPosition() {
-    if (!this.scrollArea) return;
-    
     const today = new Date();
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
     const startPosition = this.monthCalendarStart ?? "current_week";
-    
+
     if (startPosition === "start_of_month") {
       // Scroll to day 1 of focus month (instant)
-      this.scrollToMonth(this.focusMonth, "auto");
-    } else {
+      this.scrollToMonth(this.focusMonth, behavior);
+    } else {  
       // Scroll to current week (instant)
       const currentWeekStart = startOfWeek(today, { weekStartsOn });
-      this.scrollToWeek(currentWeekStart);
+      this.scrollToWeek(currentWeekStart, behavior);
     }
   }
 
   private scrollToMonth(targetDate: Date, behavior: ScrollBehavior = "smooth") {
     if (!this.scrollArea) return;
-    
+
     const targetMonthStr = format(targetDate, "MMMM yyyy");
     const weekElements = Array.from(this.scrollArea.querySelectorAll<HTMLElement>(".week"));
-    
+
     for (const weekElement of weekElements) {
       if (weekElement.dataset.monthName === targetMonthStr) {
         // Calculate scroll position using getBoundingClientRect for accuracy
         const scrollAreaRect = this.scrollArea.getBoundingClientRect();
         const weekRect = weekElement.getBoundingClientRect();
         const scrollTop = this.scrollArea.scrollTop + (weekRect.top - scrollAreaRect.top);
-        
+
         if (behavior === "smooth") {
           this.scrollArea.scrollTo({ top: scrollTop, behavior: "smooth" });
         } else {
@@ -200,24 +170,28 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     }
   }
 
-  private scrollToWeek(targetWeekStart: Date) {
+  private scrollToWeek(targetWeekStart: Date, behavior: ScrollBehavior = "auto") {
     if (!this.scrollArea) return;
-    
+
     const weekElements = Array.from(this.scrollArea.querySelectorAll<HTMLElement>(".week"));
     const allWeeks = this.generateWeeksInMonth();
-    
+
     // Find week containing target date
     for (let i = 0; i < allWeeks.length; i++) {
       const week = allWeeks[i];
-      if (week.some(day => isSameDay(day, targetWeekStart))) {
+      if (week.some((day) => isSameDay(day, targetWeekStart))) {
         const weekElement = weekElements[i];
         if (weekElement) {
           // Calculate scroll position using getBoundingClientRect for accuracy
           const scrollAreaRect = this.scrollArea.getBoundingClientRect();
           const weekRect = weekElement.getBoundingClientRect();
           const scrollTop = this.scrollArea.scrollTop + (weekRect.top - scrollAreaRect.top);
-          
-          this.scrollArea.scrollTop = scrollTop;
+
+          if (behavior === "smooth") {
+            this.scrollArea.scrollTo({ top: scrollTop, behavior: "smooth" });
+          } else {
+            this.scrollArea.scrollTop = scrollTop;
+          }
         }
         break;
       }
@@ -226,25 +200,25 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
   protected generateWeeksInMonth() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
-    
+
     const nextMonth = addMonths(this.focusMonth, 2);
-    
+
     // Start from beginning of previous month
     const rangeStart = startOfWeek(startOfMonth(this.focusMonth), { weekStartsOn });
-    
+
     // End at end of next month
     const rangeEnd = endOfWeek(endOfMonth(nextMonth), { weekStartsOn });
-    
+
     // Generate all weeks in this range
     const weeks = [];
     let currentWeekStart = rangeStart;
-    
+
     while (currentWeekStart <= rangeEnd) {
       const weekEnd = addDays(currentWeekStart, 6);
       weeks.push(eachDayOfInterval({ start: currentWeekStart, end: weekEnd }));
       currentWeekStart = addDays(currentWeekStart, 7);
     }
-    
+
     return weeks;
   }
 
@@ -282,7 +256,15 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
         }
 
         .calendar-scroll-area {
-          height: min(100%, calc(100vh - var(--header-height)));
+          --week-day-header-height: 66px;
+          height: min(
+            100%,
+            calc(
+              100vh - var(--header-height) - var(--month-header-height) - var(
+                  --week-day-header-height
+                )
+            )
+          );
           overflow-y: scroll;
           overflow-x: hidden;
           scrollbar-width: thin;
@@ -345,7 +327,9 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
         .month {
           display: inline-block;
-          transition: filter 0.3s ease, opacity 0.3s ease;
+          transition:
+            filter 0.3s ease,
+            opacity 0.3s ease;
         }
 
         .numeral {
@@ -355,7 +339,9 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           min-width: 1.25em;
           text-align: center;
 
-          transition: filter 0.3s ease, opacity 0.3s ease;
+          transition:
+            filter 0.3s ease,
+            opacity 0.3s ease;
         }
 
         .numeral.today {
@@ -367,7 +353,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
         .date.loading .numeral,
         .date.loading .month {
           filter: blur(4px);
-          opacity: 0.3;
+          opacity: 0.5;
           user-select: none;
           pointer-events: none;
         }

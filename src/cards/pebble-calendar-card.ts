@@ -53,8 +53,6 @@ class PebbleCalendarCard extends LitElement {
 
   @state() private currentView: "month" | "week" | "agenda" = "month";
 
-  @state() private monthFocusDate: Date = startOfMonth(new Date());
-
   private _retryCount: number;
 
   private _unsubscribeFromWeather?: () => Promise<void>;
@@ -184,19 +182,18 @@ class PebbleCalendarCard extends LitElement {
   }
 
   private calculateDateRange(currentDate?: Date | number): { start: Date; end: Date } {
-    const today = startOfDay(currentDate ?? Date.now());
+    const targetDate = startOfDay(currentDate ?? Date.now());
     const viewType = this.config.view_type ?? "month";
 
     if (viewType === "week") {
       const weekConfig = getResolvedWeekViewConfig(this.config);
-      return this.calculateWeekViewDateRange(today, weekConfig.week_start as Day);
+      return this.calculateWeekViewDateRange(targetDate, weekConfig.week_start as Day);
     } else if (viewType === "agenda") {
       const agendaConfig = getResolvedAgendaViewConfig(this.config);
-      return this.calculateAgendaViewDateRange(today, agendaConfig.week_start as Day);
+      return this.calculateAgendaViewDateRange(targetDate, agendaConfig.week_start as Day);
     } else {
       const monthConfig = getResolvedMonthViewConfig(this.config);
-      // Use monthFocusDate for month view instead of today
-      return this.calculateMonthViewDateRange(this.monthFocusDate, monthConfig.week_start as Day);
+      return this.calculateMonthViewDateRange(targetDate, monthConfig.week_start as Day);
     }
   }
 
@@ -238,19 +235,22 @@ class PebbleCalendarCard extends LitElement {
     };
   }
 
-  private calculateMonthViewDateRange(focusDate: Date, weekStartsOn: Day): { start: Date; end: Date } {
+  private calculateMonthViewDateRange(
+    targetDate: Date,
+    weekStartsOn: Day,
+  ): { start: Date; end: Date } {
     const today = new Date();
     const currentMonth = startOfMonth(today);
-    
+
     // Determine effective focus (can't go before current month for event fetching)
-    const effectiveFocus = max([focusDate, currentMonth]);
-    
+    const startDate = max([targetDate, currentMonth]);
+
     // Always fetch: focus month + next 2 months
-    const nextNextMonth = addMonths(effectiveFocus, 2);
-    
-    const start = startOfWeek(startOfMonth(effectiveFocus), { weekStartsOn });
-    const end = endOfWeek(endOfMonth(nextNextMonth), { weekStartsOn });
-    
+    const endDate = addMonths(startDate, 2);
+
+    const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
+    const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
+
     return { start, end };
   }
 
@@ -292,11 +292,6 @@ class PebbleCalendarCard extends LitElement {
   private handleDateRangeChange = (event: CustomEvent) => {
     this.activeDate = event.detail.currentDate;
     this._fetchEvents();
-  };
-
-  private handleMonthChange = (newFocusMonth: Date) => {
-    this.monthFocusDate = newFocusMonth;
-    this._fetchEvents(); // Async refetch, don't wait
   };
 
   render() {
@@ -345,8 +340,6 @@ class PebbleCalendarCard extends LitElement {
     return html`
       ${getResolvedMonthViewConfig(this.config).events_span_days
         ? html`<pebble-spanning-calendar
-            .focusMonth=${this.monthFocusDate}
-            .onMonthChange=${this.handleMonthChange}
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
             .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
             .textSize=${this.config?.text_size}
@@ -354,10 +347,9 @@ class PebbleCalendarCard extends LitElement {
             .weatherForecast=${this.weatherForecast}
             .localize=${this.localize}
             .hass=${this._hass}
+            @date-range-changed=${this.handleDateRangeChange}
           ></pebble-spanning-calendar>`
         : html`<pebble-basic-calendar
-            .focusMonth=${this.monthFocusDate}
-            .onMonthChange=${this.handleMonthChange}
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
             .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
             .textSize=${this.config?.text_size}
@@ -365,6 +357,7 @@ class PebbleCalendarCard extends LitElement {
             .weatherForecast=${this.weatherForecast}
             .localize=${this.localize}
             .hass=${this._hass}
+            @date-range-changed=${this.handleDateRangeChange}
           ></pebble-basic-calendar>`}
       ${this.config?.show_view_toggle
         ? html`<pebble-view-toggle
