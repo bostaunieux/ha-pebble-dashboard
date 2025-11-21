@@ -21,6 +21,12 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
 
+  @property({ attribute: false }) protected showNavControls: boolean = false;
+
+  @property({ attribute: false }) protected showViewToggle: boolean = false;
+
+  @property({ attribute: false }) protected currentView: "month" | "week" | "agenda" = "month";
+
   constructor() {
     super();
     this.events = [];

@@ -78,7 +78,8 @@ class PebbleCalendarCard extends LitElement {
     this.config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
-      show_view_toggle: false,
+      show_interactive_controls: false,
+      view_toggle_location: "header",
       view_type: "month",
       event_refresh_interval: 15,
       enable_weather: false,
@@ -295,6 +296,20 @@ class PebbleCalendarCard extends LitElement {
   };
 
   render() {
+    // Use show_interactive_controls, falling back to show_view_toggle for backward compatibility
+    const showInteractiveControls =
+      this.config?.show_interactive_controls ?? this.config?.show_view_toggle ?? false;
+    const viewToggleLocation = this.config?.view_toggle_location ?? "header";
+    
+    // Nav controls always shown in header when interactive controls are enabled
+    const showNavControls = showInteractiveControls;
+    
+    // View toggle shown in header only if location is "header"
+    const showHeaderViewToggle = showInteractiveControls && viewToggleLocation === "header";
+    
+    // View toggle shown floating only if location is "floating"
+    const showFloatingViewToggle = showInteractiveControls && viewToggleLocation === "floating";
+
     if (this.currentView === "week") {
       return html`
         <pebble-week-calendar
@@ -306,11 +321,16 @@ class PebbleCalendarCard extends LitElement {
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
           .hass=${this._hass}
+          .showNavControls=${showNavControls}
+          .showViewToggle=${showHeaderViewToggle}
+          .currentView=${this.currentView}
           @date-range-changed=${this.handleDateRangeChange}
+          @view-changed=${this.handleViewChange}
         ></pebble-week-calendar>
-        ${this.config?.show_view_toggle
+        ${showFloatingViewToggle
           ? html`<pebble-view-toggle
               .currentView=${this.currentView}
+              .location=${"floating"}
               @view-changed=${this.handleViewChange}
             ></pebble-view-toggle>`
           : nothing}
@@ -326,11 +346,16 @@ class PebbleCalendarCard extends LitElement {
           .weatherForecast=${this.weatherForecast}
           .localize=${this.localize}
           .hass=${this._hass}
+          .showNavControls=${showNavControls}
+          .showViewToggle=${showHeaderViewToggle}
+          .currentView=${this.currentView}
           @date-range-changed=${this.handleDateRangeChange}
+          @view-changed=${this.handleViewChange}
         ></pebble-agenda-calendar>
-        ${this.config?.show_view_toggle
+        ${showFloatingViewToggle
           ? html`<pebble-view-toggle
               .currentView=${this.currentView}
+              .location=${"floating"}
               @view-changed=${this.handleViewChange}
             ></pebble-view-toggle>`
           : nothing}
@@ -347,7 +372,11 @@ class PebbleCalendarCard extends LitElement {
             .weatherForecast=${this.weatherForecast}
             .localize=${this.localize}
             .hass=${this._hass}
+            .showNavControls=${showNavControls}
+            .showViewToggle=${showHeaderViewToggle}
+            .currentView=${this.currentView}
             @date-range-changed=${this.handleDateRangeChange}
+            @view-changed=${this.handleViewChange}
           ></pebble-spanning-calendar>`
         : html`<pebble-basic-calendar
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
@@ -357,11 +386,16 @@ class PebbleCalendarCard extends LitElement {
             .weatherForecast=${this.weatherForecast}
             .localize=${this.localize}
             .hass=${this._hass}
+            .showNavControls=${showNavControls}
+            .showViewToggle=${showHeaderViewToggle}
+            .currentView=${this.currentView}
             @date-range-changed=${this.handleDateRangeChange}
+            @view-changed=${this.handleViewChange}
           ></pebble-basic-calendar>`}
-      ${this.config?.show_view_toggle
+      ${showFloatingViewToggle
         ? html`<pebble-view-toggle
             .currentView=${this.currentView}
+            .location=${"floating"}
             @view-changed=${this.handleViewChange}
           ></pebble-view-toggle>`
         : nothing}

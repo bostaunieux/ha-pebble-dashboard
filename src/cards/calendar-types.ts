@@ -39,7 +39,9 @@ export interface ResolvedAgendaViewConfig {
 export type CalendarCardConfig = {
   type: "custom:pebble-calendar-card";
   calendars?: Array<CalendarEntity>;
-  show_view_toggle?: boolean;
+  show_view_toggle?: boolean; // Deprecated - kept for backward compatibility
+  show_interactive_controls?: boolean;
+  view_toggle_location?: "floating" | "header";
   view_type?: "month" | "week" | "agenda";
   event_refresh_interval?: number;
   enable_weather?: boolean;

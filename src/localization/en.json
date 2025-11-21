@@ -164,8 +164,18 @@
           }
         },
 
+        "show-interactive-controls": {
+          "label": "Show interactive controls"
+        },
         "show-view-toggle": {
           "label": "Show view toggle buttons"
+        },
+        "view-toggle-location": {
+          "label": "View toggle location",
+          "option": {
+            "header": "Header",
+            "floating": "Floating"
+          }
         },
         "week-calendar-view": {
           "label": "Week calendar view",

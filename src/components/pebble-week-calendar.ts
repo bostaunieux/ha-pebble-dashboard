@@ -316,6 +316,9 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
             .localize=${this.localize}
             .monthName=${monthName}
             .disabled=${false}
+            .showNavControls=${this.showNavControls}
+            .showViewToggle=${this.showViewToggle}
+            .currentView=${this.currentView}
             @calendar-navigated=${this.handleCalendarNavigated}
           ></pebble-calendar-month-header>
 

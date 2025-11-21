@@ -7,6 +7,8 @@ class PebbleViewToggle extends LitElement {
   @property({ type: String, attribute: "current-view" }) currentView: "month" | "week" | "agenda" =
     "month";
 
+  @property({ type: String }) location: "floating" | "header" = "header";
+
   private handleViewChange(view: "month" | "week" | "agenda") {
     this.currentView = view;
 
@@ -23,7 +25,7 @@ class PebbleViewToggle extends LitElement {
 
   render() {
     return html`
-      <div class="view-toggle">
+      <div class="view-toggle ${this.location}">
         <button
           class="toggle-button ${this.currentView === "month" ? "active" : ""}"
           @click=${this.handleMonthView}
@@ -52,18 +54,25 @@ class PebbleViewToggle extends LitElement {
   static get styles() {
     return css`
       .view-toggle {
+        display: flex;
+        gap: 8px;
+      }
+
+      .view-toggle.floating {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        display: flex;
         flex-direction: column;
-        gap: 8px;
         z-index: 1000;
         background: var(--card-background-color, #fff);
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         padding: 8px;
         border: 1px solid var(--divider-color, #e0e0e0);
+      }
+
+      .view-toggle.header {
+        flex-direction: row;
       }
 
       .toggle-button {

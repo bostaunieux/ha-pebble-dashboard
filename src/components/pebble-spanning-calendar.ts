@@ -73,6 +73,9 @@ class PebbleSpanningCalendar extends PebbleMonthCalendar {
             .localize=${this.localize}
             .monthName=${this.displayedMonth}
             .disabled=${true}
+            .showNavControls=${this.showNavControls}
+            .showViewToggle=${this.showViewToggle}
+            .currentView=${this.currentView}
             @calendar-navigated=${this.handleCalendarNavigated}
           ></pebble-calendar-month-header>
           <div class="calendar-header">
