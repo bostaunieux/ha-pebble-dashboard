@@ -8,6 +8,10 @@ import {
   startOfMonth,
   addDays,
   endOfDay,
+  addMonths,
+  endOfMonth,
+  endOfWeek,
+  max,
 } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
@@ -48,6 +52,8 @@ class PebbleCalendarCard extends LitElement {
   @state() private weatherForecast?: Map<number, ForecastAttribute>;
 
   @state() private currentView: "month" | "week" | "agenda" = "month";
+
+  @state() private monthFocusDate: Date = startOfMonth(new Date());
 
   private _retryCount: number;
 
@@ -189,7 +195,8 @@ class PebbleCalendarCard extends LitElement {
       return this.calculateAgendaViewDateRange(today, agendaConfig.week_start as Day);
     } else {
       const monthConfig = getResolvedMonthViewConfig(this.config);
-      return this.calculateMonthViewDateRange(today, monthConfig.week_start as Day);
+      // Use monthFocusDate for month view instead of today
+      return this.calculateMonthViewDateRange(this.monthFocusDate, monthConfig.week_start as Day);
     }
   }
 
@@ -231,24 +238,20 @@ class PebbleCalendarCard extends LitElement {
     };
   }
 
-  private calculateMonthViewDateRange(today: Date, weekStartsOn: Day): { start: Date; end: Date } {
-    const monthConfig = getResolvedMonthViewConfig(this.config);
-    const numWeeks = monthConfig.num_weeks;
-    const monthCalendarStart = monthConfig.month_calendar_start;
-
-    const startDate =
-      monthCalendarStart === "start_of_month"
-        ? startOfMonth(today)
-        : startOfWeek(today, { weekStartsOn });
-
-    const startWeekStart = startOfWeek(startDate, { weekStartsOn });
-    const endWeekStart = addDays(startWeekStart, (numWeeks - 1) * 7);
-    const endWeekEnd = endOfDay(addDays(endWeekStart, 6));
-
-    return {
-      start: startWeekStart,
-      end: endWeekEnd,
-    };
+  private calculateMonthViewDateRange(focusDate: Date, weekStartsOn: Day): { start: Date; end: Date } {
+    const today = new Date();
+    const currentMonth = startOfMonth(today);
+    
+    // Determine effective focus (can't go before current month for event fetching)
+    const effectiveFocus = max([focusDate, currentMonth]);
+    
+    // Always fetch: focus month + next 2 months
+    const nextNextMonth = addMonths(effectiveFocus, 2);
+    
+    const start = startOfWeek(startOfMonth(effectiveFocus), { weekStartsOn });
+    const end = endOfWeek(endOfMonth(nextNextMonth), { weekStartsOn });
+    
+    return { start, end };
   }
 
   async _fetchEvents() {
@@ -289,6 +292,11 @@ class PebbleCalendarCard extends LitElement {
   private handleDateRangeChange = (event: CustomEvent) => {
     this.activeDate = event.detail.currentDate;
     this._fetchEvents();
+  };
+
+  private handleMonthChange = (newFocusMonth: Date) => {
+    this.monthFocusDate = newFocusMonth;
+    this._fetchEvents(); // Async refetch, don't wait
   };
 
   render() {
@@ -337,8 +345,9 @@ class PebbleCalendarCard extends LitElement {
     return html`
       ${getResolvedMonthViewConfig(this.config).events_span_days
         ? html`<pebble-spanning-calendar
+            .focusMonth=${this.monthFocusDate}
+            .onMonthChange=${this.handleMonthChange}
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
-            .numWeeks=${getResolvedMonthViewConfig(this.config).num_weeks}
             .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}
@@ -347,8 +356,9 @@ class PebbleCalendarCard extends LitElement {
             .hass=${this._hass}
           ></pebble-spanning-calendar>`
         : html`<pebble-basic-calendar
+            .focusMonth=${this.monthFocusDate}
+            .onMonthChange=${this.handleMonthChange}
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
-            .numWeeks=${getResolvedMonthViewConfig(this.config).num_weeks}
             .monthCalendarStart=${getResolvedMonthViewConfig(this.config).month_calendar_start}
             .textSize=${this.config?.text_size}
             .events=${this.events}

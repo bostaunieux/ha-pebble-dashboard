@@ -2,6 +2,7 @@ import { html, css, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, state } from "lit/decorators.js";
+import "./pebble-calendar-month-header";
 import {
   format,
   startOfDay,
@@ -116,6 +117,15 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
 
   private navigatePrev = () => this.navigateWeek("prev");
   private navigateNext = () => this.navigateWeek("next");
+  
+  private navigateToToday = () => {
+    this.currentDate = startOfDay(Date.now());
+    this.dispatchEvent(
+      new CustomEvent("date-range-changed", {
+        detail: { currentDate: this.currentDate },
+      })
+    );
+  };
 
   private isCurrentWeek(): boolean {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
@@ -144,17 +154,13 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="agenda-calendar">
-          <div class="month-header">
-            <div class="month-name">${monthName}</div>
-            <div class="navigation">
-              <ha-icon-button @click=${this.navigatePrev}>
-                <ha-icon icon="mdi:chevron-left"></ha-icon>
-              </ha-icon-button>
-              <ha-icon-button @click=${this.navigateNext}>
-                <ha-icon icon="mdi:chevron-right"></ha-icon>
-              </ha-icon-button>
-            </div>
-          </div>
+          <pebble-calendar-month-header
+            .monthName=${monthName}
+            .disabled=${false}
+            .onNavigatePrev=${this.navigatePrev}
+            .onNavigateNext=${this.navigateNext}
+            .onNavigateToday=${this.navigateToToday}
+          ></pebble-calendar-month-header>
 
           <div class="day-cards-grid">
             ${weekDays.map((date) => this.renderDayCard(date))}
@@ -287,26 +293,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           height: 100%;
           display: flex;
           flex-direction: column;
-        }
-
-        .month-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 16px;
-          border-bottom: 2px solid var(--divider-color, #e0e0e0);
-        }
-
-        .month-name {
-          font-size: 1.5em;
-          font-weight: bold;
-          flex: 1;
-          text-align: center;
-        }
-
-        .navigation {
-          display: flex;
-          gap: 4px;
         }
 
         .day-cards-grid {
