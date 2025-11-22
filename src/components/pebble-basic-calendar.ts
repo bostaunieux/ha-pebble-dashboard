@@ -60,10 +60,11 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
           </div>
           <div class="calendar-scroll-area">
             <div class="calendar">
-              ${allWeeks.map((week, weekIndex) => {
+              ${allWeeks.map((week) => {
                 const monthName = format(week[week.length - 1], "MMMM yyyy");
+                const yearWeekIndex = format(week[week.length - 1], "yyyy.ww");
                 return html`
-                  <div class="week" data-week-index=${weekIndex} data-month-name=${monthName}>
+                  <div class="week" data-week-index=${yearWeekIndex} data-month-name=${monthName}>
                     ${week.map((date) => {
                       const events = this.getEventsForDay(date);
                       const forecast = this.weatherForecast?.get(getDayOfYear(date));
