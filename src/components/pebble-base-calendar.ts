@@ -21,6 +21,12 @@ export abstract class PebbleBaseCalendar extends LitElement {
 
   @property({ attribute: false }) protected localize: (key: LocalizationKey) => string;
 
+  @property({ attribute: false }) protected showNavControls: boolean = false;
+
+  @property({ attribute: false }) protected showViewToggle: boolean = false;
+
+  @property({ attribute: false }) protected currentView: "month" | "week" | "agenda" = "month";
+
   constructor() {
     super();
     this.events = [];
@@ -136,6 +142,8 @@ export abstract class PebbleBaseCalendar extends LitElement {
           --day-margin: 5px;
           --arrow-radius: 4px;
           --card-padding: 16px;
+
+          --month-header-height: 62px;
         }
 
         ha-card {

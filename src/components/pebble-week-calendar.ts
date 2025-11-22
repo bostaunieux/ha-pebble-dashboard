@@ -2,6 +2,7 @@ import { html, css, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, query, state } from "lit/decorators.js";
+import "./pebble-calendar-month-header";
 import {
   format,
   startOfDay,
@@ -237,6 +238,17 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
       );
   }
 
+  private handleCalendarNavigated = (event: CustomEvent) => {
+    const type = event.detail.type;
+    if (type === "prev") {
+      this.navigateWeek("prev");
+    } else if (type === "next") {
+      this.navigateWeek("next");
+    } else if (type === "today") {
+      this.navigateToToday();
+    }
+  }
+
   private navigateWeek(direction: "prev" | "next") {
     const weekCalendarView = this.weekCalendarView ?? "current_week";
     const multiplier = direction === "prev" ? -1 : 1;
@@ -256,8 +268,15 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     );
   }
 
-  private navigatePrev = () => this.navigateWeek("prev");
-  private navigateNext = () => this.navigateWeek("next");
+  private navigateToToday = () => {
+    this.currentDate = startOfDay(Date.now());
+    this.resetAutoScrollTimeout();
+    this.dispatchEvent(
+      new CustomEvent("date-range-changed", {
+        detail: { currentDate: this.currentDate },
+      }),
+    );
+  };
 
   render() {
     const weekDays = this.generateWeekDays();
@@ -293,19 +312,16 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="week-calendar">
-          <div class="month-header">
-            <div class="month-name">${monthName}</div>
-            <div class="navigation">
-              <ha-icon-button @click=${this.navigatePrev}>
-                <ha-icon icon="mdi:chevron-left"></ha-icon>
-              </ha-icon-button>
-              <ha-icon-button @click=${this.navigateNext}>
-                <ha-icon icon="mdi:chevron-right"></ha-icon>
-              </ha-icon-button>
-            </div>
-          </div>
+          <pebble-calendar-month-header
+            .localize=${this.localize}
+            .monthName=${monthName}
+            .disabled=${false}
+            .showNavControls=${this.showNavControls}
+            .showViewToggle=${this.showViewToggle}
+            .currentView=${this.currentView}
+            @calendar-navigated=${this.handleCalendarNavigated}
+          ></pebble-calendar-month-header>
 
-          <!-- Day headers -->
           <div class="day-headers">
             <div></div>
             ${weekDays.map((date) => {
@@ -603,26 +619,6 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           height: 100%;
           display: flex;
           flex-direction: column;
-        }
-
-        .month-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 16px;
-          border-bottom: 2px solid var(--divider-color, #e0e0e0);
-        }
-
-        .month-name {
-          font-size: 1.5em;
-          font-weight: bold;
-          flex: 1;
-          text-align: center;
-        }
-
-        .navigation {
-          display: flex;
-          gap: 4px;
         }
 
         .day-headers {

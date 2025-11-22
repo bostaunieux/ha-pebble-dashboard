@@ -5,6 +5,7 @@ import { customElement } from "lit/decorators.js";
 import { isPast, format, startOfDay, isToday, Day, getDayOfYear, endOfDay } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { PebbleMonthCalendar } from "./pebble-month-calendar";
+import "./pebble-calendar-month-header";
 
 const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
@@ -36,6 +37,15 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="calendar-container">
+          <pebble-calendar-month-header
+            .localize=${this.localize}
+            .monthName=${this.displayedMonth}
+            .disabled=${true}
+            .showNavControls=${this.showNavControls}
+            .showViewToggle=${this.showViewToggle}
+            .currentView=${this.currentView}
+            @calendar-navigated=${this.handleCalendarNavigated}
+          ></pebble-calendar-month-header>
           <div class="calendar-header">
             ${adjustedDaysOfWeek.map(
               (day, index) =>
@@ -50,17 +60,24 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
           </div>
           <div class="calendar-scroll-area">
             <div class="calendar">
-              ${allWeeks.map((week, weekIndex) => {
+              ${allWeeks.map((week) => {
+                const monthName = format(week[week.length - 1], "MMMM yyyy");
+                const yearWeekIndex = format(week[week.length - 1], "yyyy.ww");
                 return html`
-                  <div class="week">
-                    ${week.map((date, dayIndex) => {
+                  <div class="week" data-week-index=${yearWeekIndex} data-month-name=${monthName}>
+                    ${week.map((date) => {
                       const events = this.getEventsForDay(date);
                       const forecast = this.weatherForecast?.get(getDayOfYear(date));
 
                       return html`<div class="day">
                         ${this.renderForecast(forecast)}
-                        <div class="date ${classMap({ past: isPast(endOfDay(date)) })}">
-                          ${(weekIndex === 0 && dayIndex === 0) || date.getDate() === 1
+                        <div
+                          class="date ${classMap({
+                            past: isPast(endOfDay(date)),
+                            loading: this.isInitialRender,
+                          })}"
+                        >
+                          ${date.getDate() === 1
                             ? html`<div class="month">${format(date, "MMM")}</div>`
                             : nothing}
                           <div class="numeral ${classMap({ today: isToday(date) })}">

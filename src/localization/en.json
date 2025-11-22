@@ -96,7 +96,8 @@
         "detail": {
           "all-day": "All day"
         },
-        "no-events": "No events"
+        "no-events": "No events",
+        "today": "Today"
       },
       "agenda": {
         "next-week": "Next Week"
@@ -163,8 +164,18 @@
           }
         },
 
+        "show-interactive-controls": {
+          "label": "Show interactive controls"
+        },
         "show-view-toggle": {
           "label": "Show view toggle buttons"
+        },
+        "view-toggle-location": {
+          "label": "View toggle location",
+          "option": {
+            "header": "Header",
+            "floating": "Floating"
+          }
         },
         "week-calendar-view": {
           "label": "Week calendar view",

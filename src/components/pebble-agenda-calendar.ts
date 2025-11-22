@@ -2,6 +2,7 @@ import { html, css, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, state } from "lit/decorators.js";
+import "./pebble-calendar-month-header";
 import {
   format,
   startOfDay,
@@ -98,12 +99,22 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
         // Otherwise (same start, both allDay or both not), tie-breaker on end date
         return a.end.getTime() - b.end.getTime();
-      })
+      });
   }
 
-  private navigateWeek(direction: "prev" | "next") {
-    const multiplier = direction === "prev" ? -1 : 1;
-    this.currentDate = addDays(this.currentDate, 7 * multiplier);
+  private handleCalendarNavigated = (event: CustomEvent) => {
+    const type = event.detail.type;
+    if (type === "prev") {
+      this.navigateWeek(addDays(this.currentDate, -7));
+    } else if (type === "next") {
+      this.navigateWeek(addDays(this.currentDate, 7));
+    } else if (type === "today") {
+      this.navigateWeek(startOfDay(Date.now()));
+    }
+  }
+
+  private navigateWeek(targetDate: Date) {
+    this.currentDate = targetDate;
 
     this.dispatchEvent(
       new CustomEvent("date-range-changed", {
@@ -113,9 +124,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       }),
     );
   }
-
-  private navigatePrev = () => this.navigateWeek("prev");
-  private navigateNext = () => this.navigateWeek("next");
 
   private isCurrentWeek(): boolean {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
@@ -144,17 +152,15 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     return html`
       <ha-card style=${styleMap(styles)}>
         <div class="agenda-calendar">
-          <div class="month-header">
-            <div class="month-name">${monthName}</div>
-            <div class="navigation">
-              <ha-icon-button @click=${this.navigatePrev}>
-                <ha-icon icon="mdi:chevron-left"></ha-icon>
-              </ha-icon-button>
-              <ha-icon-button @click=${this.navigateNext}>
-                <ha-icon icon="mdi:chevron-right"></ha-icon>
-              </ha-icon-button>
-            </div>
-          </div>
+          <pebble-calendar-month-header
+            .localize=${this.localize}
+            .monthName=${monthName}
+            .disabled=${false}
+            .showNavControls=${this.showNavControls}
+            .showViewToggle=${this.showViewToggle}
+            .currentView=${this.currentView}
+            @calendar-navigated=${this.handleCalendarNavigated}
+          ></pebble-calendar-month-header>
 
           <div class="day-cards-grid">
             ${weekDays.map((date) => this.renderDayCard(date))}
@@ -178,9 +184,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     return html`
       <div class=${classMap(classes)}>
         <div class="day-card-header">
-          <div class="day-name">
-            ${format(date, "EEEE")}
-          </div>
+          <div class="day-name">${format(date, "EEEE")}</div>
           <div class="day-date">${format(date, "MMM d")}</div>
           ${dayEvents.length > 0
             ? html`<div class="event-count">${dayEvents.length}</div>`
@@ -223,9 +227,8 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
 
     // For all-day events with a context date, check if the context date is in the past
     // For other events or when no context date, check if the event's end has passed
-    const isPastEvent = event.allDay && contextDate
-      ? isPast(startOfDay(addDays(contextDate, 1)))
-      : isPast(event.end);
+    const isPastEvent =
+      event.allDay && contextDate ? isPast(startOfDay(addDays(contextDate, 1))) : isPast(event.end);
 
     const classes = {
       "agenda-event": true,
@@ -289,26 +292,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           flex-direction: column;
         }
 
-        .month-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 16px;
-          border-bottom: 2px solid var(--divider-color, #e0e0e0);
-        }
-
-        .month-name {
-          font-size: 1.5em;
-          font-weight: bold;
-          flex: 1;
-          text-align: center;
-        }
-
-        .navigation {
-          display: flex;
-          gap: 4px;
-        }
-
         .day-cards-grid {
           --grid-height: calc(
             100vh - var(--header-height, 0px) - var(--month-header-height) - var(--card-padding) -
@@ -320,7 +303,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           gap: 12px;
           flex: 1;
           padding: 16px 0;
-          --month-header-height: 62px;
           min-height: var(--grid-height);
           max-height: var(--grid-height);
           overflow: hidden;

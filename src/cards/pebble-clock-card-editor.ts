@@ -32,12 +32,8 @@ class PebbleClockCardEditor extends LitElement {
 
   @state() private _config!: ClockCardConfig;
 
-  private localize: (key: LocalizationKey) => string;
-
-  constructor() {
-    super();
-
-    this.localize = initLocalize(this.hass);
+  get localize() {
+    return initLocalize(this.hass);
   }
 
   setConfig(config: ClockCardConfig) {

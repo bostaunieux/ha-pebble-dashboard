@@ -1,7 +1,7 @@
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { mdiArrowLeft, mdiClose } from "@mdi/js";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import type { HomeAssistant } from "../types";
 import type { MediaPlayerItem, BrowseMediaDialogParams } from "./section-types";
 import { browseMedia } from "../media/local-media";
@@ -23,12 +23,12 @@ export default class PebbleBrowseMediaDialog extends LitElement {
 
   @state() private _opened = false;
 
-  private localize: (key: LocalizationKey) => string;
+  private get localize() {
+    return initLocalize(this.hass);
+  }
 
   constructor() {
     super();
-
-    this.localize = initLocalize(this.hass);
     this._navigateIds = [];
   }
 

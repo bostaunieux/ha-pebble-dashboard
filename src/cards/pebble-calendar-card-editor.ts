@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { CalendarEntity, CalendarCardConfig } from "./calendar-types";
 import { getCardTextOptionsSchema } from "./card-options";
 import { COLOR_CSS_VARS } from "../utils/colors";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import type { HomeAssistant } from "../types";
 import "../components/color-picker";
 import { mdiWeatherHurricane } from "@mdi/js";
@@ -16,14 +16,17 @@ class PebbleCalendarCardEditor extends LitElement {
 
   @state() private _config: CalendarCardConfig;
 
-  private localize: (key: LocalizationKey) => string;
-
+  get localize() {
+    return initLocalize(this.hass);
+  }
+  
   constructor() {
     super();
     this._config = {
       type: "custom:pebble-calendar-card",
       calendars: [],
-      show_view_toggle: false,
+      show_interactive_controls: false,
+      view_toggle_location: "header",
       view_type: "month",
       event_refresh_interval: 15,
       enable_weather: false,
@@ -32,7 +35,6 @@ class PebbleCalendarCardEditor extends LitElement {
       week_view: {},
       agenda_view: {},
     };
-    this.localize = initLocalize(this.hass);
   }
 
   setConfig(config: CalendarCardConfig) {
@@ -74,12 +76,42 @@ class PebbleCalendarCardEditor extends LitElement {
   }
 
   _getGlobalConfigSchema() {
+    // Use show_interactive_controls with fallback to show_view_toggle for backward compatibility
+    const showInteractiveControls =
+      this._config.show_interactive_controls ?? this._config.show_view_toggle ?? false;
+
     return [
       {
-        label: this.localize("calendar.editor.form.show-view-toggle.label"),
-        name: "show_view_toggle",
+        label: this.localize("calendar.editor.form.show-interactive-controls.label"),
+        name: "show_interactive_controls",
         selector: { boolean: {} },
       },
+      ...(showInteractiveControls
+        ? [
+            {
+              label: this.localize("calendar.editor.form.view-toggle-location.label"),
+              name: "view_toggle_location",
+              selector: {
+                select: {
+                  options: [
+                    {
+                      value: "header",
+                      label: this.localize(
+                        "calendar.editor.form.view-toggle-location.option.header",
+                      ),
+                    },
+                    {
+                      value: "floating",
+                      label: this.localize(
+                        "calendar.editor.form.view-toggle-location.option.floating",
+                      ),
+                    },
+                  ],
+                },
+              },
+            },
+          ]
+        : []),
       {
         label: this.localize("calendar.editor.form.view-type.label"),
         name: "view_type",
@@ -318,12 +350,13 @@ class PebbleCalendarCardEditor extends LitElement {
   _changeCalendarView(ev: CustomEvent) {
     if (!this._config) return;
 
-    const { view_type, show_view_toggle } = ev.detail.value;
+    const { view_type, show_interactive_controls, view_toggle_location } = ev.detail.value;
 
     this._config = {
       ...this._config,
       view_type,
-      show_view_toggle,
+      show_interactive_controls,
+      view_toggle_location,
     };
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
   }

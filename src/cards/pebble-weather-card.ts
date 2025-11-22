@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import { WiSunrise, WiSunset } from "../utils/icons";
 import { supportsFeature, ForecastFeatures, getDefaultForecastType } from "../utils/weather-utils";
 import "../components/pebble-weather-icon";
@@ -29,7 +29,9 @@ class PebbleWeatherCard extends LitElement {
   private _unsubscribe?: () => Promise<void>;
   private _resizeObserver?: ResizeObserver;
 
-  private localize: (key: LocalizationKey) => string;
+  private get localize() {
+    return initLocalize(this._hass);
+  }
 
   constructor() {
     super();
@@ -43,7 +45,6 @@ class PebbleWeatherCard extends LitElement {
     this.isNight = false;
     this.weather = null;
     this._retryCount = 0;
-    this.localize = initLocalize(this._hass);
   }
 
   connectedCallback() {
