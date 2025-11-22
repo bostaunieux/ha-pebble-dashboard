@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { CalendarEntity, CalendarCardConfig } from "./calendar-types";
 import { getCardTextOptionsSchema } from "./card-options";
 import { COLOR_CSS_VARS } from "../utils/colors";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import type { HomeAssistant } from "../types";
 import "../components/color-picker";
 import { mdiWeatherHurricane } from "@mdi/js";
@@ -16,8 +16,10 @@ class PebbleCalendarCardEditor extends LitElement {
 
   @state() private _config: CalendarCardConfig;
 
-  private localize: (key: LocalizationKey) => string;
-
+  get localize() {
+    return initLocalize(this.hass);
+  }
+  
   constructor() {
     super();
     this._config = {
@@ -33,7 +35,6 @@ class PebbleCalendarCardEditor extends LitElement {
       week_view: {},
       agenda_view: {},
     };
-    this.localize = initLocalize(this.hass);
   }
 
   setConfig(config: CalendarCardConfig) {

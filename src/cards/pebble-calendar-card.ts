@@ -27,7 +27,7 @@ import {
 } from "../utils/calendar-config-helpers";
 import { getColor } from "../utils/colors";
 import type { HomeAssistant } from "../types";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import "./pebble-calendar-card-editor";
 import { ForecastAttribute, ForecastEvent } from "./weather-types";
 import { ForecastFeatures, supportsFeature } from "../utils/weather-utils";
@@ -61,8 +61,6 @@ class PebbleCalendarCard extends LitElement {
 
   private reloadTimeoutId?: NodeJS.Timeout;
 
-  private localize: (key: LocalizationKey) => string;
-
   private activeDate?: Date;
 
   static get properties() {
@@ -71,6 +69,10 @@ class PebbleCalendarCard extends LitElement {
       config: {},
       events: {},
     };
+  }
+
+  private get localize() {
+    return initLocalize(this._hass);
   }
 
   constructor() {
@@ -91,7 +93,6 @@ class PebbleCalendarCard extends LitElement {
     this._retryCount = 0;
     this.weather = null;
     this.events = [];
-    this.localize = initLocalize(this._hass);
   }
 
   connectedCallback() {

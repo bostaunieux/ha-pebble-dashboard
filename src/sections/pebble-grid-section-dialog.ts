@@ -1,7 +1,7 @@
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { mdiPlus, mdiDrag, mdiClose } from "@mdi/js";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import type { HomeAssistant } from "../types";
 import type {
   PhotoSource,
@@ -28,16 +28,12 @@ export default class PebbleGridSectionDialog extends LitElement {
 
   @query(".add-remote-input") private _addRemotePhotoInputNode?: HTMLInputElement;
 
-  private _params?: StackSectionDialogParams;
-
-  private localize: (key: LocalizationKey) => string;
-
   @state() private _currTab: (typeof TABS)[number] = TABS[0];
 
-  constructor() {
-    super();
+  private _params?: StackSectionDialogParams;
 
-    this.localize = initLocalize(this.hass);
+  private get localize() {
+    return initLocalize(this.hass);
   }
 
   async showDialog(params: StackSectionDialogParams) {

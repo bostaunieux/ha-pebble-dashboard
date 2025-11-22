@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import type { HomeAssistant } from "../types";
 import { mdiWeatherHurricane, mdiWeatherSunny } from "@mdi/js";
-import initLocalize, { LocalizationKey } from "../localize";
+import initLocalize from "../localize";
 import {
   supportsFeature,
   ForecastFeatures,
@@ -21,8 +21,10 @@ class PebbleWeatherCardEditor extends LitElement {
 
   @state() private config: WeatherCardConfig;
 
-  private localize: (key: LocalizationKey) => string;
-
+  private get localize() {
+    return initLocalize(this.hass);
+  }
+  
   constructor() {
     super();
     this.config = {
@@ -32,7 +34,6 @@ class PebbleWeatherCardEditor extends LitElement {
       hide_today: false,
       hide_forecast: false,
     };
-    this.localize = initLocalize(this.hass);
   }
 
   setConfig(config: WeatherCardConfig) {
