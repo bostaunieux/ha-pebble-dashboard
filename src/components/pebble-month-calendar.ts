@@ -327,9 +327,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
         .month {
           display: inline-block;
-          transition:
-            filter 0.3s ease,
-            opacity 0.3s ease;
+          transition: opacity 0.3s ease;
         }
 
         .numeral {
@@ -339,9 +337,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           min-width: 1.25em;
           text-align: center;
 
-          transition:
-            filter 0.3s ease,
-            opacity 0.3s ease;
+          transition: opacity 0.3s ease;
         }
 
         .numeral.today {
@@ -352,8 +348,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
         /* Loading state - obfuscate day numbers */
         .date.loading .numeral,
         .date.loading .month {
-          filter: blur(4px);
-          opacity: 0.5;
+          opacity: 0;
           user-select: none;
           pointer-events: none;
         }
