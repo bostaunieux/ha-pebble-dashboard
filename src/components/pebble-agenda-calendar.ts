@@ -261,9 +261,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           <div class="day-name">${this.localize("calendar.card.agenda.next-week")}</div>
           <div class="event-count">${summary.total}</div>
         </div>
-        <div class="day-card-events summary-content">
-          <!-- Bar chart -->
-          <div class="summary-section">
+        <div class="day-card-events next-week">
             <div class="bar-chart-container">
               <div class="bar-chart">
                 ${summary.weekDays.map((day) => {
@@ -274,7 +272,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
                       <div
                         class="bar ${count > 0 ? "has-events" : ""}"
                         style="height: ${height}%"
-                        title="${format(day, "EEE, MMM d")}: ${count} event${count !== 1 ? "s" : ""}"
+                        title="${format(day, "EEE, MMM d")}, event count: ${count}"
                       ></div>
                     </div>
                   `;
@@ -288,9 +286,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
                 })}
               </div>
             </div>
-          </div>
 
-          <!-- Preview of upcoming events -->
           ${summary.previewEvents.length > 0
             ? html`
                 <div class="summary-section preview-section">
@@ -492,21 +488,15 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           padding: 20px 0;
         }
 
-        .summary-content {
+        .next-week {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 32px;
           height: 100%;
         }
 
-        .summary-section {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          flex-shrink: 0;
-        }
-
         .bar-chart-container {
+          margin-top: 16px;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -536,6 +526,10 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           transition: background-color 0.2s ease;
         }
 
+        .bar.has-events {
+          background: var(--dark-primary-color, #666);
+        }
+
         .bar-chart-labels {
           display: flex;
           justify-content: space-between;
@@ -547,11 +541,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           font-size: 0.75em;
           color: var(--secondary-text-color, #666);
           text-align: center;
-          font-weight: 500;
-        }
-
-        .bar.has-events {
-          background: var(--dark-primary-color, #666);
         }
 
         .summary-label {
@@ -563,7 +552,6 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
         }
 
         .preview-section {
-          margin-top: auto;
           flex-shrink: 0;
         }
 
