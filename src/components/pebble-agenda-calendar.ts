@@ -201,19 +201,108 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     `;
   }
 
+  private getNextWeekSummary(events: CalendarEvent[]) {
+    const { start } = this.generateNextWeekRange();
+    const weekDays = eachDayOfInterval({
+      start,
+      end: addDays(start, 6),
+    });
+
+    // Count events per day
+    const eventsByDay = new Map<number, number>();
+
+    weekDays.forEach((day) => {
+      const dayEvents = events.filter((event) => {
+        if (event.allDay) {
+          return isWithinInterval(day, { start: event.start, end: event.end });
+        }
+        return isSameDay(event.start, day);
+      });
+      const count = dayEvents.length;
+      eventsByDay.set(day.getTime(), count);
+    });
+
+    // Find max events for bar chart scaling
+    const maxEvents = Math.max(...Array.from(eventsByDay.values()), 1);
+
+    // Get first few upcoming events for preview
+    const previewEvents = events.slice(0, 3);
+
+    return {
+      total: events.length,
+      eventsByDay,
+      maxEvents,
+      weekDays,
+      previewEvents,
+    };
+  }
+
   private renderNextWeekCard(events: CalendarEvent[]) {
+    if (events.length === 0) {
+      return html`
+        <div class="day-card next-week-card">
+          <div class="day-card-header">
+            <div class="day-name">${this.localize("calendar.card.agenda.next-week")}</div>
+          </div>
+          <div class="day-card-events">
+            <div class="no-events">
+              ${this.localize("calendar.card.calendar.no-events")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    const summary = this.getNextWeekSummary(events);
+
     return html`
       <div class="day-card next-week-card">
         <div class="day-card-header">
           <div class="day-name">${this.localize("calendar.card.agenda.next-week")}</div>
-          ${events.length > 0 ? html`<div class="event-count">${events.length}</div>` : nothing}
+          <div class="event-count">${summary.total}</div>
         </div>
-        <div class="day-card-events">
-          ${events.length > 0
-            ? events.map((event) => this.renderAgendaEvent(event, true))
-            : html`<div class="no-events">
-                ${this.localize("calendar.card.calendar.no-events")}
-              </div>`}
+        <div class="day-card-events summary-content">
+          <!-- Bar chart -->
+          <div class="summary-section">
+            <div class="bar-chart-container">
+              <div class="bar-chart">
+                ${summary.weekDays.map((day) => {
+                  const count = summary.eventsByDay.get(day.getTime()) || 0;
+                  const height = (count / summary.maxEvents) * 100;
+                  return html`
+                    <div class="bar-chart-day">
+                      <div
+                        class="bar ${count > 0 ? "has-events" : ""}"
+                        style="height: ${height}%"
+                        title="${format(day, "EEE, MMM d")}: ${count} event${count !== 1 ? "s" : ""}"
+                      ></div>
+                    </div>
+                  `;
+                })}
+              </div>
+              <div class="bar-chart-labels">
+                ${summary.weekDays.map((day) => {
+                  return html`
+                    <div class="bar-label">${format(day, "EEE")}</div>
+                  `;
+                })}
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview of upcoming events -->
+          ${summary.previewEvents.length > 0
+            ? html`
+                <div class="summary-section preview-section">
+                  <div class="summary-label">Upcoming</div>
+                  <div class="preview-events">
+                    ${summary.previewEvents.map((event) =>
+                      this.renderAgendaEvent(event, true),
+                    )}
+                  </div>
+                </div>
+              `
+            : nothing}
         </div>
       </div>
     `;
@@ -401,6 +490,87 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           color: var(--secondary-text-color, #666);
           font-style: italic;
           padding: 20px 0;
+        }
+
+        .summary-content {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          height: 100%;
+        }
+
+        .summary-section {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          flex-shrink: 0;
+        }
+
+        .bar-chart-container {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .bar-chart {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 4px;
+          height: 60px;
+        }
+
+        .bar-chart-day {
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          flex: 1;
+          height: 100%;
+        }
+
+        .bar {
+          width: 100%;
+          min-height: 2px;
+          background: var(--divider-color, #e0e0e0);
+          border-radius: 2px 2px 0 0;
+          transition: background-color 0.2s ease;
+        }
+
+        .bar-chart-labels {
+          display: flex;
+          justify-content: space-between;
+          gap: 4px;
+        }
+
+        .bar-label {
+          flex: 1;
+          font-size: 0.75em;
+          color: var(--secondary-text-color, #666);
+          text-align: center;
+          font-weight: 500;
+        }
+
+        .bar.has-events {
+          background: var(--dark-primary-color, #666);
+        }
+
+        .summary-label {
+          font-size: 0.9em;
+          font-weight: 600;
+          color: var(--secondary-text-color, #666);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .preview-section {
+          margin-top: auto;
+          flex-shrink: 0;
+        }
+
+        .preview-events {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
 
         .agenda-event {
