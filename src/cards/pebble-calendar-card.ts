@@ -12,6 +12,9 @@ import {
   endOfMonth,
   endOfWeek,
   max,
+  parse,
+  interval,
+  areIntervalsOverlapping,
 } from "date-fns";
 import { HassEntity } from "home-assistant-js-websocket";
 import { CalendarCardConfig } from "./calendar-types";
@@ -52,6 +55,8 @@ class PebbleCalendarCard extends LitElement {
   @state() private weatherForecast?: Map<number, ForecastAttribute>;
 
   @state() private currentView: "month" | "week" | "agenda" = "month";
+
+  @state() public currentViewDate: Date = new Date();
 
   private _retryCount: number;
 
@@ -244,24 +249,36 @@ class PebbleCalendarCard extends LitElement {
     const today = new Date();
     const currentMonth = startOfMonth(today);
 
-    // Determine effective focus (can't go before current month for event fetching)
-    const startDate = max([targetDate, currentMonth]);
+    // If current view date is same month as today (or before), use standard range
+    if (this.currentViewDate <= endOfMonth(today)) {
+        // Determine effective focus (can't go before current month for event fetching)
+        const startDate = max([targetDate, currentMonth]);
 
-    // Always fetch: focus month + next 2 months
-    const endDate = addMonths(startDate, 2);
+        // Always fetch: focus month + next 2 months
+        const endDate = addMonths(startDate, 2);
 
+        const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
+        const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
+        return { start, end };
+    }
+
+    // If we are viewing a future month, fetch surrounding months (prev + current + next)
+    const viewMonth = startOfMonth(this.currentViewDate);
+    const startDate = addMonths(viewMonth, -1);
+    const endDate = addMonths(viewMonth, 1);
+    
     const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
     const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
 
     return { start, end };
   }
 
-  async _fetchEvents() {
+  async _fetchEvents(range?: { start: Date; end: Date }) {
     if (!this._hass || !this.config.calendars || !this.config.calendars.length) {
       return;
     }
 
-    const { start, end } = this.calculateDateRange(this.activeDate);
+    const { start, end } = range || this.calculateDateRange(this.activeDate);
     const { events, errors } = await fetchCalendarEvents(
       this._hass,
       start,
@@ -278,9 +295,26 @@ class PebbleCalendarCard extends LitElement {
     if (errors.length) {
       console.error("Encountered errors fetching calendar events: ", errors);
     }
+    
+    // Debug logging
+    console.log(`[Pebble] Fetched ${events.length} raw events`, events);
+    
     if (!errors.length || events.length) {
-      this.events = events;
+      this.events = this.mergeEvents(this.events, events, start, end);
+      console.log(`[Pebble] Total rendered events after merge: ${this.events.length}`, this.events);
     }
+  }
+
+  private mergeEvents(current: CalendarEvent[], incoming: CalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarEvent[] {
+    const rangeInterval = interval(rangeStart, rangeEnd);
+    
+    // Keep events that DO NOT overlap the fetched range
+    const keptEvents = current.filter(event => 
+      !areIntervalsOverlapping(rangeInterval, interval(event.start, event.end ?? event.start))
+    );
+    
+    // Combine with incoming events
+    return [...keptEvents, ...incoming];
   }
 
   private handleViewChange = (event: CustomEvent) => {
@@ -295,6 +329,24 @@ class PebbleCalendarCard extends LitElement {
     this.activeDate = event.detail.currentDate;
     this._fetchEvents();
   };
+
+  private handleVisibleMonthChanged = (event: CustomEvent) => {
+    const monthStr = event.detail.month;
+    if (monthStr) {
+      this.currentViewDate = parse(monthStr, "MMMM yyyy", new Date());
+    }
+  };
+
+  private handleFetchMoreEvents = (event: CustomEvent) => {
+      const monthDate = event.detail.month;
+      if (monthDate) {
+          const weekStartsOn = getResolvedMonthViewConfig(this.config).week_start as Day;
+          const start = startOfWeek(startOfMonth(monthDate), { weekStartsOn });
+          // Fetch target month + 1 extra month (2 months total)
+          const end = endOfWeek(endOfMonth(addMonths(monthDate, 1)), { weekStartsOn });
+          this._fetchEvents({ start, end });
+      }
+  }
 
   render() {
     // Use show_interactive_controls, falling back to show_view_toggle for backward compatibility
@@ -378,6 +430,8 @@ class PebbleCalendarCard extends LitElement {
             .currentView=${this.currentView}
             @date-range-changed=${this.handleDateRangeChange}
             @view-changed=${this.handleViewChange}
+            @visible-month-changed=${this.handleVisibleMonthChanged}
+            @fetch-more-events=${this.handleFetchMoreEvents}
           ></pebble-spanning-calendar>`
         : html`<pebble-basic-calendar
             .weekStartsOn=${getResolvedMonthViewConfig(this.config).week_start}
@@ -392,6 +446,8 @@ class PebbleCalendarCard extends LitElement {
             .currentView=${this.currentView}
             @date-range-changed=${this.handleDateRangeChange}
             @view-changed=${this.handleViewChange}
+            @visible-month-changed=${this.handleVisibleMonthChanged}
+            @fetch-more-events=${this.handleFetchMoreEvents}
           ></pebble-basic-calendar>`}
       ${showFloatingViewToggle
         ? html`<pebble-view-toggle

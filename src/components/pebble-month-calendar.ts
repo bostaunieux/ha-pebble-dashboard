@@ -11,6 +11,7 @@ import {
   endOfMonth,
   endOfWeek,
   isSameDay,
+  parse,
 } from "date-fns";
 import { COLOR_CSS_VARS } from "../utils/colors";
 import { PebbleBaseCalendar } from "./pebble-base-calendar";
@@ -27,6 +28,10 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
   @state() protected displayedMonth: string = "";
 
   @state() protected isInitialRender = true;
+
+  @state() protected renderedMonths: number = 3;
+
+  @state() protected isPreviousDisabled: boolean = true;
 
   @query(".calendar-scroll-area") protected scrollArea?: HTMLDivElement;
 
@@ -56,8 +61,24 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
   updated(changedProperties: Map<PropertyKey, unknown>) {
     super.updated(changedProperties);
 
+    if (changedProperties.has("displayedMonth")) {
+      const currentMonthStr = format(this.focusMonth, "MMMM yyyy");
+      const displayedMonthDate = parse(this.displayedMonth, "MMMM yyyy", new Date());
+      const focusMonthDate = startOfMonth(this.focusMonth);
+      
+      // Enable previous if displayed month is AFTER focus month
+      this.isPreviousDisabled = displayedMonthDate <= focusMonthDate;
+      console.log(`[Pebble] Displayed month: ${this.displayedMonth}, Focus month: ${currentMonthStr}, Prev disabled: ${this.isPreviousDisabled}`);
+      
+      this.dispatchEvent(
+        new CustomEvent("visible-month-changed", {
+          detail: { month: this.displayedMonth },
+        }),
+      );
+    }
+
     // On initial render, wait for events before scrolling
-    if (this.isInitialRender && changedProperties.has("events") && this.events.length > 0) {
+    if (this.isInitialRender) {
       this.updateComplete.then(() => {
         requestAnimationFrame(() => {
           this.scrollToInitialPosition();
@@ -124,8 +145,58 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     });
   }
 
-  protected handleCalendarNavigated = () => {
-    this.scrollToInitialPosition("smooth");
+  protected handleCalendarNavigated = (event: CustomEvent) => {
+    const type = event.detail.type;
+    console.log("[Pebble] handleCalendarNavigated", type, "displayedMonth:", this.displayedMonth);
+    
+    if (type === "today") {
+      this.scrollToInitialPosition("smooth");
+      return;
+    }
+
+    const currentMonthDate = parse(this.displayedMonth, "MMMM yyyy", new Date());
+    let targetDate: Date;
+
+    if (type === "prev") {
+      targetDate = addMonths(currentMonthDate, -1);
+      // Don't scroll before focus month
+      if (targetDate < startOfMonth(this.focusMonth)) {
+        targetDate = this.focusMonth;
+      }
+    } else { // next
+      targetDate = addMonths(currentMonthDate, 1);
+      
+      // Check if we need to render more months
+      const lastRenderedMonth = addMonths(this.focusMonth, this.renderedMonths - 1);
+      console.log("[Pebble] Next target:", targetDate, "Last rendered:", lastRenderedMonth);
+
+      if (targetDate > lastRenderedMonth || isSameDay(targetDate, lastRenderedMonth)) {
+        this.renderedMonths++;
+        console.log("[Pebble] Extending rendered months to:", this.renderedMonths);
+        
+        // Let the DOM update first
+        this.updateComplete.then(() => {
+            // Re-observe new elements
+            const weekElements = this.scrollArea?.querySelectorAll(".week");
+            weekElements?.forEach((week) => this.intersectionObserver?.observe(week));
+            
+            // Emit event to fetch more data
+            this.dispatchEvent(
+                new CustomEvent("fetch-more-events", {
+                  detail: { month: targetDate },
+                }),
+              );
+            
+            // Scroll AFTER update
+            console.log("[Pebble] Scrolling after update to", targetDate);
+            this.scrollToMonth(targetDate, "smooth");
+        });
+        return;
+      }
+    }
+
+    console.log("[Pebble] Scrolling immediately to", targetDate);
+    this.scrollToMonth(targetDate, "smooth");
   };
 
   private scrollToInitialPosition(behavior: ScrollBehavior = "auto") {
@@ -151,10 +222,12 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     if (!this.scrollArea) return;
 
     const targetMonthStr = format(targetDate, "MMMM yyyy");
+    console.log("[Pebble] Searching for month:", targetMonthStr);
     const weekElements = Array.from(this.scrollArea.querySelectorAll<HTMLElement>(".week"));
 
     for (const weekElement of weekElements) {
       if (weekElement.dataset.monthName === targetMonthStr) {
+        console.log("[Pebble] Found matching week element", weekElement);
         // Calculate scroll position using getBoundingClientRect for accuracy
         const scrollAreaRect = this.scrollArea.getBoundingClientRect();
         const weekRect = weekElement.getBoundingClientRect();
@@ -201,7 +274,7 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
   protected generateWeeksInMonth() {
     const weekStartsOn = +(this.weekStartsOn ?? 0) as Day;
 
-    const nextMonth = addMonths(this.focusMonth, 2);
+    const nextMonth = addMonths(this.focusMonth, this.renderedMonths - 1);
 
     // Start from beginning of previous month
     const rangeStart = startOfWeek(startOfMonth(this.focusMonth), { weekStartsOn });
