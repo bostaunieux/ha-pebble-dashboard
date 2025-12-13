@@ -111,7 +111,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     } else if (type === "today") {
       this.navigateWeek(startOfDay(Date.now()));
     }
-  }
+  };
 
   private navigateWeek(targetDate: Date) {
     this.currentDate = targetDate;
@@ -245,9 +245,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
             <div class="day-name">${this.localize("calendar.card.agenda.next-week")}</div>
           </div>
           <div class="day-card-events">
-            <div class="no-events">
-              ${this.localize("calendar.card.calendar.no-events")}
-            </div>
+            <div class="no-events">${this.localize("calendar.card.calendar.no-events")}</div>
           </div>
         </div>
       `;
@@ -262,39 +260,35 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           <div class="event-count">${summary.total}</div>
         </div>
         <div class="day-card-events next-week">
-            <div class="bar-chart-container">
-              <div class="bar-chart">
-                ${summary.weekDays.map((day) => {
-                  const count = summary.eventsByDay.get(day.getTime()) || 0;
-                  const height = (count / summary.maxEvents) * 100;
-                  return html`
-                    <div class="bar-chart-day">
-                      <div
-                        class="bar ${count > 0 ? "has-events" : ""}"
-                        style="height: ${height}%"
-                        title="${format(day, "EEE, MMM d")}, event count: ${count}"
-                      ></div>
-                    </div>
-                  `;
-                })}
-              </div>
-              <div class="bar-chart-labels">
-                ${summary.weekDays.map((day) => {
-                  return html`
-                    <div class="bar-label">${format(day, "EEE")}</div>
-                  `;
-                })}
-              </div>
+          <div class="bar-chart-container">
+            <div class="bar-chart">
+              ${summary.weekDays.map((day) => {
+                const count = summary.eventsByDay.get(day.getTime()) || 0;
+                const height = (count / summary.maxEvents) * 100;
+                return html`
+                  <div class="bar-chart-day">
+                    <div
+                      class="bar ${count > 0 ? "has-events" : ""}"
+                      style="height: ${height}%"
+                      title="${format(day, "EEE, MMM d")}, event count: ${count}"
+                    ></div>
+                  </div>
+                `;
+              })}
             </div>
+            <div class="bar-chart-labels">
+              ${summary.weekDays.map((day) => {
+                return html` <div class="bar-label">${format(day, "EEE")}</div> `;
+              })}
+            </div>
+          </div>
 
           ${summary.previewEvents.length > 0
             ? html`
                 <div class="summary-section preview-section">
                   <div class="summary-label">Upcoming</div>
                   <div class="preview-events">
-                    ${summary.previewEvents.map((event) =>
-                      this.renderAgendaEvent(event, true),
-                    )}
+                    ${summary.previewEvents.map((event) => this.renderAgendaEvent(event, true))}
                   </div>
                 </div>
               `

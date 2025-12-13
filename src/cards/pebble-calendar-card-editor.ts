@@ -19,7 +19,7 @@ class PebbleCalendarCardEditor extends LitElement {
   get localize() {
     return initLocalize(this.hass);
   }
-  
+
   constructor() {
     super();
     this._config = {

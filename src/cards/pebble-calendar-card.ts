@@ -251,22 +251,22 @@ class PebbleCalendarCard extends LitElement {
 
     // If current view date is same month as today (or before), use standard range
     if (this.currentViewDate <= endOfMonth(today)) {
-        // Determine effective focus (can't go before current month for event fetching)
-        const startDate = max([targetDate, currentMonth]);
+      // Determine effective focus (can't go before current month for event fetching)
+      const startDate = max([targetDate, currentMonth]);
 
-        // Always fetch: focus month + next 2 months
-        const endDate = addMonths(startDate, 2);
+      // Always fetch: focus month + next 2 months
+      const endDate = addMonths(startDate, 2);
 
-        const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
-        const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
-        return { start, end };
+      const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
+      const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
+      return { start, end };
     }
 
     // If we are viewing a future month, fetch surrounding months (prev + current + next)
     const viewMonth = startOfMonth(this.currentViewDate);
     const startDate = addMonths(viewMonth, -1);
     const endDate = addMonths(viewMonth, 1);
-    
+
     const start = startOfWeek(startOfMonth(startDate), { weekStartsOn });
     const end = endOfWeek(endOfMonth(endDate), { weekStartsOn });
 
@@ -295,24 +295,30 @@ class PebbleCalendarCard extends LitElement {
     if (errors.length) {
       console.error("Encountered errors fetching calendar events: ", errors);
     }
-    
+
     // Debug logging
     console.log(`[Pebble] Fetched ${events.length} raw events`, events);
-    
+
     if (!errors.length || events.length) {
       this.events = this.mergeEvents(this.events, events, start, end);
       console.log(`[Pebble] Total rendered events after merge: ${this.events.length}`, this.events);
     }
   }
 
-  private mergeEvents(current: CalendarEvent[], incoming: CalendarEvent[], rangeStart: Date, rangeEnd: Date): CalendarEvent[] {
+  private mergeEvents(
+    current: CalendarEvent[],
+    incoming: CalendarEvent[],
+    rangeStart: Date,
+    rangeEnd: Date,
+  ): CalendarEvent[] {
     const rangeInterval = interval(rangeStart, rangeEnd);
-    
+
     // Keep events that DO NOT overlap the fetched range
-    const keptEvents = current.filter(event => 
-      !areIntervalsOverlapping(rangeInterval, interval(event.start, event.end ?? event.start))
+    const keptEvents = current.filter(
+      (event) =>
+        !areIntervalsOverlapping(rangeInterval, interval(event.start, event.end ?? event.start)),
     );
-    
+
     // Combine with incoming events
     return [...keptEvents, ...incoming];
   }
@@ -338,28 +344,28 @@ class PebbleCalendarCard extends LitElement {
   };
 
   private handleFetchMoreEvents = (event: CustomEvent) => {
-      const monthDate = event.detail.month;
-      if (monthDate) {
-          const weekStartsOn = getResolvedMonthViewConfig(this.config).week_start as Day;
-          const start = startOfWeek(startOfMonth(monthDate), { weekStartsOn });
-          // Fetch target month + 1 extra month (2 months total)
-          const end = endOfWeek(endOfMonth(addMonths(monthDate, 1)), { weekStartsOn });
-          this._fetchEvents({ start, end });
-      }
-  }
+    const monthDate = event.detail.month;
+    if (monthDate) {
+      const weekStartsOn = getResolvedMonthViewConfig(this.config).week_start as Day;
+      const start = startOfWeek(startOfMonth(monthDate), { weekStartsOn });
+      // Fetch target month + 1 extra month (2 months total)
+      const end = endOfWeek(endOfMonth(addMonths(monthDate, 1)), { weekStartsOn });
+      this._fetchEvents({ start, end });
+    }
+  };
 
   render() {
     // Use show_interactive_controls, falling back to show_view_toggle for backward compatibility
     const showInteractiveControls =
       this.config?.show_interactive_controls ?? this.config?.show_view_toggle ?? false;
     const viewToggleLocation = this.config?.view_toggle_location ?? "header";
-    
+
     // Nav controls always shown in header when interactive controls are enabled
     const showNavControls = showInteractiveControls;
-    
+
     // View toggle shown in header only if location is "header"
     const showHeaderViewToggle = showInteractiveControls && viewToggleLocation === "header";
-    
+
     // View toggle shown floating only if location is "floating"
     const showFloatingViewToggle = showInteractiveControls && viewToggleLocation === "floating";
 
