@@ -34,9 +34,8 @@ const plugins = [
       before: [compileLitTemplates()],
     },
   }),
-  
-  ...(dev ? [serve(serveOptions)] : [terser(), summary({showGzippedSize: true})]),
-  
+
+  ...(dev ? [serve(serveOptions)] : [terser(), summary({ showGzippedSize: true })]),
 ];
 
 export default [

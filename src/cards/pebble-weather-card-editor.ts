@@ -24,7 +24,7 @@ class PebbleWeatherCardEditor extends LitElement {
   private get localize() {
     return initLocalize(this.hass);
   }
-  
+
   constructor() {
     super();
     this.config = {
