@@ -263,6 +263,7 @@ export default class PebbleSectionsLayout extends LitElement {
         --grid-section-min-width: 320px;
         --grid-section-max-width: 80vw;
         --resize-grip-width: 16px;
+        --edit-actions-bar-height: 40px;
 
         //    --header-height: 0px; /* TODO: Should this be removed altogether? */
 
@@ -358,8 +359,7 @@ export default class PebbleSectionsLayout extends LitElement {
         top: 0;
       }
       .edit-mode .section-wrapper {
-        margin-top: 40px;
-        border-top-right-radius: 0;
+        margin-top: var(--edit-actions-bar-height);
         border: 2px dashed var(--divider-color);
       }
 
