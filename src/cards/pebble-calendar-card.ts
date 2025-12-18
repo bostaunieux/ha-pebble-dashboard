@@ -296,12 +296,8 @@ class PebbleCalendarCard extends LitElement {
       console.error("Encountered errors fetching calendar events: ", errors);
     }
 
-    // Debug logging
-    console.log(`[Pebble] Fetched ${events.length} raw events`, events);
-
     if (!errors.length || events.length) {
       this.events = this.mergeEvents(this.events, events, start, end);
-      console.log(`[Pebble] Total rendered events after merge: ${this.events.length}`, this.events);
     }
   }
 

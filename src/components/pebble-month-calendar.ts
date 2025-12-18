@@ -62,15 +62,11 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     super.updated(changedProperties);
 
     if (changedProperties.has("displayedMonth")) {
-      const currentMonthStr = format(this.focusMonth, "MMMM yyyy");
       const displayedMonthDate = parse(this.displayedMonth, "MMMM yyyy", new Date());
       const focusMonthDate = startOfMonth(this.focusMonth);
 
       // Enable previous if displayed month is AFTER focus month
       this.isPreviousDisabled = displayedMonthDate <= focusMonthDate;
-      console.log(
-        `[Pebble] Displayed month: ${this.displayedMonth}, Focus month: ${currentMonthStr}, Prev disabled: ${this.isPreviousDisabled}`,
-      );
 
       this.dispatchEvent(
         new CustomEvent("visible-month-changed", {
@@ -149,7 +145,6 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
   protected handleCalendarNavigated = (event: CustomEvent) => {
     const type = event.detail.type;
-    console.log("[Pebble] handleCalendarNavigated", type, "displayedMonth:", this.displayedMonth);
 
     if (type === "today") {
       this.scrollToInitialPosition("smooth");
@@ -171,11 +166,9 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
 
       // Check if we need to render more months
       const lastRenderedMonth = addMonths(this.focusMonth, this.renderedMonths - 1);
-      console.log("[Pebble] Next target:", targetDate, "Last rendered:", lastRenderedMonth);
 
       if (targetDate > lastRenderedMonth || isSameDay(targetDate, lastRenderedMonth)) {
         this.renderedMonths++;
-        console.log("[Pebble] Extending rendered months to:", this.renderedMonths);
 
         // Let the DOM update first
         this.updateComplete.then(() => {
@@ -191,14 +184,12 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
           );
 
           // Scroll AFTER update
-          console.log("[Pebble] Scrolling after update to", targetDate);
           this.scrollToMonth(targetDate, "smooth");
         });
         return;
       }
     }
 
-    console.log("[Pebble] Scrolling immediately to", targetDate);
     this.scrollToMonth(targetDate, "smooth");
   };
 
@@ -225,12 +216,10 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     if (!this.scrollArea) return;
 
     const targetMonthStr = format(targetDate, "MMMM yyyy");
-    console.log("[Pebble] Searching for month:", targetMonthStr);
     const weekElements = Array.from(this.scrollArea.querySelectorAll<HTMLElement>(".week"));
 
     for (const weekElement of weekElements) {
       if (weekElement.dataset.monthName === targetMonthStr) {
-        console.log("[Pebble] Found matching week element", weekElement);
         // Calculate scroll position using getBoundingClientRect for accuracy
         const scrollAreaRect = this.scrollArea.getBoundingClientRect();
         const weekRect = weekElement.getBoundingClientRect();
