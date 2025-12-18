@@ -2,7 +2,7 @@ import { css, html, LitElement, type CSSResultGroup, type PropertyValues, nothin
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, state, query } from "lit/decorators.js";
-import { getAverageBackgroundColor, isDark } from "../utils/colors";
+import { getProminentColors, isDark } from "../utils/colors";
 import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
 import { getPhotoFromConfig } from "../media";
@@ -156,8 +156,32 @@ customElements.whenDefined("hui-grid-section").then(() => {
           return;
         }
 
-        const color = await getAverageBackgroundColor(container, container, image);
-        this._isDarkBackground = isDark(color);
+        const cards = Array.from(
+          this.shadowRoot?.querySelectorAll(".cards .container > :not(.add)") ?? [],
+        ) as HTMLElement[];
+
+        try {
+          const colors = await getProminentColors(container, [container, ...cards], image);
+
+          const containerColor = colors.get(container);
+          if (containerColor) {
+            this._isDarkBackground = isDark(containerColor);
+          }
+
+          for (const card of cards) {
+            const color = colors.get(card);
+            if (color) {
+              const dark = isDark(color);
+              card.style.setProperty("--primary-text-color", dark ? "#e1e1e1" : "#212121");
+              card.style.setProperty(
+                "--pebble-text-shadow",
+                dark ? "var(--pebble-dark-shadow)" : "var(--pebble-light-shadow)",
+              );
+            }
+          }
+        } catch (e) {
+          console.error("Failed to calculate background colors", e);
+        }
       }, 1_500);
     }, 1_000);
 
