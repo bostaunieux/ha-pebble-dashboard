@@ -116,12 +116,6 @@ export const getAverageBackgroundColor = (
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  canvas.style.position = "absolute";
-  canvas.style.top = "" + top;
-  canvas.style.left = "" + left;
-  canvas.style.zIndex = "0";
-
-  document.getElementsByTagName("body")[0].appendChild(canvas);
 
   const ctx = canvas.getContext("2d");
 
@@ -147,7 +141,12 @@ export const getAverageBackgroundColor = (
       let imageData: ImageData;
       try {
         ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
-        imageData = ctx.getImageData(cardLeft, cardTop, cardWidth, cardHeight);
+        imageData = ctx.getImageData(
+          cardLeft - left,
+          cardTop - top,
+          cardWidth,
+          cardHeight,
+        );
       } catch (e) {
         console.error("Error drawing image on canvas", e);
         reject("Failed to draw image");
@@ -170,7 +169,6 @@ export const getAverageBackgroundColor = (
       green = Math.round(green / length);
       blue = Math.round(blue / length);
 
-      canvas.parentNode?.removeChild(canvas);
       resolve({ red, green, blue });
       return true;
     };
