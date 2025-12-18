@@ -7,5 +7,6 @@ export type CountdownCardConfig = {
   title?: string; // Optional title for the static date
   hide_if_no_event?: boolean; // Modified to be boolean
   no_event_text?: string;
-  alignment?: "start" | "center" | "end";
+  horizontal_alignment?: "start" | "center" | "end";
+  vertical_alignment?: "start" | "center" | "end";
 } & CardTextOptions;

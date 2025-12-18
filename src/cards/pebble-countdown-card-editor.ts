@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { mdiFormatAlignLeft } from "@mdi/js";
 import { getCardTextOptionsSchema } from "./card-options";
 import type { HomeAssistant } from "../types";
 import initLocalize, { LocalizationKey } from "../localize";
@@ -45,26 +46,62 @@ const getSchema = (
       ]
     : []),
   {
-    name: "alignment",
-    label: localize("countdown.editor.form.alignment.label"),
-    selector: {
-      select: {
-        options: [
+    name: "",
+    type: "expandable",
+    iconPath: mdiFormatAlignLeft,
+    title: localize("countdown.editor.form.alignment.label"),
+    schema: [
+      {
+        name: "",
+        type: "grid",
+        schema: [
           {
-            label: localize("countdown.editor.form.alignment.option.start"),
-            value: "start",
+            name: "vertical_alignment",
+            label: localize("countdown.editor.form.vertical_alignment.label"),
+            selector: {
+              select: {
+                options: [
+                  {
+                    label: localize("countdown.editor.form.vertical_alignment.option.start"),
+                    value: "start",
+                  },
+                  {
+                    label: localize("countdown.editor.form.vertical_alignment.option.center"),
+                    value: "center",
+                  },
+                  {
+                    label: localize("countdown.editor.form.vertical_alignment.option.end"),
+                    value: "end",
+                  },
+                ],
+              },
+            },
           },
           {
-            label: localize("countdown.editor.form.alignment.option.center"),
-            value: "center",
-          },
-          {
-            label: localize("countdown.editor.form.alignment.option.end"),
-            value: "end",
+            name: "horizontal_alignment",
+            label: localize("countdown.editor.form.horizontal_alignment.label"),
+            selector: {
+              select: {
+                options: [
+                  {
+                    label: localize("countdown.editor.form.horizontal_alignment.option.start"),
+                    value: "start",
+                  },
+                  {
+                    label: localize("countdown.editor.form.horizontal_alignment.option.center"),
+                    value: "center",
+                  },
+                  {
+                    label: localize("countdown.editor.form.horizontal_alignment.option.end"),
+                    value: "end",
+                  },
+                ],
+              },
+            },
           },
         ],
       },
-    },
+    ],
   },
   getCardTextOptionsSchema(localize),
 ];

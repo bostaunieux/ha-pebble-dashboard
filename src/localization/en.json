@@ -103,11 +103,22 @@
           "label": "No event text"
         },
         "alignment": {
-          "label": "Alignment",
+          "label": "Alignment"
+        },
+        "horizontal_alignment": {
+          "label": "Horizontal Alignment",
           "option": {
             "start": "Start",
             "center": "Center",
             "end": "End"
+          }
+        },
+        "vertical_alignment": {
+          "label": "Vertical Alignment",
+          "option": {
+            "start": "Top",
+            "center": "Center",
+            "end": "Bottom"
           }
         }
       }

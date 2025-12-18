@@ -103,12 +103,14 @@ class PebbleCountdownCard extends LitElement {
     const timeDisplay = this._formatDuration(startTime);
 
     const textSize = this.config.text_size;
-    const alignment = this.config.alignment || "start";
+    const horizontalAlignment = this.config.horizontal_alignment || "start";
+    const verticalAlignment = this.config.vertical_alignment || "center";
     const styles = {
       "--pebble-font-size": textSize
         ? `calc(var(--card-primary-font-size, 16px) * ${textSize} / 100)`
         : undefined,
-      "--pebble-text-align": alignment,
+      "--pebble-text-align": horizontalAlignment,
+      "--pebble-vertical-align": verticalAlignment,
     };
 
     return html`
@@ -144,7 +146,7 @@ class PebbleCountdownCard extends LitElement {
         padding: 12px;
         height: 100%;
         display: grid;
-        align-items: center;
+        align-items: var(--pebble-vertical-align, center);
         text-align: var(--pebble-text-align, left);
         overflow: auto;
       }
