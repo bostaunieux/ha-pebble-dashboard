@@ -44,6 +44,28 @@ const getSchema = (
         },
       ]
     : []),
+  {
+    name: "alignment",
+    label: localize("countdown.editor.form.alignment.label"),
+    selector: {
+      select: {
+        options: [
+          {
+            label: localize("countdown.editor.form.alignment.option.start"),
+            value: "start",
+          },
+          {
+            label: localize("countdown.editor.form.alignment.option.center"),
+            value: "center",
+          },
+          {
+            label: localize("countdown.editor.form.alignment.option.end"),
+            value: "end",
+          },
+        ],
+      },
+    },
+  },
   getCardTextOptionsSchema(localize),
 ];
 

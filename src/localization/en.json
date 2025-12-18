@@ -101,6 +101,14 @@
         },
         "no-event-text": {
           "label": "No event text"
+        },
+        "alignment": {
+          "label": "Alignment",
+          "option": {
+            "start": "Start",
+            "center": "Center",
+            "end": "End"
+          }
         }
       }
     }
