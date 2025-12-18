@@ -240,6 +240,11 @@ customElements.whenDefined("hui-grid-section").then(() => {
             align-content: start;
           }
 
+          .edit-mode .cards {
+            --edit-actions-bar-height: calc(40px + 4px);
+            height: calc(100vh - (2 * var(--header-height, 0)) - var(--edit-actions-bar-height));
+          }
+
           .cards.halign-start .container {
             justify-content: start;
           }
@@ -286,6 +291,12 @@ customElements.whenDefined("hui-grid-section").then(() => {
 
           .edit-mode .add {
             border-radius: var(--original-ha-card-border-radius, 12px);
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 10;
+            width: 100px;
+            background-color: var(--card-background-color);
           }
 
           .bg {
