@@ -19,7 +19,7 @@ class PebbleCalendarCardEditor extends LitElement {
   get localize() {
     return initLocalize(this.hass);
   }
-  
+
   constructor() {
     super();
     this._config = {
@@ -169,11 +169,6 @@ class PebbleCalendarCardEditor extends LitElement {
                   ],
                 },
               },
-            },
-            {
-              label: this.localize("calendar.editor.form.num-weeks.label"),
-              name: "num_weeks",
-              selector: { number: { min: 1, max: 24 } },
             },
           ],
         },

@@ -97,6 +97,7 @@ export const fetchCalendarEvents = async (
         daysInterval: differenceInCalendarDays(end, start),
         calendar: cal.entity_id,
         color: cal.color,
+        uid: event.uid,
         eventData: {
           uid: event.uid,
           summary: event.summary,

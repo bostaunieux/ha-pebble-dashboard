@@ -1,5 +1,6 @@
 import "./cards/pebble-calendar-card";
 import "./cards/pebble-clock-card";
+import "./cards/pebble-countdown-card";
 import "./cards/pebble-weather-card";
 import "./patched/hui-view-editor";
 import "./patched/hui-card-element-editor";
@@ -37,6 +38,13 @@ window.customCards.push({
   name: "Pebble Weather Card",
   preview: true,
   description: "Pebble Weather Card",
+});
+
+window.customCards.push({
+  type: "pebble-countdown-card",
+  name: "Pebble Countdown Card",
+  preview: true,
+  description: "Countdown to upcoming events",
 });
 
 window.customCards.push({

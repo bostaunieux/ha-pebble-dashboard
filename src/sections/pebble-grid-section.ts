@@ -2,7 +2,7 @@ import { css, html, LitElement, type CSSResultGroup, type PropertyValues, nothin
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { customElement, property, state, query } from "lit/decorators.js";
-import { getAverageBackgroundColor, isDark } from "../utils/colors";
+import { getProminentColors, isDark } from "../utils/colors";
 import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
 import { getPhotoFromConfig } from "../media";
@@ -55,6 +55,13 @@ customElements.whenDefined("hui-grid-section").then(() => {
 
     updated(changedProps: PropertyValues) {
       super.updated(changedProps);
+
+      if (changedProps.has("lovelace")) {
+        const oldLovelace = changedProps.get("lovelace") as Lovelace | undefined;
+        if (oldLovelace?.editMode !== this.lovelace?.editMode) {
+          this._updateColors();
+        }
+      }
 
       if (
         changedProps.has("hass") &&
@@ -149,17 +156,55 @@ customElements.whenDefined("hui-grid-section").then(() => {
       // delay the switch to allow the new image to load in the background
       setTimeout(async () => {
         this._isMainActive = !this._isMainActive;
-
-        const container = this._containerNode;
-        const image = this._isMainActive ? this._mainBackground : this._altBackground;
-        if (!container || !image) {
-          return;
-        }
-
-        const color = await getAverageBackgroundColor(container, container, image);
-        this._isDarkBackground = isDark(color);
+        this._updateColors();
       }, 1_500);
     }, 1_000);
+
+    async _updateColors() {
+      const container = this._containerNode;
+      const image = this._isMainActive ? this._mainBackground : this._altBackground;
+      if (!container || !image) {
+        return;
+      }
+
+      const cards = Array.from(
+        this.shadowRoot?.querySelectorAll(".cards .container > :not(.add)") ?? [],
+      ) as HTMLElement[];
+
+      const editMode = this.lovelace?.editMode ?? false;
+
+      if (editMode) {
+        this._isDarkBackground = true;
+        for (const card of cards) {
+          card.style.setProperty("--primary-text-color", "#e1e1e1");
+          card.style.setProperty("--pebble-text-shadow", "var(--pebble-dark-shadow)");
+        }
+        return;
+      }
+
+      try {
+        const colors = await getProminentColors(container, [container, ...cards], image);
+
+        const containerColor = colors.get(container);
+        if (containerColor) {
+          this._isDarkBackground = isDark(containerColor);
+        }
+
+        for (const card of cards) {
+          const color = colors.get(card);
+          if (color) {
+            const dark = isDark(color);
+            card.style.setProperty("--primary-text-color", dark ? "#e1e1e1" : "#212121");
+            card.style.setProperty(
+              "--pebble-text-shadow",
+              dark ? "var(--pebble-dark-shadow)" : "var(--pebble-light-shadow)",
+            );
+          }
+        }
+      } catch (e) {
+        console.error("Failed to calculate background colors", e);
+      }
+    }
 
     private _setupBackgroundRefresh(intervalConfig: number = DEFAULT_PHOTO_UPDATE_INTERVAL_MINS) {
       this._clearRefreshTimers();
@@ -240,6 +285,10 @@ customElements.whenDefined("hui-grid-section").then(() => {
             align-content: start;
           }
 
+          .edit-mode .cards {
+            height: calc(100vh - (2 * var(--header-height, 0)) - var(--edit-actions-bar-height));
+          }
+
           .cards.halign-start .container {
             justify-content: start;
           }
@@ -286,6 +335,12 @@ customElements.whenDefined("hui-grid-section").then(() => {
 
           .edit-mode .add {
             border-radius: var(--original-ha-card-border-radius, 12px);
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 10;
+            width: 100px;
+            background-color: var(--card-background-color);
           }
 
           .bg {

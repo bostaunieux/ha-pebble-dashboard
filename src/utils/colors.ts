@@ -100,28 +100,24 @@ const getIlluminanceFromHex = (input: string) => {
 export const isDark = (color: string | RgbColor) =>
   (typeof color === "string" ? getIlluminanceFromHex(color) : getIlluminance(color)) < 185;
 
-export const getAverageBackgroundColor = (
+export const getAverageBackgroundColor = async (
   container: HTMLElement,
   card: HTMLElement,
   imageUrl: string,
 ): Promise<RgbColor> => {
-  const { top, left, width, height } = container.getBoundingClientRect();
-  const {
-    top: cardTop,
-    left: cardLeft,
-    width: cardWidth,
-    height: cardHeight,
-  } = card.getBoundingClientRect();
+  const results = await getProminentColors(container, [card], imageUrl);
+  return results.get(card) || { red: 0, green: 0, blue: 0 };
+};
 
+export const getProminentColors = (
+  container: HTMLElement,
+  elements: HTMLElement[],
+  imageUrl: string,
+): Promise<Map<HTMLElement, RgbColor>> => {
+  const { top, left, width, height } = container.getBoundingClientRect();
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  canvas.style.position = "absolute";
-  canvas.style.top = "" + top;
-  canvas.style.left = "" + left;
-  canvas.style.zIndex = "0";
-
-  document.getElementsByTagName("body")[0].appendChild(canvas);
 
   const ctx = canvas.getContext("2d");
 
@@ -144,34 +140,58 @@ export const getAverageBackgroundColor = (
         offsetY,
       } = getCoverDimensions(width, height, img.naturalWidth, img.naturalHeight);
 
-      let imageData: ImageData;
       try {
         ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
-        imageData = ctx.getImageData(cardLeft, cardTop, cardWidth, cardHeight);
       } catch (e) {
         console.error("Error drawing image on canvas", e);
         reject("Failed to draw image");
         return false;
       }
-      const pixelMap = imageData.data;
 
-      let red = 0;
-      let green = 0;
-      let blue = 0;
-      let length = 4 * Math.floor(cardWidth) * Math.floor(cardHeight);
+      const resultMap = new Map<HTMLElement, RgbColor>();
 
-      for (let i = 0; i < length; i += 4) {
-        red += pixelMap[i];
-        green += pixelMap[i + 1];
-        blue += pixelMap[i + 2];
+      for (const element of elements) {
+        const {
+          top: cardTop,
+          left: cardLeft,
+          width: cardWidth,
+          height: cardHeight,
+        } = element.getBoundingClientRect();
+
+        let imageData: ImageData;
+        try {
+          // Uses relative coordinates now, ensuring correct sampling off-screen or scrolled
+          imageData = ctx.getImageData(
+            cardLeft - left,
+            cardTop - top,
+            cardWidth,
+            cardHeight,
+          );
+        } catch (e) {
+          console.error("Error getting image data", e);
+          continue;
+        }
+        const pixelMap = imageData.data;
+
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+        let length = 4 * Math.floor(cardWidth) * Math.floor(cardHeight);
+
+        for (let i = 0; i < length; i += 4) {
+          red += pixelMap[i];
+          green += pixelMap[i + 1];
+          blue += pixelMap[i + 2];
+        }
+        length = length / 4;
+        red = Math.round(red / length);
+        green = Math.round(green / length);
+        blue = Math.round(blue / length);
+
+        resultMap.set(element, { red, green, blue });
       }
-      length = length / 4;
-      red = Math.round(red / length);
-      green = Math.round(green / length);
-      blue = Math.round(blue / length);
 
-      canvas.parentNode?.removeChild(canvas);
-      resolve({ red, green, blue });
+      resolve(resultMap);
       return true;
     };
 

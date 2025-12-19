@@ -263,6 +263,7 @@ export default class PebbleSectionsLayout extends LitElement {
         --grid-section-min-width: 320px;
         --grid-section-max-width: 80vw;
         --resize-grip-width: 16px;
+        --edit-actions-bar-height: 40px;
 
         //    --header-height: 0px; /* TODO: Should this be removed altogether? */
 
@@ -305,7 +306,7 @@ export default class PebbleSectionsLayout extends LitElement {
       }
 
       .container.edit-mode {
-        overflow-y: auto;
+        height: calc(100vh - (2 * var(--header-height, 0)));
         grid-template-columns: var(--first-col-width, 500px) auto;
         grid-gap: calc(8 * var(--grid-gap));
       }
@@ -318,7 +319,7 @@ export default class PebbleSectionsLayout extends LitElement {
 
       .section-actions {
         position: absolute;
-        top: 4px;
+        top: 6px;
         right: 0;
         inset-inline-end: 0;
         inset-inline-start: initial;
@@ -357,16 +358,9 @@ export default class PebbleSectionsLayout extends LitElement {
         right: calc(-6 * var(--grid-gap));
         top: 0;
       }
-
-      /* .section-wrapper {
-        height: 100%;
-      } */
-
       .edit-mode .section-wrapper {
-        margin-top: 40px;
-        /* border-radius: var(--ha-card-border-radius, 12px);
-        border-top-right-radius: 0;
-        border: 2px dashed var(--divider-color); */
+        margin-top: var(--edit-actions-bar-height);
+        border: 2px dashed var(--divider-color);
       }
 
       .sortable-ghost {

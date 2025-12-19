@@ -40,7 +40,7 @@ class PebbleBasicCalendar extends PebbleMonthCalendar {
           <pebble-calendar-month-header
             .localize=${this.localize}
             .monthName=${this.displayedMonth}
-            .disabled=${true}
+            .disabled=${this.isPreviousDisabled}
             .showNavControls=${this.showNavControls}
             .showViewToggle=${this.showViewToggle}
             .currentView=${this.currentView}

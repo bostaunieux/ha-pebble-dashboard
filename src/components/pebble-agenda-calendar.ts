@@ -13,6 +13,7 @@ import {
   startOfWeek,
   eachDayOfInterval,
   isSameWeek,
+  isSameMonth,
   isPast,
 } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
@@ -111,7 +112,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     } else if (type === "today") {
       this.navigateWeek(startOfDay(Date.now()));
     }
-  }
+  };
 
   private navigateWeek(targetDate: Date) {
     this.currentDate = targetDate;
@@ -226,7 +227,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     const maxEvents = Math.max(...Array.from(eventsByDay.values()), 1);
 
     // Get first few upcoming events for preview
-    const previewEvents = events.slice(0, 3);
+    const previewEvents = events.slice(0, 5);
 
     return {
       total: events.length,
@@ -245,9 +246,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
             <div class="day-name">${this.localize("calendar.card.agenda.next-week")}</div>
           </div>
           <div class="day-card-events">
-            <div class="no-events">
-              ${this.localize("calendar.card.calendar.no-events")}
-            </div>
+            <div class="no-events">${this.localize("calendar.card.calendar.no-events")}</div>
           </div>
         </div>
       `;
@@ -262,39 +261,35 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
           <div class="event-count">${summary.total}</div>
         </div>
         <div class="day-card-events next-week">
-            <div class="bar-chart-container">
-              <div class="bar-chart">
-                ${summary.weekDays.map((day) => {
-                  const count = summary.eventsByDay.get(day.getTime()) || 0;
-                  const height = (count / summary.maxEvents) * 100;
-                  return html`
-                    <div class="bar-chart-day">
-                      <div
-                        class="bar ${count > 0 ? "has-events" : ""}"
-                        style="height: ${height}%"
-                        title="${format(day, "EEE, MMM d")}, event count: ${count}"
-                      ></div>
-                    </div>
-                  `;
-                })}
-              </div>
-              <div class="bar-chart-labels">
-                ${summary.weekDays.map((day) => {
-                  return html`
-                    <div class="bar-label">${format(day, "EEE")}</div>
-                  `;
-                })}
-              </div>
+          <div class="bar-chart-container">
+            <div class="bar-chart">
+              ${summary.weekDays.map((day) => {
+                const count = summary.eventsByDay.get(day.getTime()) || 0;
+                const height = (count / summary.maxEvents) * 100;
+                return html`
+                  <div class="bar-chart-day">
+                    <div
+                      class="bar ${count > 0 ? "has-events" : ""}"
+                      style="height: ${height}%"
+                      title="${format(day, "EEE, MMM d")}, event count: ${count}"
+                    ></div>
+                  </div>
+                `;
+              })}
             </div>
+            <div class="bar-chart-labels">
+              ${summary.weekDays.map((day) => {
+                return html` <div class="bar-label">${format(day, "EEE")}</div> `;
+              })}
+            </div>
+          </div>
 
           ${summary.previewEvents.length > 0
             ? html`
                 <div class="summary-section preview-section">
                   <div class="summary-label">Upcoming</div>
                   <div class="preview-events">
-                    ${summary.previewEvents.map((event) =>
-                      this.renderAgendaEvent(event, true),
-                    )}
+                    ${summary.previewEvents.map((event) => this.renderAgendaEvent(event, true))}
                   </div>
                 </div>
               `
@@ -326,8 +321,19 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     };
 
     let timeDisplay = "";
+    let hideDatePrefix = false;
+
     if (event.allDay) {
-      timeDisplay = this.localize("calendar.card.calendar.detail.all-day");
+      if (!isSameDay(event.start, event.end) && showDate) {
+        hideDatePrefix = true;
+        const startText = format(event.start, "MMM d");
+        const endText = isSameMonth(event.start, event.end)
+          ? format(event.end, "d")
+          : format(event.end, "MMM d");
+        timeDisplay = `${startText} - ${endText}`;
+      } else {
+        timeDisplay = this.localize("calendar.card.calendar.detail.all-day");
+      }
     } else {
       const startHour = event.start.getHours();
       const startMinute = event.start.getMinutes();
@@ -361,7 +367,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
         <div class="event-title">${event.title}</div>
         <div class="event-time">
-          ${showDate ? html`${format(event.start, "MMM d")} · ` : nothing}${timeDisplay}
+          ${showDate && !hideDatePrefix ? html`${format(event.start, "MMM d")} · ` : nothing}${timeDisplay}
         </div>
       </button>
     `;

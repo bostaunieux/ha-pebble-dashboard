@@ -160,7 +160,6 @@ export default class PebbleBrowseMediaDialog extends LitElement {
           children: updateChildren(this._rootItem.children),
         };
 
-        console.log(this._rootItem);
       } catch (e) {
         console.warn("Failed to browse media", e);
       }

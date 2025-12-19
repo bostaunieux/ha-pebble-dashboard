@@ -81,6 +81,49 @@
       }
     }
   },
+  "countdown": {
+    "card": {
+      "default-countdown-label": "Countdown"
+    },
+    "editor": {
+      "form": {
+        "entity": {
+          "label": "Calendar"
+        },
+        "date": {
+          "label": "Target date (YYYY-MM-DD or ISO)"
+        },
+        "title": {
+          "label": "Event name"
+        },
+        "hide-if-no-event": {
+          "label": "Hide card when no future events"
+        },
+        "no-event-text": {
+          "label": "No event text"
+        },
+        "alignment": {
+          "label": "Alignment"
+        },
+        "horizontal_alignment": {
+          "label": "Horizontal Alignment",
+          "option": {
+            "start": "Start",
+            "center": "Center",
+            "end": "End"
+          }
+        },
+        "vertical_alignment": {
+          "label": "Vertical Alignment",
+          "option": {
+            "start": "Top",
+            "center": "Center",
+            "end": "Bottom"
+          }
+        }
+      }
+    }
+  },
   "calendar": {
     "card": {
       "calendar": {
@@ -144,9 +187,6 @@
         },
         "events": {
           "title": "Events"
-        },
-        "num-weeks": {
-          "label": "Number of weeks to show"
         },
         "view-type": {
           "label": "Default view",

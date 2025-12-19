@@ -247,7 +247,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     } else if (type === "today") {
       this.navigateToToday();
     }
-  }
+  };
 
   private navigateWeek(direction: "prev" | "next") {
     const weekCalendarView = this.weekCalendarView ?? "current_week";
@@ -295,6 +295,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
     }
 
     const maxEventsPerDay = Math.max(
+      0,
       ...weekEvents.map((day) => day.filter((event) => event.allDay).length),
     );
 

@@ -18,9 +18,7 @@ class PebbleCalendarMonthHeader extends LitElement {
   };
 
   private handleNextClick = () => {
-    if (!this.disabled) {
-      this.handleNavigated("next");
-    }
+    this.handleNavigated("next");
   };
 
   private handleTodayClick = () => {
@@ -64,7 +62,7 @@ class PebbleCalendarMonthHeader extends LitElement {
               <button class="today-button" @click=${this.handleTodayClick}>
                 ${this.localize("calendar.card.calendar.today")}
               </button>
-              <ha-icon-button @click=${this.handleNextClick} ?disabled=${this.disabled}>
+              <ha-icon-button @click=${this.handleNextClick}>
                 <ha-icon icon="mdi:chevron-right"></ha-icon>
               </ha-icon-button>
             </div>`

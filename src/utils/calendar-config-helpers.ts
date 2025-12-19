@@ -24,7 +24,6 @@ export function getResolvedMonthViewConfig(config: CalendarCardConfig): Resolved
   return {
     week_start: getWeekStart(config, "month"),
     events_span_days: getEventsSpanDays(config, "month"),
-    num_weeks: config.month_view?.num_weeks ?? 12,
     month_calendar_start: config.month_view?.month_calendar_start ?? "current_week",
   };
 }
