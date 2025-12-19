@@ -188,9 +188,6 @@
         "events": {
           "title": "Events"
         },
-        "num-weeks": {
-          "label": "Number of weeks to show"
-        },
         "view-type": {
           "label": "Default view",
           "option": {

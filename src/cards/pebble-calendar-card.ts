@@ -519,7 +519,7 @@ class PebbleCalendarCard extends LitElement {
   }
 
   static getStubConfig() {
-    return { num_weeks: 4, calendars: [] };
+    return { calendars: [] };
   }
 
   static get styles() {

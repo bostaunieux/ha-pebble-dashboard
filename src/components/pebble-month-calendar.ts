@@ -19,8 +19,6 @@ import { PebbleBaseCalendar } from "./pebble-base-calendar";
 export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
   @property({ attribute: false }) protected weekStartsOn: Day;
 
-  @property({ attribute: false }) protected numWeeks?: number;
-
   @property({ attribute: false }) protected monthCalendarStart?: "current_week" | "start_of_month";
 
   @property({ attribute: false }) protected focusMonth: Date = startOfMonth(new Date());
@@ -41,7 +39,6 @@ export abstract class PebbleMonthCalendar extends PebbleBaseCalendar {
     super();
     this.displayedMonth = format(new Date(), "MMMM yyyy");
     this.weekStartsOn = 0;
-    this.numWeeks = 12;
     this.monthCalendarStart = "current_week";
   }
 
