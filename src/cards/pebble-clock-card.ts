@@ -85,14 +85,14 @@ class PebbleClockCard extends LitElement {
       .time {
         display: flex;
         gap: 2px;
-        line-height: 5em;
+        line-height: 4em;
       }
       .hours-minutes {
         font-size: 4em;
       }
       .seconds {
         font-size: 1.75em;
-        line-height: 1.9em;
+        line-height: 1.4em;
       }
       .date {
         margin-top: 12px;
