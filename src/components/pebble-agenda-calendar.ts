@@ -13,6 +13,7 @@ import {
   startOfWeek,
   eachDayOfInterval,
   isSameWeek,
+  isSameMonth,
   isPast,
 } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
@@ -226,7 +227,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     const maxEvents = Math.max(...Array.from(eventsByDay.values()), 1);
 
     // Get first few upcoming events for preview
-    const previewEvents = events.slice(0, 3);
+    const previewEvents = events.slice(0, 5);
 
     return {
       total: events.length,
@@ -320,8 +321,19 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
     };
 
     let timeDisplay = "";
+    let hideDatePrefix = false;
+
     if (event.allDay) {
-      timeDisplay = this.localize("calendar.card.calendar.detail.all-day");
+      if (!isSameDay(event.start, event.end) && showDate) {
+        hideDatePrefix = true;
+        const startText = format(event.start, "MMM d");
+        const endText = isSameMonth(event.start, event.end)
+          ? format(event.end, "d")
+          : format(event.end, "MMM d");
+        timeDisplay = `${startText} - ${endText}`;
+      } else {
+        timeDisplay = this.localize("calendar.card.calendar.detail.all-day");
+      }
     } else {
       const startHour = event.start.getHours();
       const startMinute = event.start.getMinutes();
@@ -355,7 +367,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
         <div class="event-title">${event.title}</div>
         <div class="event-time">
-          ${showDate ? html`${format(event.start, "MMM d")} · ` : nothing}${timeDisplay}
+          ${showDate && !hideDatePrefix ? html`${format(event.start, "MMM d")} · ` : nothing}${timeDisplay}
         </div>
       </button>
     `;
