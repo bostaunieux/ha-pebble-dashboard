@@ -2,13 +2,14 @@
 
 Customizable dashboard for Home Assistant
 
-![Dashboard Screenshot](./static/pebble-dashboard-screenshot-v0.5.0.webp)
+![Dashboard Screenshot](./static/pebble-dashboard-screenshot.webp)
 
 Included cards
 
 - Clock Card
 - Weather Card
 - Calendar Card
+- Countdown Card
 
 Additional features
 
@@ -129,33 +130,53 @@ The total number of forecast units will depend on the weather entity used. If mo
 
 ### Calendar Card
 
-Note the "Consolidate multi-day events" option is experimantal and only works in modern browsers (from 2023+)
+Note the "Consolidate multi-day events" option is experimental and only works in modern browsers (from 2023+)
 
 If enabled, weather entries will be added to all available days, showing the high and low temps, as well as a descriptive weather icon.
 
-| Monthly Calendar                                                                                                      | Weekly Calendar                                                                                                     |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 400px;"> | <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 400px;"> |
+| Monthly Calendar                                                                                                      | Weekly Calendar                                                                                                     | Agenda Calendar |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
+| <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="./static/pebble-agenda-calendar-card.webp" alt="Agenda Calendar Card" style="width: 100%; max-width: 300px;"> |
 
-| Option                    | Type    | Default        | Description                                             |
-| ------------------------- | ------- | -------------- | ------------------------------------------------------- |
-| `calendars`               | array   | []             | List of calendar entities to display                    |
-| `show_view_toggle`        | boolean | false          | Show toggle to switch between month/week views          |
-| `view_type`               | string  | "month"        | Default view: "month" or "week"                         |
-| `event_refresh_interval`  | number  | 15             | How often to refresh events (minutes)                   |
-| `enable_weather`          | boolean | false          | Enable weather display in calendar                      |
-| `weather_entity`          | string  | -              | Weather entity for calendar (if enabled)                |
-| **Month View Options**    |         |                |                                                         |
-| `month_calendar_start`    | string  | "current_week" | Start point: "current_week" or "start_of_month"         |
-| `num_weeks`               | number  | 12             | Number of weeks to show (1-24)                          |
-| `week_start`              | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)            |
-| `events_span_days`        | boolean | false          | Consolidate multi-day events (experimental)             |
-| **Week View Options**     |         |                |                                                         |
-| `week_calendar_view`      | string  | "current_week" | View type: "current_week", "next_5_days", "next_7_days" |
-| `week_start`              | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)            |
-| `events_span_days`        | boolean | false          | Consolidate multi-day events (experimental)             |
-| **Standard Card Options** |         |                |                                                         |
-| `text_size`               | number  | 100            | Text size as a percentage                               |
+| Option                      | Type    | Default        | Description                                                          |
+| --------------------------- | ------- | -------------- | -------------------------------------------------------------------- |
+| `calendars`                 | array   | []             | List of calendar entities to display                                 |
+| `show_interactive_controls` | boolean | false          | Show interactive controls (view toggle, date navigation)             |
+| `view_toggle_location`      | string  | "header"       | Location of view toggle: "header", "floating"                        |
+| `show_view_toggle`          | boolean | false          | **REMOVED v0.6.0** Use `show_interactive_controls` instead           |
+| `view_type`                 | string  | "month"        | Default view: "month", "week", or "agenda"                           |
+| `event_refresh_interval`    | number  | 15             | How often to refresh events (minutes)                                |
+| `enable_weather`            | boolean | false          | Enable weather display in calendar                                   |
+| `weather_entity`            | string  | -              | Weather entity for calendar (if enabled)                             |
+| **Month View Options**      |         |                |                                                                      |
+| `month_calendar_start`      | string  | "current_week" | Start point: "current_week" or "start_of_month"                      |
+| `num_weeks`                 | number  | 12             | **REMOVED v0.6.0** Number of weeks to show (1-24)                    |
+| `week_start`                | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)                         |
+| `events_span_days`          | boolean | false          | Consolidate multi-day events (experimental)                          |
+| **Week View Options**       |         |                |                                                                      |
+| `week_calendar_view`        | string  | "current_week" | View type: "current_week", "next_5_days", "next_7_days"              |
+| `week_start`                | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)                         |
+| `events_span_days`          | boolean | false          | Consolidate multi-day events (experimental)                          |
+| **Agenda View Options**     |         |                |                                                                      |
+| `week_start`                | string  | "0"            | Week start day: "0" (Sunday) or "1" (Monday)                         |
+| **Standard Card Options**   |         |                |                                                                      |
+| `text_size`                 | number  | 100            | Text size as a percentage                                            |
+
+### Countdown Card
+
+![Countdown Card](./static/pebble-countdown-card.webp)
+
+| Option                 | Type    | Default   | Description                                            |
+| ---------------------- | ------- | --------- | ------------------------------------------------------ |
+| `entity`               | string  | -         | Calendar entity to use for the countdown               |
+| `date`                 | string  | -         | Target date (if no entity selected)                    |
+| `title`                | string  | -         | Title for the countdown (if no entity selected)        |
+| `hide_if_no_event`     | boolean | false     | Hide the card if no event is found                     |
+| `no_event_text`        | string  | No events | Text to display when no event is found (if not hidden) |
+| `vertical_alignment`   | string  | center    | Vertical alignment of text: "start", "center", "end"   |
+| `horizontal_alignment` | string  | start     | Horizontal alignment of text: "start", "center", "end" |
+| **Standard Card Options** |      |           |                                                        |
+| `text_size`            | number  | 100       | Text size as a percentage                              |
 
 ## Disclaimer
 
