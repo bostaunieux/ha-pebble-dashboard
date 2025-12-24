@@ -113,7 +113,7 @@ Options
 
 | Hourly Weather                                                                                                        | Daily Weather                                                                                                       |
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| <img src="./static/pebble-hourly-weather-card.webp" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;"> | <img src="./static/pebble-daily-weather-card.webp" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
+| <img src="https://github.com/user-attachments/assets/2e5e2320-a26d-4671-bb1b-e67a041b9ded" alt="Hourly Weather Card" style="width: 100%; max-width: 400px;"> | <img src="https://github.com/user-attachments/assets/a2e975bd-c17c-490a-aeb8-9d35b87ba093" alt="Daily Weather Card" style="width: 100%; max-width: 400px;"> |
 
 The total number of forecast units will depend on the weather entity used. If more entries are available than fix in view, the forecast will be scrollable horizontally.
 
@@ -136,7 +136,7 @@ If enabled, weather entries will be added to all available days, showing the hig
 
 | Monthly Calendar                                                                                                      | Weekly Calendar                                                                                                     | Agenda Calendar |
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
-| <img src="./static/pebble-month-calendar-card.webp" alt="Month Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="./static/pebble-week-calendar-card.webp" alt="Week Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="./static/pebble-agenda-calendar-card.webp" alt="Agenda Calendar Card" style="width: 100%; max-width: 300px;"> |
+| <img src="https://github.com/user-attachments/assets/fad2af7f-aad3-4f78-8c0c-3cced33c3ce4" alt="Month Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="https://github.com/user-attachments/assets/f74fbfab-64fc-4b2b-9dc6-01b823ca41c0" alt="Week Calendar Card" style="width: 100%; max-width: 300px;"> | <img src="https://github.com/user-attachments/assets/c7d71bce-c74f-40b3-ac87-d9bc3e2e0eb0" alt="Agenda Calendar Card" style="width: 100%; max-width: 300px;"> |
 
 | Option                      | Type    | Default        | Description                                                          |
 | --------------------------- | ------- | -------------- | -------------------------------------------------------------------- |
