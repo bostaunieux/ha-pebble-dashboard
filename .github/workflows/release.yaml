@@ -1,21 +1,80 @@
 name: Release
+
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Release type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      preid:
+        description: Pre-release identifier (e.g. beta, rc)
+        required: false
+        default: beta
+
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
         run: npm ci
+
+      - name: Bump version
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          PREID: ${{ inputs.preid }}
+        run: |
+          if [ "$RELEASE_TYPE" = "prerelease" ]; then
+            npm version prerelease --preid "$PREID" -m "chore(release): v%s"
+          else
+            npm version "$RELEASE_TYPE" -m "chore(release): v%s"
+          fi
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Build
         run: npm run build
-      - name: Release
+
+      - name: Push tag and version commit
+        run: git push --follow-tags origin HEAD
+
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          tag_name: v${{ steps.version.outputs.version }}
           generate_release_notes: true
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
           files: dist/*.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
