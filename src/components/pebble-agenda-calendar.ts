@@ -367,7 +367,9 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       <button class=${classMap(classes)} style=${styleMap(styles)} @click=${onClick}>
         <div class="event-title">${event.title}</div>
         <div class="event-time">
-          ${showDate && !hideDatePrefix ? html`${format(event.start, "MMM d")} · ` : nothing}${timeDisplay}
+          ${showDate && !hideDatePrefix
+            ? html`${format(event.start, "MMM d")} · `
+            : nothing}${timeDisplay}
         </div>
       </button>
     `;

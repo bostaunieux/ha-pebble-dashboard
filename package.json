@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20.19.0"
   },
   "overrides": {
     "@rollup/plugin-eslint": {
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "home-assistant-js-websocket": "^9.2.1",
     "lit": "^3.1.3"
   },

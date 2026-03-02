@@ -161,12 +161,7 @@ export const getProminentColors = (
         let imageData: ImageData;
         try {
           // Uses relative coordinates now, ensuring correct sampling off-screen or scrolled
-          imageData = ctx.getImageData(
-            cardLeft - left,
-            cardTop - top,
-            cardWidth,
-            cardHeight,
-          );
+          imageData = ctx.getImageData(cardLeft - left, cardTop - top, cardWidth, cardHeight);
         } catch (e) {
           console.error("Error getting image data", e);
           continue;
