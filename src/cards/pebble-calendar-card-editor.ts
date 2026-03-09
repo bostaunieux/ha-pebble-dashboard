@@ -544,10 +544,11 @@ class PebbleCalendarCardEditor extends LitElement {
 
           <div class="box">
             ${calendars.map((calendar, index) => {
+              const otherCalendarEntities = calendarEntities.filter((_, i) => i !== index);
               return html` <div class="calendar-entry">
                 <ha-form
                   .hass=${this.hass}
-                  .schema=${[this._getCalendarSchema(calendarEntities)]}
+                  .schema=${[this._getCalendarSchema(otherCalendarEntities)]}
                   .data=${{ calendar_entity: calendar.entity }}
                   .computeLabel=${computeLabel}
                   .calendarIndex=${index}
