@@ -70,11 +70,7 @@ export default class PebbleGridSectionDialog extends LitElement {
           <ha-tab-group @wa-tab-show=${this._handleTabChanged}>
             ${TABS.map(
               (tab) => html`
-                <ha-tab-group-tab
-                  slot="nav"
-                  .panel=${tab}
-                  .active=${this._currTab === tab}
-                >
+                <ha-tab-group-tab slot="nav" .panel=${tab} .active=${this._currTab === tab}>
                   ${this.hass!.localize(
                     `ui.panel.lovelace.editor.edit_section.${tab.replace("-", "_")}`,
                   )}
@@ -110,11 +106,26 @@ export default class PebbleGridSectionDialog extends LitElement {
                       @selected=${this._onSelectChange}
                       .configKey=${"vertical_align"}
                       .options=${[
-                        { value: "start", label: this.localize("section.editor.alignment.option.start") },
-                        { value: "middle", label: this.localize("section.editor.alignment.option.middle") },
-                        { value: "end", label: this.localize("section.editor.alignment.option.end") },
-                        { value: "between", label: this.localize("section.editor.alignment.option.between") },
-                        { value: "around", label: this.localize("section.editor.alignment.option.around") },
+                        {
+                          value: "start",
+                          label: this.localize("section.editor.alignment.option.start"),
+                        },
+                        {
+                          value: "middle",
+                          label: this.localize("section.editor.alignment.option.middle"),
+                        },
+                        {
+                          value: "end",
+                          label: this.localize("section.editor.alignment.option.end"),
+                        },
+                        {
+                          value: "between",
+                          label: this.localize("section.editor.alignment.option.between"),
+                        },
+                        {
+                          value: "around",
+                          label: this.localize("section.editor.alignment.option.around"),
+                        },
                       ]}
                     ></ha-select>
 
@@ -124,9 +135,18 @@ export default class PebbleGridSectionDialog extends LitElement {
                       @selected=${this._onSelectChange}
                       .configKey=${"horizontal_align"}
                       .options=${[
-                        { value: "start", label: this.localize("section.editor.alignment.option.start") },
-                        { value: "middle", label: this.localize("section.editor.alignment.option.middle") },
-                        { value: "end", label: this.localize("section.editor.alignment.option.end") },
+                        {
+                          value: "start",
+                          label: this.localize("section.editor.alignment.option.start"),
+                        },
+                        {
+                          value: "middle",
+                          label: this.localize("section.editor.alignment.option.middle"),
+                        },
+                        {
+                          value: "end",
+                          label: this.localize("section.editor.alignment.option.end"),
+                        },
                       ]}
                     ></ha-select>
 
@@ -146,8 +166,15 @@ export default class PebbleGridSectionDialog extends LitElement {
                       @selected=${this._onSelectChange}
                       .configKey=${"border_radius"}
                       .options=${[
-                        { value: "none", label: this.localize("section.editor.formatting.border-radius.options.default") },
-                        ...[...Array(13)].map((_, i) => i * 2).map(r => ({ value: String(r), label: String(r) })),
+                        {
+                          value: "none",
+                          label: this.localize(
+                            "section.editor.formatting.border-radius.options.default",
+                          ),
+                        },
+                        ...[...Array(13)]
+                          .map((_, i) => i * 2)
+                          .map((r) => ({ value: String(r), label: String(r) })),
                       ]}
                     ></ha-select>
                   </div>
@@ -165,10 +192,22 @@ export default class PebbleGridSectionDialog extends LitElement {
                       @selected=${this._onPhotoSourceChange}
                       .options=${[
                         { value: "none", label: this.localize("section.editor.photo-source.none") },
-                        { value: "local_media", label: this.localize("section.editor.photo-source.local-media.title") },
-                        { value: "picsum", label: this.localize("section.editor.photo-source.picsum.title") },
-                        { value: "entity", label: this.localize("section.editor.photo-source.entity.title") },
-                        { value: "remote", label: this.localize("section.editor.photo-source.remote.title") },
+                        {
+                          value: "local_media",
+                          label: this.localize("section.editor.photo-source.local-media.title"),
+                        },
+                        {
+                          value: "picsum",
+                          label: this.localize("section.editor.photo-source.picsum.title"),
+                        },
+                        {
+                          value: "entity",
+                          label: this.localize("section.editor.photo-source.entity.title"),
+                        },
+                        {
+                          value: "remote",
+                          label: this.localize("section.editor.photo-source.remote.title"),
+                        },
                       ]}
                     ></ha-select>
                     ${section.photo_source && section.photo_source !== "none"
@@ -230,8 +269,18 @@ export default class PebbleGridSectionDialog extends LitElement {
                               .value=${section.photo_config?.picsum?.collection ?? "all"}
                               @selected=${this._onPicsumCollectionChange}
                               .options=${[
-                                { value: "all", label: this.localize("section.editor.photo-source.picsum.collection.option.all") },
-                                { value: "nature", label: this.localize("section.editor.photo-source.picsum.collection.option.nature") },
+                                {
+                                  value: "all",
+                                  label: this.localize(
+                                    "section.editor.photo-source.picsum.collection.option.all",
+                                  ),
+                                },
+                                {
+                                  value: "nature",
+                                  label: this.localize(
+                                    "section.editor.photo-source.picsum.collection.option.nature",
+                                  ),
+                                },
                               ]}
                             ></ha-select>
                           </div>
@@ -340,11 +389,7 @@ export default class PebbleGridSectionDialog extends LitElement {
         </div>
 
         <ha-dialog-footer slot="footer">
-          <ha-button
-            slot="secondaryAction"
-            appearance="plain"
-            @click=${this._dismiss}
-          >
+          <ha-button slot="secondaryAction" appearance="plain" @click=${this._dismiss}>
             ${this.localize("dialogs.generic.cancel")}
           </ha-button>
 
@@ -550,7 +595,6 @@ export default class PebbleGridSectionDialog extends LitElement {
   static get styles() {
     return [
       css`
-
         :host {
           --mdc-button-horizontal-padding: 16px;
           --mdc-button-outline-width: 1px;
