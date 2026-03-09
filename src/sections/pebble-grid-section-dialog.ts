@@ -10,8 +10,6 @@ import type {
   MediaPlayerItem,
 } from "./section-types";
 
-const stopPropagation = (ev: Event) => ev.stopPropagation();
-
 const TABS = ["tab-settings", "tab-visibility"] as const;
 const computeLabel = (s: { label?: string }) => s.label;
 
@@ -109,66 +107,28 @@ export default class PebbleGridSectionDialog extends LitElement {
                     <ha-select
                       .label=${this.localize("section.editor.alignment.vertical-align.title")}
                       .value=${section["vertical_align"]}
-                      @selected=${this._onInputChange}
-                      @closed=${stopPropagation}
-                      fixedMenuPosition
-                      naturalMenuWidth
+                      @selected=${this._onSelectChange}
                       .configKey=${"vertical_align"}
-                    >
-                      ${[
-                        {
-                          label: this.localize("section.editor.alignment.option.start"),
-                          value: "start",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.middle"),
-                          value: "middle",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.end"),
-                          value: "end",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.between"),
-                          value: "between",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.around"),
-                          value: "around",
-                        },
-                      ].map(
-                        ({ label, value }) =>
-                          html`<ha-list-item value=${value}>${label}</ha-list-item>`,
-                      )}
-                    </ha-select>
+                      .options=${[
+                        { value: "start", label: this.localize("section.editor.alignment.option.start") },
+                        { value: "middle", label: this.localize("section.editor.alignment.option.middle") },
+                        { value: "end", label: this.localize("section.editor.alignment.option.end") },
+                        { value: "between", label: this.localize("section.editor.alignment.option.between") },
+                        { value: "around", label: this.localize("section.editor.alignment.option.around") },
+                      ]}
+                    ></ha-select>
 
                     <ha-select
                       .label=${this.localize("section.editor.alignment.horizontal-align.title")}
                       .value=${section["horizontal_align"]}
-                      @selected=${this._onInputChange}
-                      @closed=${stopPropagation}
-                      fixedMenuPosition
-                      naturalMenuWidth
+                      @selected=${this._onSelectChange}
                       .configKey=${"horizontal_align"}
-                    >
-                      ${[
-                        {
-                          label: this.localize("section.editor.alignment.option.start"),
-                          value: "start",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.middle"),
-                          value: "middle",
-                        },
-                        {
-                          label: this.localize("section.editor.alignment.option.end"),
-                          value: "end",
-                        },
-                      ].map(
-                        ({ label, value }) =>
-                          html`<ha-list-item value=${value}>${label}</ha-list-item>`,
-                      )}
-                    </ha-select>
+                      .options=${[
+                        { value: "start", label: this.localize("section.editor.alignment.option.start") },
+                        { value: "middle", label: this.localize("section.editor.alignment.option.middle") },
+                        { value: "end", label: this.localize("section.editor.alignment.option.end") },
+                      ]}
+                    ></ha-select>
 
                     <ha-textfield
                       .label=${this.localize("section.editor.formatting.background-blur.label")}
@@ -182,24 +142,14 @@ export default class PebbleGridSectionDialog extends LitElement {
 
                     <ha-select
                       .label=${this.localize("section.editor.formatting.border-radius.label")}
-                      .value=${section["border_radius"]}
-                      @selected=${this._onInputChange}
-                      @closed=${stopPropagation}
-                      fixedMenuPosition
-                      naturalMenuWidth
+                      .value=${String(section["border_radius"] ?? "none")}
+                      @selected=${this._onSelectChange}
                       .configKey=${"border_radius"}
-                    >
-                      <ha-list-item value="none"
-                        >${this.localize(
-                          "section.editor.formatting.border-radius.options.default",
-                        )}</ha-list-item
-                      >
-                      ${[...Array(13)]
-                        .map((_, index) => index * 2)
-                        .map(
-                          (radius) => html`<ha-list-item value=${radius}>${radius}</ha-list-item>`,
-                        )}
-                    </ha-select>
+                      .options=${[
+                        { value: "none", label: this.localize("section.editor.formatting.border-radius.options.default") },
+                        ...[...Array(13)].map((_, i) => i * 2).map(r => ({ value: String(r), label: String(r) })),
+                      ]}
+                    ></ha-select>
                   </div>
                 </ha-expansion-panel>
 
@@ -211,29 +161,16 @@ export default class PebbleGridSectionDialog extends LitElement {
                   <div class="source-select">
                     <ha-select
                       .label=${this.localize("section.editor.photo-source.label")}
-                      .value=${section["photo_source"]}
-                      .configKey=${"photo_source"}
+                      .value=${section["photo_source"] ?? "none"}
                       @selected=${this._onPhotoSourceChange}
-                      @closed=${stopPropagation}
-                      fixedMenuPosition
-                      naturalMenuWidth
-                    >
-                      <ha-list-item value="none">
-                        ${this.localize("section.editor.photo-source.none")}
-                      </ha-list-item>
-                      <ha-list-item value="local_media">
-                        ${this.localize("section.editor.photo-source.local-media.title")}
-                      </ha-list-item>
-                      <ha-list-item value="picsum">
-                        ${this.localize("section.editor.photo-source.picsum.title")}
-                      </ha-list-item>
-                      <ha-list-item value="entity">
-                        ${this.localize("section.editor.photo-source.entity.title")}
-                      </ha-list-item>
-                      <ha-list-item value="remote">
-                        ${this.localize("section.editor.photo-source.remote.title")}
-                      </ha-list-item>
-                    </ha-select>
+                      .options=${[
+                        { value: "none", label: this.localize("section.editor.photo-source.none") },
+                        { value: "local_media", label: this.localize("section.editor.photo-source.local-media.title") },
+                        { value: "picsum", label: this.localize("section.editor.photo-source.picsum.title") },
+                        { value: "entity", label: this.localize("section.editor.photo-source.entity.title") },
+                        { value: "remote", label: this.localize("section.editor.photo-source.remote.title") },
+                      ]}
+                    ></ha-select>
                     ${section.photo_source && section.photo_source !== "none"
                       ? html`
                           <div class="grid">
@@ -290,31 +227,13 @@ export default class PebbleGridSectionDialog extends LitElement {
                               .label=${this.localize(
                                 "section.editor.photo-source.picsum.collection.label",
                               )}
-                              .value=${section.photo_config?.picsum?.collection}
+                              .value=${section.photo_config?.picsum?.collection ?? "all"}
                               @selected=${this._onPicsumCollectionChange}
-                              @closed=${stopPropagation}
-                              fixedMenuPosition
-                              naturalMenuWidth
-                              .configKey=${"picsum.collection"}
-                            >
-                              ${[
-                                {
-                                  label: this.localize(
-                                    "section.editor.photo-source.picsum.collection.option.all",
-                                  ),
-                                  value: "all",
-                                },
-                                {
-                                  label: this.localize(
-                                    "section.editor.photo-source.picsum.collection.option.nature",
-                                  ),
-                                  value: "nature",
-                                },
-                              ].map(
-                                ({ label, value }) =>
-                                  html`<ha-list-item value=${value}>${label}</ha-list-item>`,
-                              )}
-                            </ha-select>
+                              .options=${[
+                                { value: "all", label: this.localize("section.editor.photo-source.picsum.collection.option.all") },
+                                { value: "nature", label: this.localize("section.editor.photo-source.picsum.collection.option.nature") },
+                              ]}
+                            ></ha-select>
                           </div>
                         `
                       : nothing}
@@ -486,11 +405,18 @@ export default class PebbleGridSectionDialog extends LitElement {
     this._currTab = newTab;
   }
 
-  _onPhotoSourceChange(ev: CustomEvent<{ value: PhotoSource }>) {
+  _onSelectChange(ev: CustomEvent<{ value: string }>) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { value } = ev.target as any;
+    const { configKey } = ev.target as any;
 
-    const photoSource = value === "none" ? undefined : value;
+    this._section = {
+      ...this._section!,
+      [configKey]: ev.detail.value,
+    };
+  }
+
+  _onPhotoSourceChange(ev: CustomEvent<{ value: string }>) {
+    const photoSource = ev.detail.value === "none" ? undefined : (ev.detail.value as PhotoSource);
 
     this._section = {
       ...this._section!,
@@ -515,8 +441,8 @@ export default class PebbleGridSectionDialog extends LitElement {
     };
   }
 
-  _onPicsumCollectionChange(ev: CustomEvent) {
-    if (!this._section || !ev.target) {
+  _onPicsumCollectionChange(ev: CustomEvent<{ value: string }>) {
+    if (!this._section) {
       return;
     }
 
@@ -525,7 +451,7 @@ export default class PebbleGridSectionDialog extends LitElement {
       photo_config: {
         ...(this._section.photo_config ?? {}),
         picsum: {
-          collection: (ev.target as HTMLSelectElement).value === "nature" ? "nature" : "all",
+          collection: ev.detail.value === "nature" ? "nature" : "all",
         },
       },
     };
