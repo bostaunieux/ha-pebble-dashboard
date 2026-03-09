@@ -67,15 +67,8 @@ export default class PebbleBrowseMediaDialog extends LitElement {
       this._navigateIds && this._navigateIds.length > (this._params?.minimumNavigateLevel ?? 1);
 
     return html`
-      <ha-dialog
-        open
-        flexContent
-        scrimClickAction
-        hideActions
-        .heading=${this.localize("section.editor.browse-media.title")}
-        @closed=${this.closeDialog}
-      >
-        <ha-dialog-header show-border slot="heading">
+      <ha-dialog open flexContent @closed=${this.closeDialog}>
+        <ha-dialog-header show-border slot="header">
           ${showBackButton
             ? html`
                 <ha-icon-button

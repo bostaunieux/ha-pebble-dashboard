@@ -66,27 +66,25 @@ export default class PebbleGridSectionDialog extends LitElement {
     }
 
     return html`
-      <ha-dialog
-        open
-        @closed=${this.closeDialog}
-        scrimClickAction
-        .heading=${this.localize("section.editor.title")}
-      >
-        <mwc-tab-bar
-          .activeIndex=${TABS.indexOf(this._currTab)}
-          @MDCTabBar:activated=${this._handleTabChanged}
-        >
-          ${TABS.map(
-            (tab) => html`
-              <mwc-tab
-                .label=${this.hass!.localize(
-                  `ui.panel.lovelace.editor.edit_section.${tab.replace("-", "_")}`,
-                )}
-              >
-              </mwc-tab>
-            `,
-          )}
-        </mwc-tab-bar>
+      <ha-dialog open @closed=${this.closeDialog}>
+        <ha-dialog-header slot="header">
+          <span slot="title">${this.localize("section.editor.title")}</span>
+          <ha-tab-group @wa-tab-show=${this._handleTabChanged}>
+            ${TABS.map(
+              (tab) => html`
+                <ha-tab-group-tab
+                  slot="nav"
+                  .panel=${tab}
+                  .active=${this._currTab === tab}
+                >
+                  ${this.hass!.localize(
+                    `ui.panel.lovelace.editor.edit_section.${tab.replace("-", "_")}`,
+                  )}
+                </ha-tab-group-tab>
+              `,
+            )}
+          </ha-tab-group>
+        </ha-dialog-header>
 
         <div class="content">
           ${this._error ? html`<ha-alert alert-type="error">${this._error}</ha-alert>` : ""}
@@ -422,18 +420,19 @@ export default class PebbleGridSectionDialog extends LitElement {
             : nothing}
         </div>
 
-        <ha-button
-          @click=${this._dismiss}
-          slot="secondaryAction"
-          appearance="plain"
-          ?dialogInitialFocus=${false}
-        >
-          ${this.localize("dialogs.generic.cancel")}
-        </ha-button>
+        <ha-dialog-footer slot="footer">
+          <ha-button
+            slot="secondaryAction"
+            appearance="plain"
+            @click=${this._dismiss}
+          >
+            ${this.localize("dialogs.generic.cancel")}
+          </ha-button>
 
-        <ha-button @click=${this._confirm} ?dialogInitialFocus=${false} slot="primaryAction">
-          ${this.localize("dialogs.generic.save")}
-        </ha-button>
+          <ha-button slot="primaryAction" @click=${this._confirm}>
+            ${this.localize("dialogs.generic.save")}
+          </ha-button>
+        </ha-dialog-footer>
       </ha-dialog>
     `;
   }
@@ -480,7 +479,7 @@ export default class PebbleGridSectionDialog extends LitElement {
   }
 
   private _handleTabChanged(ev: CustomEvent): void {
-    const newTab = TABS[ev.detail.index];
+    const newTab = ev.detail.name as (typeof TABS)[number];
     if (newTab === this._currTab) {
       return;
     }
@@ -625,12 +624,6 @@ export default class PebbleGridSectionDialog extends LitElement {
   static get styles() {
     return [
       css`
-        @media all and (min-width: 450px) and (min-height: 500px) {
-          ha-dialog {
-            --mdc-dialog-min-width: min(600px, 95vw);
-            --mdc-dialog-max-width: min(600px, 95vw);
-          }
-        }
 
         :host {
           --mdc-button-horizontal-padding: 16px;
