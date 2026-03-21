@@ -1,6 +1,8 @@
 import { LitElement, html, css, nothing } from "lit";
+import type { PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
+import { createRef, ref } from "lit/directives/ref.js";
 import { HassEntity } from "home-assistant-js-websocket";
 import { mdiWater } from "@mdi/js";
 import initLocalize from "../localize";
@@ -24,10 +26,17 @@ class PebbleWeatherCard extends LitElement {
   @state() private forecastEvent?: ForecastEvent;
   @state() private containerWidth: number = 0;
 
+  /** Full weekday label for the leftmost visible future-day column; null hides the strip. */
+  @state() private _forecastDayStripLabel: string | null = null;
+
   private _retryCount: number;
 
   private _unsubscribe?: () => Promise<void>;
   private _resizeObserver?: ResizeObserver;
+  private _forecastListRef = createRef<HTMLDivElement>();
+  private _forecastListResizeObserver?: ResizeObserver;
+  private _forecastListObserverEl: HTMLElement | null = null;
+  private _forecastDayStripRaf = 0;
 
   private get localize() {
     return initLocalize(this._hass);
@@ -57,6 +66,17 @@ class PebbleWeatherCard extends LitElement {
     super.disconnectedCallback();
     this._unsubscribe?.();
     this._resizeObserver?.disconnect();
+    this._forecastListResizeObserver?.disconnect();
+    this._forecastListObserverEl = null;
+    cancelAnimationFrame(this._forecastDayStripRaf);
+  }
+
+  protected updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    this.updateComplete.then(() => {
+      this._attachForecastListObservers();
+      this._scheduleForecastDayStripUpdate();
+    });
   }
 
   set hass(hass: HomeAssistant) {
@@ -253,51 +273,179 @@ class PebbleWeatherCard extends LitElement {
       return position * 0.5;
     };
 
-    return html`<div class="forecast-list">
-      ${forecast.map((entry) => {
-        const datetime = new Date(entry.datetime);
-        const calculatedSunrise = new Date(datetime);
-        const calculatedSunset = new Date(datetime);
+    return html`
+      <div class="forecast-hourly-wrap">
+        ${forecast.length
+          ? html`<div
+              class="forecast-day-strip ${this._forecastDayStripLabel ? "is-visible" : ""}"
+              aria-hidden=${!this._forecastDayStripLabel}
+            >
+              <span class="forecast-day-strip-label">${this._forecastDayStripLabel ?? ""}</span>
+            </div>`
+          : nothing}
+        <div
+          class="forecast-list"
+          ${ref(this._forecastListRef)}
+          @scroll=${this._onForecastScroll}
+        >
+          ${forecast.map((entry) => {
+            const datetime = new Date(entry.datetime);
+            const calculatedSunrise = new Date(datetime);
+            const calculatedSunset = new Date(datetime);
 
-        if (sunrise && sunset) {
-          const sunriseTime = new Date(sunrise);
-          const sunsetTime = new Date(sunset);
+            if (sunrise && sunset) {
+              const sunriseTime = new Date(sunrise);
+              const sunsetTime = new Date(sunset);
 
-          calculatedSunrise.setHours(
-            sunriseTime.getHours(),
-            sunriseTime.getMinutes(),
-            sunriseTime.getSeconds(),
-          );
-          calculatedSunset.setHours(
-            sunsetTime.getHours(),
-            sunsetTime.getMinutes(),
-            sunsetTime.getSeconds(),
-          );
-        } else {
-          // fallback to time-based calculation if sunrise/sunset data is not available
-          calculatedSunrise.setHours(6, 0, 0);
-          calculatedSunset.setHours(18, 0, 0);
+              calculatedSunrise.setHours(
+                sunriseTime.getHours(),
+                sunriseTime.getMinutes(),
+                sunriseTime.getSeconds(),
+              );
+              calculatedSunset.setHours(
+                sunsetTime.getHours(),
+                sunsetTime.getMinutes(),
+                sunsetTime.getSeconds(),
+              );
+            } else {
+              // fallback to time-based calculation if sunrise/sunset data is not available
+              calculatedSunrise.setHours(6, 0, 0);
+              calculatedSunset.setHours(18, 0, 0);
+            }
+            const isNight = datetime < calculatedSunrise || datetime >= calculatedSunset;
+
+            return html`
+              <div class="forecast hourly">
+                <div class="time">${this._renderDateTime(entry.datetime, hourly)}</div>
+                <div class="hourly-conditions" style="top: ${calculatePosition(entry.temperature)}%;">
+                  <div class="forecast-icon">
+                    <pebble-weather-icon
+                      .condition=${entry.condition}
+                      .isNight=${isNight}
+                    ></pebble-weather-icon>
+                  </div>
+                  <div class="forecast-temp">
+                    <span>${entry.temperature}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          })}
+        </div>
+      </div>
+    `;
+  }
+
+  private _onForecastScroll() {
+    this._scheduleForecastDayStripUpdate();
+  }
+
+  private _scheduleForecastDayStripUpdate() {
+    cancelAnimationFrame(this._forecastDayStripRaf);
+    this._forecastDayStripRaf = requestAnimationFrame(() => this._updateForecastDayStrip());
+  }
+
+  /** True if `d` falls on the user's local calendar day (today). */
+  private _isLocalToday(d: Date): boolean {
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  }
+
+  private _updateForecastDayStrip() {
+    const listEl = this._forecastListRef.value;
+    const forecast = this.forecastEvent?.forecast ?? [];
+
+    if (
+      !listEl ||
+      !forecast.length ||
+      this.config.forecast_type !== "hourly" ||
+      this.config.hide_forecast
+    ) {
+      if (this._forecastDayStripLabel !== null) {
+        this._forecastDayStripLabel = null;
+      }
+      return;
+    }
+
+    const children = listEl.querySelectorAll(".forecast.hourly");
+    if (children.length !== forecast.length) {
+      this._scheduleForecastDayStripUpdate();
+      return;
+    }
+
+    const view = listEl.getBoundingClientRect();
+    const leftEdge = view.left;
+    const rightEdge = view.right;
+
+    let anyTodayVisible = false;
+    const intersecting: { index: number; left: number }[] = [];
+
+    children.forEach((child, index) => {
+      const r = child.getBoundingClientRect();
+      if (r.right > leftEdge && r.left < rightEdge) {
+        let d: Date;
+        try {
+          d = new Date(forecast[index].datetime);
+        } catch {
+          return;
         }
-        const isNight = datetime < calculatedSunrise || datetime >= calculatedSunset;
+        if (this._isLocalToday(d)) {
+          anyTodayVisible = true;
+        }
+        intersecting.push({ index, left: r.left });
+      }
+    });
 
-        return html`
-          <div class="forecast hourly">
-            <div class="time">${this._renderDateTime(entry.datetime, hourly)}</div>
-            <div class="hourly-conditions" style="top: ${calculatePosition(entry.temperature)}%;">
-              <div class="forecast-icon">
-                <pebble-weather-icon
-                  .condition=${entry.condition}
-                  .isNight=${isNight}
-                ></pebble-weather-icon>
-              </div>
-              <div class="forecast-temp">
-                <span>${entry.temperature}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      })}
-    </div>`;
+    if (anyTodayVisible || intersecting.length === 0) {
+      if (this._forecastDayStripLabel !== null) {
+        this._forecastDayStripLabel = null;
+      }
+      return;
+    }
+
+    const leftmost = intersecting.reduce((a, b) => (a.left <= b.left ? a : b));
+    let dayDate: Date;
+    try {
+      dayDate = new Date(forecast[leftmost.index].datetime);
+    } catch {
+      if (this._forecastDayStripLabel !== null) {
+        this._forecastDayStripLabel = null;
+      }
+      return;
+    }
+
+    const label = new Intl.DateTimeFormat(this._hass.locale?.language ?? "en-US", {
+      weekday: "long",
+    }).format(dayDate);
+
+    if (this._forecastDayStripLabel !== label) {
+      this._forecastDayStripLabel = label;
+    }
+  }
+
+  private _attachForecastListObservers() {
+    const el = this._forecastListRef.value;
+    if (!el || this.config.forecast_type !== "hourly" || this.config.hide_forecast) {
+      if (this._forecastListObserverEl) {
+        this._forecastListResizeObserver?.disconnect();
+        this._forecastListObserverEl = null;
+      }
+      return;
+    }
+    if (this._forecastListObserverEl === el) {
+      return;
+    }
+    this._forecastListResizeObserver?.disconnect();
+    this._forecastListObserverEl = el;
+    this._forecastListResizeObserver = new ResizeObserver(() =>
+      this._scheduleForecastDayStripUpdate(),
+    );
+    this._forecastListResizeObserver.observe(el);
+    this._scheduleForecastDayStripUpdate();
   }
 
   _getPrecipitationFormatter() {
@@ -454,10 +602,13 @@ class PebbleWeatherCard extends LitElement {
     return css`
       :host {
         --mdc-icon-size: 100px;
+        display: block;
+        min-width: 0;
       }
 
       ha-card {
         padding: 24px;
+        min-width: 0;
         filter: var(--pebble-card-filter, "none");
         font-size: var(--pebble-font-size, var(--card-primary-font-size, 16px));
       }
@@ -465,6 +616,7 @@ class PebbleWeatherCard extends LitElement {
       .weather {
         display: grid;
         gap: 18px;
+        min-width: 0;
       }
 
       .current {
@@ -509,8 +661,54 @@ class PebbleWeatherCard extends LitElement {
         margin-bottom: 12px;
       }
 
+      .forecast-hourly-wrap {
+        position: relative;
+        /* Allow grid/flex parents to shrink this track so inner overflow-x can scroll */
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .forecast-day-strip {
+        position: absolute;
+        left: 0;
+        /* Below hour labels: .time uses 0.8125em of .forecast-list (1.5em); + row gap 20px */
+        top: calc(0.8125em * 1.35 + 20px);
+        bottom: 0;
+        width: 1.75rem;
+        z-index: 1;
+        pointer-events: none;
+        display: flex;
+        place-items: center;
+        background-color: var(--card-background-color, var(--ha-card-background-color, #fff));
+        opacity: 0;
+        transition: opacity 300ms ease;
+      }
+
+      .forecast-day-strip.is-visible {
+        opacity: 0.75;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .forecast-day-strip {
+          transition: none;
+        }
+      }
+
+      .forecast-day-strip-label {
+        font-weight: bold;
+        color: var(--primary-text-color);
+        text-transform: uppercase;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        max-height: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .forecast-list {
         display: flex;
+        min-width: 0;
         overflow-x: auto;
         overflow-y: hidden;
         gap: 8px;
