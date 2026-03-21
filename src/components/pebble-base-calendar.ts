@@ -1,6 +1,7 @@
 import { LitElement, html, css, CSSResultGroup, nothing } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { property } from "lit/decorators.js";
+import { mdiClose } from "@mdi/js";
 import { isSameDay, isWithinInterval, format } from "date-fns";
 import { CalendarEvent } from "../utils/calendar-utils";
 import { COLOR_CSS_VARS } from "../utils/colors";
@@ -89,46 +90,44 @@ export abstract class PebbleBaseCalendar extends LitElement {
       color,
     });
 
-    return html`
-      <ha-dialog
-        open
-        @closed=${this.closeDialog}
-        .heading=${html`<div class="header_title">
-          <ha-icon-button
-            .label=${this.hass?.localize("ui.dialogs.generic.close") ?? "Close"}
-            dialogAction="close"
-            class="header_button"
-            ><ha-icon icon="mdi:close"></ha-icon
-          ></ha-icon-button>
-          <span>${event.eventData.summary}</span>
-        </div>`}
-      >
-        <div class="event-dialog-content">
-            <ha-icon icon="mdi:calendar-account" style=${iconStyles}></ha-icon>
-            <div class="event-dialog-info">
-              ${this.hass.formatEntityAttributeValue(
-                this.hass.states[event.calendar],
-                "friendly_name",
-              )}
-            </div>
-            <ha-icon icon="mdi:calendar-clock"></ha-icon>
-            <div class="event-dialog-info">
-              ${
-                event.allDay
-                  ? html`${this.localize("calendar.card.calendar.detail.all-day")}
-                    ${!isSameDay(event.start, event.end)
-                      ? html` (${format(event.start, "MMM d")} - ${format(event.end, "MMM d")})`
-                      : nothing}`
-                  : html`${format(event.start, formatTokens)} - ${format(event.end, formatTokens)}`
-              }
-            </div>
+    const title = event.title ?? event.eventData.summary;
 
+    return html`
+      <ha-dialog open @closed=${this.closeDialog}>
+        <ha-dialog-header show-border slot="header">
+          <span slot="title">${title}</span>
+          <ha-icon-button
+            slot="actionItems"
+            .label=${this.hass?.localize("ui.dialogs.generic.close") ?? "Close"}
+            .path=${mdiClose}
+            @click=${this.closeDialog}
+          ></ha-icon-button>
+        </ha-dialog-header>
+        <div class="event-dialog-content">
+          <ha-icon icon="mdi:calendar-account" style=${iconStyles}></ha-icon>
+          <div class="event-dialog-info">
+            ${this.hass.formatEntityAttributeValue(
+              this.hass.states[event.calendar],
+              "friendly_name",
+            )}
+          </div>
+          <ha-icon icon="mdi:calendar-clock"></ha-icon>
+          <div class="event-dialog-info">
             ${
-              event.eventData.description
-                ? html` <div class="event-dialog-description">${event.eventData.description}</div> `
-                : nothing
+              event.allDay
+                ? html`${this.localize("calendar.card.calendar.detail.all-day")}
+                  ${!isSameDay(event.start, event.end)
+                    ? html` (${format(event.start, "MMM d")} - ${format(event.end, "MMM d")})`
+                    : nothing}`
+                : html`${format(event.start, formatTokens)} - ${format(event.end, formatTokens)}`
             }
           </div>
+
+          ${
+            event.eventData.description
+              ? html`<div class="event-dialog-description">${event.eventData.description}</div>`
+              : nothing
+          }
         </div>
       </ha-dialog>
     `;
@@ -193,6 +192,7 @@ export abstract class PebbleBaseCalendar extends LitElement {
           display: grid;
           grid-template-columns: min-content 1fr;
           gap: 16px;
+          padding-top: var(--ha-space-4, 16px);
         }
 
         .event-dialog-description {
