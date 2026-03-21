@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 **Pebble Dashboard** is a custom Home Assistant dashboard and card collection. It provides:
+
 - Custom dashboard layout (Pebble Sections) with two-column responsive design and dynamic background images
 - Custom cards: Clock, Calendar, Weather, Countdown
 - Full UI configurability for all components
@@ -24,15 +25,18 @@ This is a **Home Assistant custom component** distributed via HACS (Home Assista
 ## Common Commands
 
 ### Development
+
 - `npm start` — Start dev server with file watching on port 4000. Server auto-reloads on file changes.
 - `npm run build` — Build production bundle to `dist/pebble-dashboard.js` with minification
 
 ### Testing & Linting
+
 - `npm test` — Run Jest tests (looks for `**/__tests__/**/*.test.ts`)
 - `npm run test:watch` — Run Jest in watch mode
 - `npm run format` — Format all files with Prettier (100 character line width)
 
 ### Home Assistant Development
+
 - `npm run start:hass` — Spin up a Docker-based Home Assistant dev instance on port 8123
 - Development config is in `.hass_dev/` (includes demo automation, climate/light/climate packages for testing)
 
@@ -97,6 +101,7 @@ class PebbleClockCardEditor extends LitElement {
 ```
 
 **Each card must:**
+
 1. Extend `LitElement` and use `@customElement()` decorator
 2. Accept `hass` (HomeAssistant instance) as a property
 3. Store config in `@state()`
@@ -104,6 +109,7 @@ class PebbleClockCardEditor extends LitElement {
 5. Be imported in `src/index.ts` and registered with metadata
 
 **Custom elements registered in `index.ts` must declare:**
+
 - `type`: HTML element name (e.g., `"pebble-calendar-card"`)
 - `name`: Human-readable name
 - `description`: Brief description
@@ -127,6 +133,7 @@ class PebbleClockCardEditor extends LitElement {
 ## Building & Bundling
 
 **Rollup configuration** (`rollup.config.mjs`):
+
 - Input: `src/index.ts`
 - Output: `dist/pebble-dashboard.js` (ES module, tree-shaken, dynamic imports inlined)
 - Plugins:
@@ -142,6 +149,7 @@ class PebbleClockCardEditor extends LitElement {
 ## Testing
 
 **Jest setup** (`jest.config.js`):
+
 - Preset: `ts-jest` (handles TypeScript → JavaScript transformation)
 - Environment: Node (not browser)
 - Test discovery: `src/**/__tests__/**/*.test.ts`
@@ -152,6 +160,7 @@ Tests typically import and test utilities, type transformations, and event handl
 ## Code Quality
 
 **ESLint** (`eslint.config.mts`):
+
 - Plugins: `typescript-eslint`, `eslint-plugin-lit`, `eslint-plugin-lit-a11y`, `eslint-plugin-wc` (Web Components)
 - Config: Recommended rules from all plugins + Prettier integration (no style conflicts)
 - Notable rules:
@@ -163,10 +172,12 @@ Tests typically import and test utilities, type transformations, and event handl
 ## Deployment & Releases
 
 **GitHub Workflows:**
+
 - `.github/workflows/build.yaml` — Runs on every PR and push (excluding version tags). Checks out, installs, and runs `npm run build`.
 - `.github/workflows/validate.yaml` — Likely runs linting/tests (check workflow file for details).
 
 **HACS Distribution**: Built JavaScript is released as a GitHub release. Users download `pebble-dashboard.js` and either:
+
 - Add manually via Home Assistant UI as a JavaScript module resource at `/local/pebble-dashboard.js`, OR
 - Install via HACS (which handles file management)
 
@@ -178,4 +189,3 @@ Tests typically import and test utilities, type transformations, and event handl
 - **Editor Pattern**: Card editors must follow Home Assistant's editor interface (emit `config-changed` events, etc.). See existing card editors for the pattern.
 - **Media Source Integration**: Background images can be fetched from Home Assistant's Media source or external sources. Picsum and remote URL logic is in `src/media/`.
 - **Responsive Design**: The Pebble grid section is designed for full-screen dashboard use with a resize bar between left/right columns. Sections inherit background images and styling.
-
