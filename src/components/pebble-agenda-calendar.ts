@@ -320,7 +320,7 @@ class PebbleAgendaCalendar extends PebbleBaseCalendar {
       "--event-color": color,
     };
 
-    let timeDisplay = "";
+    let timeDisplay: string | undefined;
     let hideDatePrefix = false;
 
     if (event.allDay) {

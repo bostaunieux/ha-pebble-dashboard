@@ -355,7 +355,7 @@ class PebbleWeekCalendar extends PebbleBaseCalendar {
           <div class="all-day-events">
             <div class="time-labels-spacer"></div>
             ${weekDays.map((date, index) => {
-              let allDayEvents: CalendarEvent[] = [];
+              let allDayEvents: CalendarEvent[] | undefined;
               if (this.eventsSpanDays && weekEvents.length > 0) {
                 // Use spanning events logic
                 allDayEvents = weekEvents[index]?.filter((e) => e.allDay) || [];

@@ -309,18 +309,16 @@ const getMaxSimultaneousOverlaps = (
   timePoints.sort((a, b) => a.time.getTime() - b.time.getTime());
 
   let maxOverlaps = 0;
-  let currentOverlaps = 0;
 
   const activeEvents = new Set<CalendarEvent>();
 
   for (const point of timePoints) {
     if (point.type === "start") {
       activeEvents.add(point.event);
-      currentOverlaps = activeEvents.size;
+      const currentOverlaps = activeEvents.size;
       maxOverlaps = Math.max(maxOverlaps, currentOverlaps);
     } else {
       activeEvents.delete(point.event);
-      currentOverlaps = activeEvents.size;
     }
   }
 
