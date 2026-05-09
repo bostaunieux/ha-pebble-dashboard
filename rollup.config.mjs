@@ -7,11 +7,6 @@ import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
 import summary from "rollup-plugin-summary";
 
-// NOTE: This is experimental and may change. This precompiles html template literals
-// which should speed up initial rendering of templates. This can safely be removed
-// without impacting functionality in the built code.
-import { compileLitTemplates } from "@lit-labs/compiler";
-
 const dev = process.env.ROLLUP_WATCH;
 
 const serveOptions = {
@@ -29,11 +24,7 @@ const plugins = [
   json(),
   commonjs(),
   eslint(),
-  typescript({
-    transformers: {
-      before: [compileLitTemplates()],
-    },
-  }),
+  typescript(),
 
   ...(dev ? [serve(serveOptions)] : [terser(), summary({ showGzippedSize: true })]),
 ];

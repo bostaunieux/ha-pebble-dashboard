@@ -14,7 +14,7 @@ class PebbleCountdownCard extends LitElement {
   @state() private config!: CountdownCardConfig;
   @state() private now: Date = new Date();
 
-  private _interval?: NodeJS.Timeout;
+  private _interval?: ReturnType<typeof setInterval>;
 
   private get localize() {
     return initLocalize(this.hass);

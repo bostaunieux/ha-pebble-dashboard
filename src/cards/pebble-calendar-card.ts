@@ -62,9 +62,9 @@ class PebbleCalendarCard extends LitElement {
 
   private _unsubscribeFromWeather?: () => Promise<void>;
 
-  private reloadIntervalId?: NodeJS.Timeout;
+  private reloadIntervalId?: ReturnType<typeof setInterval>;
 
-  private reloadTimeoutId?: NodeJS.Timeout;
+  private reloadTimeoutId?: ReturnType<typeof setTimeout>;
 
   private activeDate?: Date;
 
