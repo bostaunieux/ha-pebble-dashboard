@@ -20,10 +20,6 @@ interface EntityRegistryDisplayEntry {
   // display_precision?: number;
 }
 
-interface Resources {
-  [language: string]: Record<string, string>;
-}
-
 export interface HomeAssistant {
   connection: Connection;
   connected: boolean;
@@ -40,7 +36,6 @@ export interface HomeAssistant {
   // local stored language, keep that name for backward compatibility
   selectedLanguage: string | null;
   locale: any /*TODO Fix ME FrontendLocaleData */;
-  resources: Resources;
   localize: LocalizeFunc;
   callApi<T>(
     method: "GET" | "POST" | "PUT" | "DELETE",

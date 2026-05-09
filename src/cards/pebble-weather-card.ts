@@ -181,9 +181,9 @@ class PebbleWeatherCard extends LitElement {
   }
 
   _renderDescription(entity: HassEntity, inline: boolean) {
-    const lang = this._hass.selectedLanguage || this._hass.language;
-    const description =
-      this._hass.resources[lang]?.[`component.weather.entity_component._.state.${entity.state}`];
+    const key = `component.weather.entity_component._.state.${entity.state}`;
+    const localized = this._hass.localize?.(key);
+    const description = localized && localized !== key ? localized : undefined;
 
     return description
       ? html`<div class="description ${inline ? "inline" : ""}">${description}</div>`
