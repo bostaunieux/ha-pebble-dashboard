@@ -12,6 +12,7 @@
     "rootDir": "./",
     "types": ["jest"],
     "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "resolveJsonModule": true
   },
   "include": ["./src/**/*.ts"]
