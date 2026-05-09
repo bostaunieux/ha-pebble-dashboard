@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=24.4.1"
   },
   "overrides": {
     "@rollup/plugin-eslint": {
@@ -34,7 +34,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^10.0.1",
-    "@lit-labs/compiler": "^1.0.3",
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-eslint": "^9.0.5",
     "@rollup/plugin-json": "^6.1.0",
@@ -56,7 +55,7 @@
     "rollup-plugin-summary": "^3.0.1",
     "ts-jest": "^29.4.4",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.5",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.43.0"
   }
 }
