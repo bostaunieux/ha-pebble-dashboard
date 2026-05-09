@@ -1,7 +1,7 @@
 import { css, html, LitElement, type CSSResultGroup, type PropertyValues, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { customElement, property, state, query } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { getProminentColors, isDark } from "../utils/colors";
 import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
@@ -33,8 +33,6 @@ customElements.whenDefined("hui-grid-section").then(() => {
     @state() private _isMainActive = true;
 
     @state() private _isDarkBackground = true;
-
-    @query(".pebble-container") private _containerNode!: HTMLDivElement;
 
     /** For entity photo source, the URL of the photo */
     private _photoEntityUrl?: string;
@@ -161,7 +159,8 @@ customElements.whenDefined("hui-grid-section").then(() => {
     }, 1_000);
 
     async _updateColors() {
-      const container = this._containerNode;
+      const container = this.shadowRoot?.querySelector('.pebble-container') as HTMLElement | null;
+    
       const image = this._isMainActive ? this._mainBackground : this._altBackground;
       if (!container || !image) {
         return;
