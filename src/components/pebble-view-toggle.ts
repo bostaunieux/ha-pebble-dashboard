@@ -59,11 +59,11 @@ class PebbleViewToggle extends LitElement {
       }
 
       .view-toggle.floating {
-        position: fixed;
+        position: absolute;
         bottom: 20px;
         right: 20px;
         flex-direction: column;
-        z-index: 1000;
+        z-index: 1;
         background: var(--card-background-color, #fff);
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
