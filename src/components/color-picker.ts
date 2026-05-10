@@ -5,6 +5,8 @@ import { COLORS, ColorOption, computeCssColor } from "../utils/colors";
 import { HomeAssistant } from "../types";
 import { LocalizationKey } from "../localize";
 
+const DEFAULT_VALUE = "default";
+
 @customElement("pebble-calendar-color-picker")
 export class ColorPicker extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -26,58 +28,69 @@ export class ColorPicker extends LitElement {
     this.value = null;
   }
 
-  _valueSelected(ev: CustomEvent) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const value = (ev.target as any).value;
-    if (value) {
-      this.dispatchEvent(
-        new CustomEvent("value-changed", {
-          detail: { value: value !== "default" ? value : undefined },
-        }),
-      );
-    }
+  private _handleSelect(ev: CustomEvent<{ item: { value: string } }>) {
+    ev.stopPropagation();
+    const value = ev.detail?.item?.value;
+    if (!value) return;
+    this.dispatchEvent(
+      new CustomEvent("value-changed", {
+        detail: { value: value !== DEFAULT_VALUE ? value : undefined },
+      }),
+    );
   }
 
-  render() {
+  private _labelFor(value: string) {
+    if (!this.localize) return value;
+    return this.localize(`colorpicker.editor.options.${value}` as LocalizationKey);
+  }
+
+  private _renderValue = (value: string) => {
+    const isDefault = !value || value === DEFAULT_VALUE;
     return html`
-      <ha-select
-        .icon=${Boolean(this.value)}
-        .label=${this.label}
-        .value=${this.value || "default"}
-        .helper=${this.helper}
-        .disabled=${this.disabled}
-        @closed=${this._onClose}
-        @selected=${this._valueSelected}
-        fixedMenuPosition
-        naturalMenuWidth
+      <span slot="start" class="swatch">
+        ${isDefault ? nothing : this._renderColorCircle(value as ColorOption)}
+      </span>
+      <span slot="headline">${this._labelFor(isDefault ? DEFAULT_VALUE : value)}</span>
+    `;
+  };
+
+  render() {
+    const currentValue = this.value || DEFAULT_VALUE;
+    return html`
+      <ha-dropdown
+        placement="bottom"
+        ?disabled=${this.disabled ?? false}
+        @wa-select=${this._handleSelect}
       >
-        ${this.value
-          ? html`
-              <span slot="icon">
-                ${this._renderColorCircle((this.value as ColorOption) || "grey")}
-              </span>
-            `
-          : nothing}
-        <mwc-list-item value="default">
-          ${this.localize("colorpicker.editor.options.default")}
-        </mwc-list-item>
+        <ha-picker-field
+          slot="trigger"
+          type="button"
+          compact
+          .label=${this.label}
+          .value=${currentValue}
+          .valueRenderer=${this._renderValue}
+          .disabled=${this.disabled}
+          .hideClearIcon=${true}
+        ></ha-picker-field>
+        <ha-dropdown-item
+          .value=${DEFAULT_VALUE}
+          .selected=${currentValue === DEFAULT_VALUE}
+        >
+          ${this._labelFor(DEFAULT_VALUE)}
+        </ha-dropdown-item>
         ${Array.from(COLORS).map(
           (color) => html`
-            <mwc-list-item .value=${color} graphic="icon">
-              ${this.localize(`colorpicker.editor.options.${color}`)}
-              <span slot="graphic">${this._renderColorCircle(color)}</span>
-            </mwc-list-item>
+            <ha-dropdown-item .value=${color} .selected=${currentValue === color}>
+              <span slot="icon">${this._renderColorCircle(color)}</span>
+              ${this._labelFor(color)}
+            </ha-dropdown-item>
           `,
         )}
-      </ha-select>
+      </ha-dropdown>
     `;
   }
 
-  _onClose(ev: CustomEvent) {
-    ev.stopPropagation();
-  }
-
-  _renderColorCircle(color: ColorOption) {
+  private _renderColorCircle(color: ColorOption) {
     return html`
       <span
         class="circle-color"
@@ -90,15 +103,27 @@ export class ColorPicker extends LitElement {
 
   static get styles() {
     return css`
+      :host {
+        display: block;
+      }
+      ha-dropdown {
+        width: 100%;
+        display: block;
+      }
+      ha-picker-field {
+        width: 100%;
+      }
+      .swatch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
       .circle-color {
         display: block;
         background-color: var(--circle-color);
         border-radius: 10px;
         width: 20px;
         height: 20px;
-      }
-      ha-select {
-        width: 100%;
       }
     `;
   }
