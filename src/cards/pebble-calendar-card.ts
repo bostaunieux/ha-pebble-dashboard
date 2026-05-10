@@ -1,4 +1,4 @@
-import { LitElement, html, nothing } from "lit";
+import { LitElement, html, css, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import {
   startOfDay,
@@ -383,11 +383,13 @@ class PebbleCalendarCard extends LitElement {
           @view-changed=${this.handleViewChange}
         ></pebble-week-calendar>
         ${showFloatingViewToggle
-          ? html`<pebble-view-toggle
-              .currentView=${this.currentView}
-              .location=${"floating"}
-              @view-changed=${this.handleViewChange}
-            ></pebble-view-toggle>`
+          ? html`<div class="floating-anchor">
+              <pebble-view-toggle
+                .currentView=${this.currentView}
+                .location=${"floating"}
+                @view-changed=${this.handleViewChange}
+              ></pebble-view-toggle>
+            </div>`
           : nothing}
       `;
     }
@@ -408,11 +410,13 @@ class PebbleCalendarCard extends LitElement {
           @view-changed=${this.handleViewChange}
         ></pebble-agenda-calendar>
         ${showFloatingViewToggle
-          ? html`<pebble-view-toggle
-              .currentView=${this.currentView}
-              .location=${"floating"}
-              @view-changed=${this.handleViewChange}
-            ></pebble-view-toggle>`
+          ? html`<div class="floating-anchor">
+              <pebble-view-toggle
+                .currentView=${this.currentView}
+                .location=${"floating"}
+                @view-changed=${this.handleViewChange}
+              ></pebble-view-toggle>
+            </div>`
           : nothing}
       `;
     }
@@ -452,11 +456,13 @@ class PebbleCalendarCard extends LitElement {
             @fetch-more-events=${this.handleFetchMoreEvents}
           ></pebble-basic-calendar>`}
       ${showFloatingViewToggle
-        ? html`<pebble-view-toggle
-            .currentView=${this.currentView}
-            .location=${"floating"}
-            @view-changed=${this.handleViewChange}
-          ></pebble-view-toggle>`
+        ? html`<div class="floating-anchor">
+            <pebble-view-toggle
+              .currentView=${this.currentView}
+              .location=${"floating"}
+              @view-changed=${this.handleViewChange}
+            ></pebble-view-toggle>
+          </div>`
         : nothing}
     `;
   }
@@ -523,7 +529,18 @@ class PebbleCalendarCard extends LitElement {
   }
 
   static get styles() {
-    return [];
+    return css`
+      .floating-anchor {
+        position: sticky;
+        bottom: 0;
+        height: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      .floating-anchor > * {
+        pointer-events: auto;
+      }
+    `;
   }
 }
 
