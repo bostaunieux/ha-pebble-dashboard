@@ -1,4 +1,9 @@
-import { getEventPosition, CalendarEvent } from "../calendar-utils";
+import {
+  CalendarEvent,
+  filterEventsInRange,
+  getEventPosition,
+  getNextWeekRange,
+} from "../calendar-utils";
 
 // Helper function to create a CalendarEvent for testing
 const createEvent = (
@@ -206,5 +211,145 @@ describe("getEventPosition", () => {
       expect(position2.width).toBe(100); // Full width
       expect(position2.left).toBe(0); // 0% offset
     });
+  });
+});
+
+// Helper to build a calendar event on an arbitrary date
+const eventOn = (
+  title: string,
+  start: Date,
+  end: Date,
+  allDay: boolean = false,
+): CalendarEvent => ({
+  title,
+  start,
+  end,
+  daysInterval: 0,
+  calendar: "test-calendar",
+  allDay,
+  eventData: {
+    summary: title,
+    dtstart: start.toISOString(),
+    dtend: end.toISOString(),
+  },
+});
+
+describe("getNextWeekRange", () => {
+  test("when week starts on Monday, end covers the full Sunday including evening", () => {
+    // Wednesday 2026-06-03
+    const currentDate = new Date(2026, 5, 3);
+    const { start, end } = getNextWeekRange(currentDate, 1);
+
+    // Next week starts Monday 2026-06-08 at 00:00
+    expect(start.getDay()).toBe(1);
+    expect(start.getDate()).toBe(8);
+    expect(start.getHours()).toBe(0);
+    expect(start.getMinutes()).toBe(0);
+
+    // Next week ends Sunday 2026-06-14 at end-of-day
+    expect(end.getDay()).toBe(0);
+    expect(end.getDate()).toBe(14);
+    expect(end.getHours()).toBe(23);
+    expect(end.getMinutes()).toBe(59);
+  });
+
+  test("when week starts on Sunday, end covers the full Saturday including evening", () => {
+    // Tuesday 2026-06-02
+    const currentDate = new Date(2026, 5, 2);
+    const { start, end } = getNextWeekRange(currentDate, 0);
+
+    // Next week starts Sunday 2026-06-07 at 00:00
+    expect(start.getDay()).toBe(0);
+    expect(start.getDate()).toBe(7);
+
+    // Next week ends Saturday 2026-06-13 at end-of-day
+    expect(end.getDay()).toBe(6);
+    expect(end.getDate()).toBe(13);
+    expect(end.getHours()).toBe(23);
+  });
+});
+
+describe("filterEventsInRange (regression for Sunday exclusion)", () => {
+  test("includes timed events on the final day of a Monday-starting week", () => {
+    // Wednesday 2026-06-03 => next week is Mon 06-08 to Sun 06-14
+    const range = getNextWeekRange(new Date(2026, 5, 3), 1);
+
+    const sundayMorning = eventOn(
+      "Sunday brunch",
+      new Date(2026, 5, 14, 10, 0),
+      new Date(2026, 5, 14, 12, 0),
+    );
+    const sundayEvening = eventOn(
+      "Sunday dinner",
+      new Date(2026, 5, 14, 18, 0),
+      new Date(2026, 5, 14, 20, 0),
+    );
+
+    const filtered = filterEventsInRange([sundayMorning, sundayEvening], range);
+
+    expect(filtered).toContain(sundayMorning);
+    expect(filtered).toContain(sundayEvening);
+  });
+
+  test("includes timed events on the final day of a Sunday-starting week", () => {
+    // Tuesday 2026-06-02 => next week is Sun 06-07 to Sat 06-13
+    const range = getNextWeekRange(new Date(2026, 5, 2), 0);
+
+    const saturdayEvening = eventOn(
+      "Saturday party",
+      new Date(2026, 5, 13, 19, 0),
+      new Date(2026, 5, 13, 23, 0),
+    );
+
+    const filtered = filterEventsInRange([saturdayEvening], range);
+
+    expect(filtered).toContain(saturdayEvening);
+  });
+
+  test("includes all-day events on the final day of the week", () => {
+    const range = getNextWeekRange(new Date(2026, 5, 3), 1);
+
+    // All-day Sunday event (HA normalizes allDay end to end-of-day)
+    const sundayAllDay = eventOn(
+      "Sunday all-day",
+      new Date(2026, 5, 14, 0, 0),
+      new Date(2026, 5, 14, 23, 59, 59),
+      true,
+    );
+
+    expect(filterEventsInRange([sundayAllDay], range)).toContain(sundayAllDay);
+  });
+
+  test("excludes events fully outside the range", () => {
+    const range = getNextWeekRange(new Date(2026, 5, 3), 1);
+
+    // The week before next week
+    const earlierEvent = eventOn(
+      "Earlier",
+      new Date(2026, 5, 5, 10, 0),
+      new Date(2026, 5, 5, 11, 0),
+    );
+    // The week after next week
+    const laterEvent = eventOn(
+      "Later",
+      new Date(2026, 5, 16, 10, 0),
+      new Date(2026, 5, 16, 11, 0),
+    );
+
+    const filtered = filterEventsInRange([earlierEvent, laterEvent], range);
+    expect(filtered).not.toContain(earlierEvent);
+    expect(filtered).not.toContain(laterEvent);
+  });
+
+  test("includes events that fully span the range", () => {
+    const range = getNextWeekRange(new Date(2026, 5, 3), 1);
+
+    const spanning = eventOn(
+      "Conference",
+      new Date(2026, 5, 1, 9, 0),
+      new Date(2026, 5, 20, 17, 0),
+    );
+
+    expect(filterEventsInRange([spanning], range)).toContain(spanning);
   });
 });

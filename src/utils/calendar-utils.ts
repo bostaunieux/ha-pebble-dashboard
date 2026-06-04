@@ -1,14 +1,18 @@
 import {
+  addDays,
   differenceInCalendarDays,
   endOfDay,
+  isWithinInterval,
   parseISO,
   startOfDay,
+  startOfWeek,
   subDays,
   max,
   min,
   eachDayOfInterval,
   getHours,
   getMinutes,
+  Day,
 } from "date-fns";
 import type { HomeAssistant } from "../types";
 
@@ -149,6 +153,37 @@ export const getTimeUntilNextInterval = (intervalMinutes: number, now: Date = ne
   const totalSeconds = totalMinutes - seconds;
 
   return totalSeconds * 1_000 - milliseconds;
+};
+
+/**
+ * Returns the date range for the week following the week containing `currentDate`.
+ * `end` is the end of the last day (23:59:59.999) so timed events on the final
+ * day of the week are not excluded by inclusive interval checks.
+ */
+export const getNextWeekRange = (
+  currentDate: Date,
+  weekStartsOn: Day,
+): { start: Date; end: Date } => {
+  const currentWeekStart = startOfWeek(currentDate, { weekStartsOn });
+  const nextWeekStart = addDays(currentWeekStart, 7);
+  const nextWeekEnd = endOfDay(addDays(nextWeekStart, 6));
+  return { start: nextWeekStart, end: nextWeekEnd };
+};
+
+/**
+ * Returns events that overlap the given date range. An event overlaps if it
+ * starts within the range, ends within the range, or fully spans the range.
+ */
+export const filterEventsInRange = (
+  events: ReadonlyArray<CalendarEvent>,
+  range: { start: Date; end: Date },
+): CalendarEvent[] => {
+  return events.filter(
+    (event) =>
+      isWithinInterval(event.start, range) ||
+      isWithinInterval(event.end, range) ||
+      (event.start <= range.start && event.end >= range.end),
+  );
 };
 
 export const getEventsByWeekdays = (
