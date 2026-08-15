@@ -1,7 +1,7 @@
 import { css, html, LitElement, type CSSResultGroup, type PropertyValues, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property, query, queryAll, state } from "lit/decorators.js";
 import { getProminentColors, isDark } from "../utils/colors";
 import type { HomeAssistant, Lovelace } from "../types";
 import type { StackSectionConfig } from "./section-types";
@@ -27,6 +27,11 @@ customElements.whenDefined("hui-grid-section").then(() => {
     @state() private _config?: StackSectionConfig;
 
     @state() private _altBackground?: string;
+
+    @query(".pebble-container") private _container?: HTMLElement;
+
+    @queryAll(".cards .container > :not(.add)")
+    private _cardElements!: NodeListOf<HTMLElement>;
 
     @state() private _mainBackground?: string;
 
@@ -159,16 +164,14 @@ customElements.whenDefined("hui-grid-section").then(() => {
     }, 1_000);
 
     async _updateColors() {
-      const container = this.shadowRoot?.querySelector('.pebble-container') as HTMLElement | null;
-    
+      const container = this._container;
+
       const image = this._isMainActive ? this._mainBackground : this._altBackground;
       if (!container || !image) {
         return;
       }
 
-      const cards = Array.from(
-        this.shadowRoot?.querySelectorAll(".cards .container > :not(.add)") ?? [],
-      ) as HTMLElement[];
+      const cards = Array.from(this._cardElements);
 
       const editMode = this.lovelace?.editMode ?? false;
 
